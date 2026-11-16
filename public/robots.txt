@@ -1,0 +1,15 @@
+# UCCIB — tijdelijke stand.
+#
+# Zolang de site nog niet op uccib.com staat, houden we elke zoekmachine buiten.
+# Dit bestand voorkomt dat de bouwplaats (uccib.pages.dev) in Google belandt.
+#
+# BIJ DE OVERGANG NAAR LIVE (F6, docs/LIVE.md) moet dit bestand vervangen worden door:
+#
+#   User-agent: *
+#   Allow: /
+#   Sitemap: https://uccib.com/sitemap-index.xml
+#
+# Wie dit leest en de site staat al live: dat is de fout, niet de bedoeling.
+
+User-agent: *
+Disallow: /
