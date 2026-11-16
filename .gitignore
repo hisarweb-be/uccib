@@ -12,3 +12,8 @@ npm-debug.log*
 coverage/
 test-results/
 playwright-report/
+
+# Projectdocumenten van de moeder staan in D:/project/project/uccib/{voortgang,planning}.
+# Een kopie in deze map mag nooit mee in de repo of in de uitrol.
+/BORD.md
+/PLAN-UCCIB.md
