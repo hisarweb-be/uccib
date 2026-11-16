@@ -32,6 +32,9 @@ jobs:
       - name: Afhankelijkheden
         run: npm ci
 
+      - name: Browser voor de keuring
+        run: npx playwright install --with-deps chromium
+
       - name: Typen en sjablonen
         run: npm run check
 

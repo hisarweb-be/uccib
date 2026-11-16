@@ -87,9 +87,15 @@ export async function startStaticServer(root) {
   };
 }
 
+const LAPTOP_CACHE = 'D:/cache/ms-playwright';
+
+/**
+ * Op deze laptop staat Chromium in D:/cache/ms-playwright (nooit op C:).
+ * Op een andere machine, ook in CI, geldt de standaardcache van Playwright.
+ */
 export async function openBrowser() {
-  if (!process.env.PLAYWRIGHT_BROWSERS_PATH) {
-    process.env.PLAYWRIGHT_BROWSERS_PATH = 'D:/cache/ms-playwright';
+  if (!process.env.PLAYWRIGHT_BROWSERS_PATH && (await exists(LAPTOP_CACHE))) {
+    process.env.PLAYWRIGHT_BROWSERS_PATH = LAPTOP_CACHE;
   }
   return chromium.launch({ headless: true });
 }
