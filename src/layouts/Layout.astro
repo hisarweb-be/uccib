@@ -11,23 +11,48 @@ import type { Slug } from '../data/site';
 
 interface Props {
   locale: Locale;
-  slug: Slug;
+  /**
+   * De slug van deze pagina, of null voor een pagina die geen eigen inhoud heeft
+   * (de 404 en de conceptpagina's). Zonder slug leidt de layout geen canonical en
+   * geen hreflang-wissels af; de aanroeper geeft dan `path` zelf mee.
+   */
+  slug: Slug | null;
+  /** Pad van deze route. Nodig zodra `slug` null is, want dan valt er niets af te leiden. */
+  path?: string;
   title: string;
   description: string;
+  /** Houd deze pagina buiten de zoekmachines. Geldt voor 404 en conceptpagina's. */
+  noindex?: boolean;
 }
 
-const { locale, slug, title, description } = Astro.props;
+const { locale, slug, path, title, description, noindex = false } = Astro.props;
 const t = getDictionary(locale);
-const canonical = new URL(pagePath(locale, slug), SITE.url).href;
+
+const routePath = path ?? (slug === null ? '/' : pagePath(locale, slug as Slug));
+/**
+ * Geen canonical op een pagina die noindex draagt. De 404 heeft geen eigen URL
+ * (Cloudflare toont hem op elk onbekend pad) en een concept is tijdelijk; een
+ * canonical naar een adres dat geen inhoud heeft, is een verkeerde verklaring
+ * aan de zoekmachine. Zonder canonical is er ook geen og:url om te delen.
+ */
+const canonical = noindex ? null : new URL(routePath, SITE.url).href;
 
 /** Open Graph-beeld per taal, uit de beeldset van F1. */
 const ogImage = new URL(`/beeld/og/og-1200x630-${locale}.png`, SITE.url).href;
 
-/** Zelfde pagina in elke taal, voor de hreflang-verwijzingen. */
-const alternates = LOCALES.map((other) => ({
-  hreflang: LOCALE_TAGS[other].html,
-  href: new URL(pagePath(other, slug), SITE.url).href,
-}));
+/**
+ * Zelfde pagina in elke taal, voor de hreflang-verwijzingen. Alleen als er een
+ * slug is: een conceptpagina heeft geen eigen inhoud en staat op noindex, dus
+ * drie talen naar elkaar verwijzen zou drie lege pagina's aan elkaar knopen.
+ */
+const alternates: ReadonlyArray<{ hreflang: string; href: string }> =
+  slug === null
+    ? []
+    : LOCALES.map((other) => ({
+        hreflang: LOCALE_TAGS[other].html,
+        href: new URL(pagePath(other, slug), SITE.url).href,
+      }));
+const xDefault = alternates[0]?.href;
 ---
 
 <!doctype html>
@@ -37,19 +62,20 @@ const alternates = LOCALES.map((other) => ({
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
+    {canonical && <link rel="canonical" href={canonical} />}
     {
       alternates.map((alt) => (
         <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
       ))
     }
-    <link rel="alternate" hreflang="x-default" href={alternates[0]?.href} />
+    {xDefault && <link rel="alternate" hreflang="x-default" href={xDefault} />}
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={t.siteName} />
     <meta property="og:locale" content={LOCALE_TAGS[locale].og} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
+    {canonical && <meta property="og:url" content={canonical} />}
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />

@@ -3,7 +3,7 @@ import { SITE } from '../data/site';
 import Logo from './Logo.astro';
 import { getDictionary, type Locale } from '../i18n';
 import { pagePath } from '../i18n/config';
-import type { Slug } from '../data/site';
+import { isActiveSlug, type Slug } from '../data/site';
 
 interface Props {
   locale: Locale;
@@ -12,24 +12,31 @@ interface Props {
 const { locale } = Astro.props;
 const t = getDictionary(locale);
 
-/** Vijf quick links, dezelfde set als het huidige footerblok plus doneren. */
-const QUICK_LINKS: ReadonlyArray<{ slug: Slug; label: string }> = [
-  { slug: 'hakkimizda', label: t.nav.hakkimizda },
-  { slug: 'subelerimiz', label: t.nav.subelerimiz },
-  { slug: 'bolge-derneklerimiz', label: t.nav['bolge-derneklerimiz'] },
-  { slug: 'bagislar', label: t.nav.bagislar },
-  { slug: 'iletisim', label: t.nav.iletisim },
-];
+/**
+ * De quick links van het huidige footerblok, zonder de pagina's die nog geen
+ * inhoud hebben (zie CONCEPT_SLUGS in src/data/site.ts). Ze komen vanzelf terug
+ * zodra hun slug daar verdwijnt.
+ */
+const QUICK_LINKS = (
+  [
+    { slug: 'hakkimizda', label: t.nav.hakkimizda },
+    { slug: 'subelerimiz', label: t.nav.subelerimiz },
+    { slug: 'bolge-derneklerimiz', label: t.nav['bolge-derneklerimiz'] },
+    { slug: 'bagislar', label: t.nav.bagislar },
+    { slug: 'iletisim', label: t.nav.iletisim },
+  ] as ReadonlyArray<{ slug: Slug; label: string }>
+).filter((link) => isActiveSlug(link.slug));
 
-/** Onderaan, dezelfde drie als op de huidige site. */
-const LEGAL_LINKS: ReadonlyArray<{ slug: Slug; label: string }> = [
-  { slug: 'iletisim', label: t.nav.iletisim },
-  { slug: 'disclameer', label: t.nav.disclameer },
-  {
-    slug: 'cerez-politikasi-cookie-policy',
-    label: t.nav['cerez-politikasi-cookie-policy'],
-  },
-];
+/** Onderaan de twee juridische pagina's; die hebben allebei echte inhoud. */
+const LEGAL_LINKS = (
+  [
+    { slug: 'disclameer', label: t.nav.disclameer },
+    {
+      slug: 'cerez-politikasi-cookie-policy',
+      label: t.nav['cerez-politikasi-cookie-policy'],
+    },
+  ] as ReadonlyArray<{ slug: Slug; label: string }>
+).filter((link) => isActiveSlug(link.slug));
 ---
 
 <footer class="site-footer on-dark">

@@ -6,7 +6,7 @@
  * Elke fout is één leesbare regel; exitcode 1 bij elke fout, 0 als alles groen is.
  */
 import { resolve } from 'node:path';
-import { runChecks, LOCALES, SLUGS } from './lib/keuring.mjs';
+import { runChecks, LOCALES, SLUGS, ACTIVE_SLUGS } from './lib/keuring.mjs';
 
 const distDir = resolve('dist');
 const [rawSlug = '', rawLocale] = process.argv.slice(2);
@@ -19,6 +19,15 @@ if (rawLocale && !LOCALES.includes(rawLocale)) {
 if (rawSlug !== '' && !SLUGS.includes(rawSlug)) {
   console.error(`Onbekende slug "${rawSlug}".`);
   console.error(`Bekende slugs: ${SLUGS.filter(Boolean).join(', ')}`);
+  process.exit(1);
+}
+
+/**
+ * Een concept heeft geen echte inhoud: de vijf paginacontroles horen daar niet
+ * te slagen. Zeg dat eerlijk en verwijs naar de poort die er wél voor is.
+ */
+if (rawSlug !== '' && !ACTIVE_SLUGS.includes(rawSlug)) {
+  console.error(`Slug "${rawSlug}" is een concept zonder eigen inhoud; keur hem met npm run verify.`);
   process.exit(1);
 }
 
