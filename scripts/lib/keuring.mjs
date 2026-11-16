@@ -224,11 +224,29 @@ export async function checkPage({ browser, baseUrl, distDir, locale, slug }) {
   const page = await context.newPage();
   try {
     await page.goto(`${baseUrl}${route}`, { waitUntil: 'load' });
-    const brokenImages = await page.evaluate(() =>
-      [...document.images]
+    // Lazy afbeeldingen onder de vouw laden pas na scrollen. Eerst alles in
+    // beeld brengen en op load of error wachten, anders meldt de keuring een
+    // gezonde pagina willekeurig als stuk.
+    const brokenImages = await page.evaluate(async () => {
+      const images = [...document.images];
+      for (const img of images) img.loading = 'eager';
+      window.scrollTo(0, document.body.scrollHeight);
+      window.scrollTo(0, 0);
+      await Promise.all(
+        images.map((img) =>
+          img.complete
+            ? Promise.resolve()
+            : new Promise((resolve) => {
+                img.addEventListener('load', resolve, { once: true });
+                img.addEventListener('error', resolve, { once: true });
+                setTimeout(resolve, 10000);
+              }),
+        ),
+      );
+      return images
         .filter((img) => !img.complete || img.naturalWidth === 0)
-        .map((img) => img.getAttribute('src') ?? '(geen src)'),
-    );
+        .map((img) => img.getAttribute('src') ?? '(geen src)');
+    });
     for (const src of brokenImages) {
       errors.push(`${label}: afbeelding laadt niet in de browser (${src})`);
     }
