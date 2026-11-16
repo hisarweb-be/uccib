@@ -1,0 +1,315 @@
+{
+ "gegenereerd": "2026-11-16T15:51:48.219Z",
+ "breedtes": [
+  480,
+  960,
+  1440,
+  2048
+ ],
+ "beelden": [
+  {
+   "slug": "menukaart-bahar-kermesi",
+   "bron": "1-1.png",
+   "breedtes": [
+    480,
+    960
+   ],
+   "notitie": "Hoge menukaart 1024x1536, gebruikt op /baharkermesi-menu/ als poster",
+   "origineel": {
+    "bytes": 1514811,
+    "breedte": 1024,
+    "hoogte": 1536,
+    "mime": "png"
+   },
+   "varianten": [
+    {
+     "breedte": 480,
+     "hoogte": 720,
+     "avif": 37751,
+     "webp": 50020,
+     "pad": "/beeld/menukaart-bahar-kermesi/480"
+    },
+    {
+     "breedte": 960,
+     "hoogte": 1440,
+     "avif": 100038,
+     "webp": 135746,
+     "pad": "/beeld/menukaart-bahar-kermesi/960"
+    }
+   ]
+  },
+  {
+   "slug": "dank-donatie",
+   "bron": "tesekkur.jpg",
+   "breedtes": [
+    480,
+    960,
+    1440
+   ],
+   "notitie": "Dankbeeld 1522x2157, gebruikt op /bagis-onayi/",
+   "origineel": {
+    "bytes": 433395,
+    "breedte": 1522,
+    "hoogte": 2157,
+    "mime": "jpeg"
+   },
+   "varianten": [
+    {
+     "breedte": 480,
+     "hoogte": 680,
+     "avif": 33245,
+     "webp": 45982,
+     "pad": "/beeld/dank-donatie/480"
+    },
+    {
+     "breedte": 960,
+     "hoogte": 1361,
+     "avif": 75573,
+     "webp": 110002,
+     "pad": "/beeld/dank-donatie/960"
+    },
+    {
+     "breedte": 1440,
+     "hoogte": 2041,
+     "avif": 119995,
+     "webp": 172594,
+     "pad": "/beeld/dank-donatie/1440"
+    }
+   ]
+  },
+  {
+   "slug": "gebouw",
+   "bron": "IMG_2130-scaled.jpg",
+   "breedtes": [
+    480,
+    960,
+    1440
+   ],
+   "notitie": "Eigen foto gebouw 1600x1200, homepagina",
+   "origineel": {
+    "bytes": 211461,
+    "breedte": 1600,
+    "hoogte": 1200,
+    "mime": "jpeg"
+   },
+   "varianten": [
+    {
+     "breedte": 480,
+     "hoogte": 360,
+     "avif": 10039,
+     "webp": 11416,
+     "pad": "/beeld/gebouw/480"
+    },
+    {
+     "breedte": 960,
+     "hoogte": 720,
+     "avif": 28013,
+     "webp": 30956,
+     "pad": "/beeld/gebouw/960"
+    },
+    {
+     "breedte": 1440,
+     "hoogte": 1080,
+     "avif": 49545,
+     "webp": 53816,
+     "pad": "/beeld/gebouw/1440"
+    }
+   ]
+  },
+  {
+   "slug": "interieur",
+   "bron": "IMG_2180-scaled.jpg",
+   "breedtes": [
+    480,
+    960,
+    1440
+   ],
+   "notitie": "Eigen foto interieur 1600x1200, homepagina",
+   "origineel": {
+    "bytes": 370288,
+    "breedte": 1600,
+    "hoogte": 1200,
+    "mime": "jpeg"
+   },
+   "varianten": [
+    {
+     "breedte": 480,
+     "hoogte": 360,
+     "avif": 12943,
+     "webp": 18174,
+     "pad": "/beeld/interieur/480"
+    },
+    {
+     "breedte": 960,
+     "hoogte": 720,
+     "avif": 45779,
+     "webp": 70898,
+     "pad": "/beeld/interieur/960"
+    },
+    {
+     "breedte": 1440,
+     "hoogte": 1080,
+     "avif": 97130,
+     "webp": 145760,
+     "pad": "/beeld/interieur/1440"
+    }
+   ]
+  },
+  {
+   "slug": "mescit",
+   "bron": "MESCIT-1-scaled.jpg",
+   "breedtes": [
+    480,
+    960,
+    1440
+   ],
+   "notitie": "Eigen foto mescit 1600x1200, homepagina",
+   "origineel": {
+    "bytes": 393085,
+    "breedte": 1600,
+    "hoogte": 1200,
+    "mime": "jpeg"
+   },
+   "varianten": [
+    {
+     "breedte": 480,
+     "hoogte": 360,
+     "avif": 12674,
+     "webp": 17720,
+     "pad": "/beeld/mescit/480"
+    },
+    {
+     "breedte": 960,
+     "hoogte": 720,
+     "avif": 50870,
+     "webp": 71794,
+     "pad": "/beeld/mescit/960"
+    },
+    {
+     "breedte": 1440,
+     "hoogte": 1080,
+     "avif": 108651,
+     "webp": 154906,
+     "pad": "/beeld/mescit/1440"
+    }
+   ]
+  },
+  {
+   "slug": "logo/uccib-woordmerk",
+   "bron": "uccib-logo-png-YENI.png",
+   "breedtes": [
+    280,
+    560,
+    1120
+   ],
+   "notitie": "Woordmerk 1600x503, op de site weergegeven op 280 px breed, dus 280 en 2x = 560",
+   "origineel": {
+    "bytes": 203436,
+    "breedte": 1600,
+    "hoogte": 503,
+    "mime": "png"
+   },
+   "varianten": [
+    {
+     "breedte": 280,
+     "hoogte": 88,
+     "avif": 5667,
+     "webp": 10258,
+     "pad": "/beeld/logo/uccib-woordmerk/280"
+    },
+    {
+     "breedte": 560,
+     "hoogte": 176,
+     "avif": 11359,
+     "webp": 21722,
+     "pad": "/beeld/logo/uccib-woordmerk/560"
+    },
+    {
+     "breedte": 1120,
+     "hoogte": 352,
+     "avif": 23817,
+     "webp": 47756,
+     "pad": "/beeld/logo/uccib-woordmerk/1120"
+    }
+   ]
+  },
+  {
+   "slug": "logo/uccib-vierkant",
+   "bron": "cropped-uccib-logo-png-YENI-1.png",
+   "breedtes": [
+    192,
+    384,
+    512
+   ],
+   "notitie": "Vierkant logo 512x512, bron van favicon en app-iconen",
+   "origineel": {
+    "bytes": 82520,
+    "breedte": 512,
+    "hoogte": 512,
+    "mime": "png"
+   },
+   "varianten": [
+    {
+     "breedte": 192,
+     "hoogte": 192,
+     "avif": 5231,
+     "webp": 8950,
+     "pad": "/beeld/logo/uccib-vierkant/192"
+    },
+    {
+     "breedte": 384,
+     "hoogte": 384,
+     "avif": 10375,
+     "webp": 19078,
+     "pad": "/beeld/logo/uccib-vierkant/384"
+    },
+    {
+     "breedte": 512,
+     "hoogte": 512,
+     "avif": 9733,
+     "webp": 18184,
+     "pad": "/beeld/logo/uccib-vierkant/512"
+    }
+   ]
+  },
+  {
+   "slug": "logo/uccib-affice",
+   "bron": "logo-afis-alti-icin.png",
+   "breedtes": [
+    480,
+    960,
+    1440
+   ],
+   "notitie": "Logo onder de affiche 1600x1032, op /baharkermesi-menu/",
+   "origineel": {
+    "bytes": 192928,
+    "breedte": 1600,
+    "hoogte": 1032,
+    "mime": "png"
+   },
+   "varianten": [
+    {
+     "breedte": 480,
+     "hoogte": 310,
+     "avif": 12329,
+     "webp": 19960,
+     "pad": "/beeld/logo/uccib-affice/480"
+    },
+    {
+     "breedte": 960,
+     "hoogte": 619,
+     "avif": 26529,
+     "webp": 46550,
+     "pad": "/beeld/logo/uccib-affice/960"
+    },
+    {
+     "breedte": 1440,
+     "hoogte": 929,
+     "avif": 41940,
+     "webp": 80136,
+     "pad": "/beeld/logo/uccib-affice/1440"
+    }
+   ]
+  }
+ ]
+}

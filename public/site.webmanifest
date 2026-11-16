@@ -1,0 +1,16 @@
+{
+  "name": "UCCIB",
+  "short_name": "UCCIB",
+  "description": "Unie van Islamitische Culturele Centra van België",
+  "lang": "tr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0f6b66",
+  "icons": [
+    { "src": "/beeld/logo/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/beeld/logo/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/beeld/logo/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

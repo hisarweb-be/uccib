@@ -1,0 +1,41 @@
+---
+/**
+ * Het UCCIB-woordmerk uit de beeldset van F1 (public/beeld/logo/uccib-woordmerk/).
+ * Drie breedtes, nooit breder laden dan nodig: 280 voor een gewoon scherm,
+ * 560 voor een scherm met dubbele dichtheid, 1120 voor driedubbel en zoom.
+ * De maten staan in public/beeld/manifest.json; wijzigt de beeldset daar, dan
+ * hoort deze lijst mee te wijzigen.
+ *
+ * De alt komt uit het woordenboek. Naast het logo staat geen geschreven
+ * sitenaam, dus dit beeld is de enige bron van de organisatienaam: het alt is
+ * daarom altijd gevuld en nooit leeg.
+ */
+import { SITE } from '../data/site';
+import { getDictionary, type Locale } from '../i18n';
+
+interface Props {
+  locale: Locale;
+  /** Class voor het beeld zelf, bijvoorbeeld de maat in de kop of de voet. */
+  class?: string;
+}
+
+const { locale, class: className } = Astro.props;
+const t = getDictionary(locale);
+
+const BASE = '/beeld/logo/uccib-woordmerk';
+const srcset = (ext: 'avif' | 'webp') =>
+  `${BASE}/280.${ext} 280w, ${BASE}/560.${ext} 560w, ${BASE}/1120.${ext} 1120w`;
+---
+
+<picture>
+  <source type="image/avif" srcset={srcset('avif')} sizes="(min-width: 640px) 280px, 220px" />
+  <source type="image/webp" srcset={srcset('webp')} sizes="(min-width: 640px) 280px, 220px" />
+  <img
+    src={SITE.logo}
+    width={SITE.logoWidth}
+    height={SITE.logoHeight}
+    alt={t.logoAlt}
+    class={className}
+    decoding="async"
+  />
+</picture>

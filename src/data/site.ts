@@ -14,9 +14,10 @@ export const SITE = {
   city: 'Brussel',
   country: 'BE',
   geo: { lat: 50.8676, lng: 4.3529 },
-  logo: '/brand/uccib-logo.png',
-  logoWidth: 1600,
-  logoHeight: 503,
+  /** Terugvalbeeld van het logo: de kleinste WebP uit de F1-set, 560x176, 21,7 kB in plaats van 203 kB. */
+  logo: '/beeld/logo/uccib-woordmerk/560.webp',
+  logoWidth: 560,
+  logoHeight: 176,
   themeColor: '#0f6b66',
   openingHours: 'ma-vr 09:00-17:00',
 } as const;

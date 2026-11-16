@@ -1,5 +1,6 @@
 ---
 import { SITE } from '../data/site';
+import Logo from './Logo.astro';
 import { getDictionary, type Locale } from '../i18n';
 import { pagePath } from '../i18n/config';
 import type { Slug } from '../data/site';
@@ -35,15 +36,7 @@ const LEGAL_LINKS: ReadonlyArray<{ slug: Slug; label: string }> = [
   <div class="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
     <div class="grid gap-10 md:grid-cols-3">
       <div>
-        <img
-          class="footer-logo"
-          src={SITE.logo}
-          width={SITE.logoWidth}
-          height={SITE.logoHeight}
-          alt={t.logoAlt}
-          loading="lazy"
-          decoding="async"
-        />
+        <Logo locale={locale} class="footer-logo" />
         <p class="mt-4 max-w-xs text-sm">{t.siteTagline}</p>
 
         <ul class="mt-6 space-y-1 text-sm">
@@ -116,8 +109,10 @@ const LEGAL_LINKS: ReadonlyArray<{ slug: Slug; label: string }> = [
   }
 
   .footer-logo {
-    height: 56px;
-    width: auto;
+    display: block;
+    width: 224px;
+    max-width: 100%;
+    height: auto;
     background: #fff;
     border-radius: 6px;
     padding: 6px 10px;

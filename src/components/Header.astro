@@ -1,5 +1,6 @@
 ---
 import { SITE } from '../data/site';
+import Logo from './Logo.astro';
 import { LOCALES, LOCALE_LABELS, LOCALE_TAGS, getDictionary, type Locale } from '../i18n';
 import { pagePath } from '../i18n/config';
 import type { Slug } from '../data/site';
@@ -62,13 +63,7 @@ const mainNav = MAIN_NAV.map((key) => ({
   <div class="site-header">
     <div class="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-8 lg:px-8">
       <a class="logo-link" href={pagePath(locale, '')}>
-        <img
-          src={SITE.logo}
-          width={SITE.logoWidth}
-          height={SITE.logoHeight}
-          alt={t.logoAlt}
-          decoding="async"
-        />
+        <Logo locale={locale} />
       </a>
 
       <nav aria-label={t.navLabel}>
@@ -127,9 +122,13 @@ const mainNav = MAIN_NAV.map((key) => ({
     display: inline-flex;
   }
 
+  /* 280 px breed is de maat waarop de beeldset van F1 is gemaakt; de hoogte
+     volgt vanzelf uit de verhouding 560:176. */
   .logo-link img {
-    height: 64px;
-    width: auto;
+    display: block;
+    width: 280px;
+    max-width: 100%;
+    height: auto;
   }
 
   .nav-link {
