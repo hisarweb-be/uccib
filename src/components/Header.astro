@@ -1,0 +1,173 @@
+---
+import { SITE } from '../data/site';
+import { LOCALES, LOCALE_LABELS, LOCALE_TAGS, getDictionary, type Locale } from '../i18n';
+import { pagePath } from '../i18n/config';
+import type { Slug } from '../data/site';
+
+interface Props {
+  locale: Locale;
+  slug: Slug;
+}
+
+const { locale, slug } = Astro.props;
+const t = getDictionary(locale);
+
+/** De zeven hoofditems, in dezelfde volgorde als het huidige menu. */
+const MAIN_NAV = [
+  'home',
+  'hakkimizda',
+  'haberler',
+  'bolge-derneklerimiz',
+  'subelerimiz',
+  'namaz-vakitleri',
+  'cuma-hutbesi',
+] as const;
+
+const mainNav = MAIN_NAV.map((key) => ({
+  key,
+  label: t.nav[key],
+  href: pagePath(locale, (key === 'home' ? '' : key) as Slug),
+}));
+---
+
+<header>
+  <div class="topbar on-dark">
+    <div class="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-1 px-4 py-2 sm:px-6 lg:px-8">
+      <div class="flex flex-wrap items-center gap-x-5 gap-y-1">
+        <a class="topbar-link" href={`tel:${SITE.phoneHref}`}>
+          <span class="sr-only">{t.footer.phone}: </span>{SITE.phone}
+        </a>
+        <a class="topbar-link" href={`mailto:${SITE.email}`}>
+          <span class="sr-only">{t.footer.email}: </span>{SITE.email}
+        </a>
+      </div>
+      <nav aria-label={t.langLabel} class="flex items-center gap-x-4">
+        {
+          LOCALES.map((other) => (
+            <a
+              class:list={['topbar-link', { 'is-current': other === locale }]}
+              href={pagePath(other, slug)}
+              hreflang={LOCALE_TAGS[other].html}
+              lang={LOCALE_TAGS[other].html}
+              aria-current={other === locale ? 'true' : undefined}
+            >
+              {LOCALE_LABELS[other].native}
+            </a>
+          ))
+        }
+      </nav>
+    </div>
+  </div>
+
+  <div class="site-header">
+    <div class="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-8 lg:px-8">
+      <a class="logo-link" href={pagePath(locale, '')}>
+        <img
+          src={SITE.logo}
+          width={SITE.logoWidth}
+          height={SITE.logoHeight}
+          alt={t.logoAlt}
+          decoding="async"
+        />
+      </a>
+
+      <nav aria-label={t.navLabel}>
+        <ul class="flex flex-wrap items-center gap-x-1 gap-y-1">
+          {
+            mainNav.map((item) => (
+              <li>
+                <a
+                  class:list={[
+                    'nav-link',
+                    { 'is-current': item.key === 'home' ? slug === '' : slug === item.key },
+                  ]}
+                  href={item.href}
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <a class="donate" href={pagePath(locale, 'bagislar')}>{t.donateCta}</a>
+    </div>
+  </div>
+</header>
+
+<style>
+  .topbar {
+    background: var(--color-brand-dark);
+    color: #fff;
+    font-size: var(--text-small);
+  }
+
+  .topbar-link {
+    color: #fff;
+    text-decoration: none;
+  }
+
+  .topbar-link:hover,
+  .topbar-link:focus-visible {
+    text-decoration: underline;
+  }
+
+  .topbar-link.is-current {
+    font-weight: 700;
+    text-decoration: underline;
+  }
+
+  .site-header {
+    background: var(--color-surface);
+    border-bottom: 4px solid var(--color-brand);
+  }
+
+  .logo-link {
+    display: inline-flex;
+  }
+
+  .logo-link img {
+    height: 64px;
+    width: auto;
+  }
+
+  .nav-link {
+    display: inline-block;
+    padding: 10px 11px;
+    font-size: var(--text-nav);
+    font-weight: 600;
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+
+  .nav-link:hover,
+  .nav-link:focus-visible {
+    color: var(--color-brand-dark);
+    text-decoration: underline;
+  }
+
+  .nav-link.is-current {
+    color: var(--color-brand-dark);
+    text-decoration: underline;
+    text-underline-offset: 0.35em;
+  }
+
+  .donate {
+    display: inline-block;
+    align-self: flex-start;
+    padding: 12px 28px;
+    border-radius: var(--radius-pill);
+    background: var(--color-brand-dark);
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .donate:hover,
+  .donate:focus-visible {
+    background: var(--color-ink);
+    text-decoration: none;
+  }
+</style>

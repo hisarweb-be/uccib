@@ -1,0 +1,147 @@
+---
+import { SITE } from '../data/site';
+import { getDictionary, type Locale } from '../i18n';
+import { pagePath } from '../i18n/config';
+import type { Slug } from '../data/site';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale);
+
+/** Vijf quick links, dezelfde set als het huidige footerblok plus doneren. */
+const QUICK_LINKS: ReadonlyArray<{ slug: Slug; label: string }> = [
+  { slug: 'hakkimizda', label: t.nav.hakkimizda },
+  { slug: 'subelerimiz', label: t.nav.subelerimiz },
+  { slug: 'bolge-derneklerimiz', label: t.nav['bolge-derneklerimiz'] },
+  { slug: 'bagislar', label: t.nav.bagislar },
+  { slug: 'iletisim', label: t.nav.iletisim },
+];
+
+/** Onderaan, dezelfde drie als op de huidige site. */
+const LEGAL_LINKS: ReadonlyArray<{ slug: Slug; label: string }> = [
+  { slug: 'iletisim', label: t.nav.iletisim },
+  { slug: 'disclameer', label: t.nav.disclameer },
+  {
+    slug: 'cerez-politikasi-cookie-policy',
+    label: t.nav['cerez-politikasi-cookie-policy'],
+  },
+];
+---
+
+<footer class="site-footer on-dark">
+  <div class="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+    <div class="grid gap-10 md:grid-cols-3">
+      <div>
+        <img
+          class="footer-logo"
+          src={SITE.logo}
+          width={SITE.logoWidth}
+          height={SITE.logoHeight}
+          alt={t.logoAlt}
+          loading="lazy"
+          decoding="async"
+        />
+        <p class="mt-4 max-w-xs text-sm">{t.siteTagline}</p>
+
+        <ul class="mt-6 space-y-1 text-sm">
+          {
+            QUICK_LINKS.map((link) => (
+              <li>
+                <a class="footer-link" href={pagePath(locale, link.slug)}>
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="footer-heading">{t.footer.address}</h2>
+        <address class="mt-3 not-italic leading-relaxed">
+          {t.siteTaglineAlt}<br />
+          {t.siteTagline}<br />
+          {SITE.street}<br />
+          {SITE.postalCode} {SITE.city}, België
+        </address>
+      </div>
+
+      <div>
+        <h2 class="footer-heading">{t.footer.contact}</h2>
+        <dl class="mt-3 space-y-2 text-sm">
+          <div>
+            <dt class="inline font-semibold">{t.footer.phone}: </dt>
+            <dd class="inline">
+              <a class="footer-link" href={`tel:${SITE.phoneHref}`}>{SITE.phone}</a>
+            </dd>
+          </div>
+          <div>
+            <dt class="inline font-semibold">{t.footer.email}: </dt>
+            <dd class="inline">
+              <a class="footer-link" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <div class="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-5 text-sm sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
+      <p>{t.footer.rights}</p>
+      <nav aria-label={t.footerNavLabel}>
+        <ul class="flex flex-wrap gap-x-5 gap-y-1">
+          {
+            LEGAL_LINKS.map((link) => (
+              <li>
+                <a class="footer-link" href={pagePath(locale, link.slug)}>
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: var(--color-footer);
+    color: var(--color-footer-text);
+  }
+
+  .footer-logo {
+    height: 56px;
+    width: auto;
+    background: #fff;
+    border-radius: 6px;
+    padding: 6px 10px;
+  }
+
+  .footer-heading {
+    font-family: var(--font-body);
+    font-size: var(--text-h4);
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .footer-link {
+    color: var(--color-footer-text);
+    text-decoration: none;
+  }
+
+  .footer-link:hover,
+  .footer-link:focus-visible {
+    color: #fff;
+    text-decoration: underline;
+  }
+
+  .footer-bottom {
+    border-top: 1px solid var(--color-footer-line);
+  }
+</style>

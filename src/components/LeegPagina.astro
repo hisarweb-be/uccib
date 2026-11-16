@@ -1,0 +1,23 @@
+---
+/**
+ * Lege paginabasis: alleen titel en h1, zodat elke route bestaat en de keuring
+ * (titel, beschrijving, precies één h1, canonical, drie hreflang) groen kan zijn.
+ * F2 en F3 vullen de inhoud per slug.
+ */
+import Layout from '../layouts/Layout.astro';
+import { getDictionary, type Locale } from '../i18n';
+import type { Slug } from '../data/site';
+
+interface Props {
+  locale: Locale;
+  slug: Slug;
+}
+
+const { locale, slug } = Astro.props;
+const t = getDictionary(locale);
+const page = t.pages[slug];
+---
+
+<Layout locale={locale} slug={slug} title={page.title} description={page.description}>
+  <h1>{page.h1}</h1>
+</Layout>

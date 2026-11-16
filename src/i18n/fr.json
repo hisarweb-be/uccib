@@ -1,0 +1,107 @@
+{
+  "lang": "fr",
+  "siteName": "UCCIB",
+  "siteTagline": "Union des Centres Culturels Islamiques Belgium",
+  "siteTaglineAlt": "Belçika İslam Kültür Merkezleri Birliği Vakfı",
+  "skipToContent": "Aller au contenu",
+  "navLabel": "Menu principal",
+  "footerNavLabel": "Liens de pied de page",
+  "langLabel": "Choisir une langue",
+  "logoAlt": "UCCIB — Union des Centres Culturels Islamiques Belgium",
+  "donateCta": "Faire un don",
+  "footer": {
+    "address": "Adresse",
+    "contact": "Contact",
+    "phone": "Téléphone",
+    "email": "E-mail",
+    "rights": "© 2026 | UCCIB — Union des Centres Culturels Islamiques Belgium"
+  },
+  "nav": {
+    "home": "Accueil",
+    "hakkimizda": "À propos",
+    "haberler": "Actualités & presse",
+    "bolge-derneklerimiz": "Associations régionales",
+    "subelerimiz": "Nos sections",
+    "namaz-vakitleri": "Heures de prière",
+    "cuma-hutbesi": "Prêche du vendredi",
+    "bagislar": "Faire un don",
+    "iletisim": "Contact",
+    "disclameer": "Mentions légales",
+    "cerez-politikasi-cookie-policy": "Politique de cookies",
+    "hizmetlerimiz": "Nos services",
+    "baharkermesi-menu": "Menu de la foire de printemps",
+    "bagis-onayi": "Don confirmé"
+  },
+  "pages": {
+    "": {
+      "title": "UCCIB — Union des Centres Culturels Islamiques Belgium",
+      "description": "UCCIB, l'Union des Centres Culturels Islamiques Belgium. Depuis 1979 au service religieux, social et culturel en Belgique.",
+      "h1": "Union des Centres Culturels Islamiques Belgium"
+    },
+    "hakkimizda": {
+      "title": "À propos",
+      "description": "La fondation UCCIB, créée en 1979 à Bruxelles : indépendante, sans appartenance politique et en concertation avec les pouvoirs communaux, provinciaux et fédéraux.",
+      "h1": "À propos"
+    },
+    "hizmetlerimiz": {
+      "title": "Nos services",
+      "description": "Les sept services de l'UCCIB : heures de prière, prêche du vendredi, sections, dons, enseignement et jeunesse, visites de mosquée et journée portes ouvertes.",
+      "h1": "Nos services"
+    },
+    "haberler": {
+      "title": "Actualités & presse",
+      "description": "Actualités et communiqués de presse de l'UCCIB, les plus récents en premier.",
+      "h1": "Actualités & presse"
+    },
+    "iletisim": {
+      "title": "Contact",
+      "description": "Contact de l'UCCIB : Rue Charles Demeer 3, 1020 Bruxelles. Téléphone, e-mail, WhatsApp et itinéraire.",
+      "h1": "Contact"
+    },
+    "bagislar": {
+      "title": "Faire un don",
+      "description": "Soutenez l'UCCIB avec 5, 10, 25, 50, 100, 250, 500 ou 1.000 euros, ou un montant de votre choix. Pour le service religieux, social et culturel.",
+      "h1": "Faire un don"
+    },
+    "bagis-onayi": {
+      "title": "Don confirmé",
+      "description": "Merci pour votre don. Votre soutien rend possible l'action religieuse, sociale et culturelle de l'UCCIB.",
+      "h1": "Don confirmé"
+    },
+    "subelerimiz": {
+      "title": "Nos sections",
+      "description": "Les sections de l'UCCIB : adresse, téléphone et emplacement sur la carte.",
+      "h1": "Nos sections"
+    },
+    "bolge-derneklerimiz": {
+      "title": "Associations régionales",
+      "description": "Les associations régionales de l'UCCIB, groupées par région.",
+      "h1": "Associations régionales"
+    },
+    "namaz-vakitleri": {
+      "title": "Heures de prière",
+      "description": "Les heures de prière à Bruxelles par jour : imsak, lever du soleil, midi, après-midi, soir et nuit.",
+      "h1": "Heures de prière"
+    },
+    "cuma-hutbesi": {
+      "title": "Prêche du vendredi",
+      "description": "Archives des prêches du vendredi, les plus récents en premier, avec le texte et éventuellement un pdf par prêche.",
+      "h1": "Prêche du vendredi"
+    },
+    "disclameer": {
+      "title": "Mentions légales",
+      "description": "Mentions légales, clause de non-responsabilité et informations de publication de l'UCCIB.",
+      "h1": "Mentions légales"
+    },
+    "cerez-politikasi-cookie-policy": {
+      "title": "Politique de cookies",
+      "description": "Ce site ne place aucun cookie. Cette page précise quelles données sont traitées et lesquelles ne le sont pas.",
+      "h1": "Politique de cookies"
+    },
+    "baharkermesi-menu": {
+      "title": "Menu de la foire de printemps",
+      "description": "Le menu et les prix de la foire de printemps.",
+      "h1": "Menu de la foire de printemps"
+    }
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "lang": "nl",
+  "siteName": "UCCIB",
+  "siteTagline": "Unie van Islamitische Culturele Centra van België",
+  "siteTaglineAlt": "Union des Centres Culturels Islamiques Belgium",
+  "skipToContent": "Naar de inhoud",
+  "navLabel": "Hoofdmenu",
+  "footerNavLabel": "Voetlinks",
+  "langLabel": "Kies een taal",
+  "logoAlt": "UCCIB — Unie van Islamitische Culturele Centra van België",
+  "donateCta": "Doneer",
+  "footer": {
+    "address": "Adres",
+    "contact": "Contact",
+    "phone": "Telefoon",
+    "email": "E-mail",
+    "rights": "© 2026 | UCCIB — Union des Centres Culturels Islamiques Belgium"
+  },
+  "nav": {
+    "home": "Startpagina",
+    "hakkimizda": "Over ons",
+    "haberler": "Nieuws & pers",
+    "bolge-derneklerimiz": "Regionale verenigingen",
+    "subelerimiz": "Onze afdelingen",
+    "namaz-vakitleri": "Gebedstijden",
+    "cuma-hutbesi": "Vrijdagpreek",
+    "bagislar": "Doneren",
+    "iletisim": "Contact",
+    "disclameer": "Colofon",
+    "cerez-politikasi-cookie-policy": "Cookiebeleid",
+    "hizmetlerimiz": "Onze diensten",
+    "baharkermesi-menu": "Menu voorjaarsmarkt",
+    "bagis-onayi": "Donatie bevestigd"
+  },
+  "pages": {
+    "": {
+      "title": "UCCIB — Unie van Islamitische Culturele Centra van België",
+      "description": "UCCIB, de Unie van Islamitische Culturele Centra van België. Sinds 1979 religieuze, sociale en culturele dienstverlening in België.",
+      "h1": "Union des Centres Culturels Islamiques Belgium"
+    },
+    "hakkimizda": {
+      "title": "Over ons",
+      "description": "De UCCIB-stichting, opgericht in 1979 in Brussel: onafhankelijk, partijloos en samenwerkend met gemeente-, provincie- en federale overheden.",
+      "h1": "Over ons"
+    },
+    "hizmetlerimiz": {
+      "title": "Onze diensten",
+      "description": "De zeven diensten van UCCIB: gebedstijden, vrijdagpreek, afdelingen, donaties, onderwijs en jeugd, moskeebezoek en open moskeedag.",
+      "h1": "Onze diensten"
+    },
+    "haberler": {
+      "title": "Nieuws & pers",
+      "description": "Nieuws en persberichten van UCCIB, het meest recente bovenaan.",
+      "h1": "Nieuws & pers"
+    },
+    "iletisim": {
+      "title": "Contact",
+      "description": "Contact met UCCIB: Rue Charles Demeer 3, 1020 Brussel. Telefoon, e-mail, WhatsApp en routebeschrijving.",
+      "h1": "Contact"
+    },
+    "bagislar": {
+      "title": "Doneren",
+      "description": "Steun UCCIB met 5, 10, 25, 50, 100, 250, 500 of 1.000 euro, of met een bedrag naar keuze. Voor religieuze, sociale en culturele dienstverlening.",
+      "h1": "Doneren"
+    },
+    "bagis-onayi": {
+      "title": "Donatie bevestigd",
+      "description": "Dank voor uw gift. Uw steun maakt de religieuze, sociale en culturele werking van UCCIB mogelijk.",
+      "h1": "Donatie bevestigd"
+    },
+    "subelerimiz": {
+      "title": "Onze afdelingen",
+      "description": "De afdelingen van UCCIB: adres, telefoon en locatie op de kaart.",
+      "h1": "Onze afdelingen"
+    },
+    "bolge-derneklerimiz": {
+      "title": "Regionale verenigingen",
+      "description": "De regionale verenigingen van UCCIB, gegroepeerd per regio.",
+      "h1": "Regionale verenigingen"
+    },
+    "namaz-vakitleri": {
+      "title": "Gebedstijden",
+      "description": "De gebedstijden voor Brussel per dag: imsak, zonsopgang, middag, namiddag, avond en nacht.",
+      "h1": "Gebedstijden"
+    },
+    "cuma-hutbesi": {
+      "title": "Vrijdagpreek",
+      "description": "Archief van de vrijdagpreken, de nieuwste bovenaan, met per preek de tekst en eventueel een pdf.",
+      "h1": "Vrijdagpreek"
+    },
+    "disclameer": {
+      "title": "Colofon",
+      "description": "Colofon, disclaimer en publicatiegegevens van UCCIB.",
+      "h1": "Colofon"
+    },
+    "cerez-politikasi-cookie-policy": {
+      "title": "Cookiebeleid",
+      "description": "Deze site plaatst geen cookies. Deze pagina legt uit welke gegevens wel en niet worden verwerkt.",
+      "h1": "Cookiebeleid"
+    },
+    "baharkermesi-menu": {
+      "title": "Menu voorjaarsmarkt",
+      "description": "Het menu en de prijzen van de voorjaarsmarkt.",
+      "h1": "Menu voorjaarsmarkt"
+    }
+  }
+}

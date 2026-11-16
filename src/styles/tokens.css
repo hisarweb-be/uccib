@@ -1,0 +1,122 @@
+@import 'tailwindcss';
+
+/**
+ * Huisstijl-tokens, overgenomen uit de huidige site.
+ * Herkomst per token staat in TOKENS.md. Niets hier is verzonnen.
+ *
+ * Contrastregel die uit de meting volgt: --c (#1f9e96) haalt 3.29:1 op wit en
+ * mag dus nooit tekst of een link zijn. Tekst, links en knoppen gebruiken --cd.
+ */
+@theme {
+  /* Kleur: rollen */
+  --color-brand: #1f9e96; /* --c : vlakken, randen, iconen, focusring */
+  --color-brand-dark: #0f6b66; /* --cd : tekst, links, knoppen, topbar */
+  --color-brand-light: #e8f5f4; /* --cl : zachte vlakken */
+  --color-ink: #33393b; /* --t : bodytekst */
+  --color-ink-muted: #5f6769; /* --tm : secundaire tekst */
+  --color-surface: #ffffff; /* --w */
+  --color-surface-alt: #f5f7f7; /* --g : afwisselende secties */
+  --color-line: #e3e8e8; /* --line : randen */
+  --color-footer: #2d3436; /* footerachtergrond */
+  --color-footer-text: #cfd6d6; /* footertekst */
+  --color-footer-line: #444b4d; /* scheidingslijn in de footer */
+
+  /* Typografie */
+  --font-body: "Open Sans Variable", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --font-head: "Noto Serif Variable", Georgia, "Times New Roman", serif;
+
+  --text-body: 17px;
+  --text-small: 14px;
+  --text-nav: 15px;
+
+  /* Koppen: dezelfde clamp-reeksen als de huidige site */
+  --text-h1: clamp(28px, 1.6rem + 1.6vw, 42px);
+  --text-h2: clamp(24px, 1.3rem + 1vw, 34px);
+  --text-h3: clamp(20px, 1.1rem + 0.5vw, 24px);
+  --text-h4: clamp(18px, 1rem + 0.3vw, 20px);
+  --text-hero: clamp(26px, 1.2rem + 2.6vw, 50px);
+
+  /* Vorm */
+  --radius-pill: 30px;
+  --spacing-header: 92px; /* .hdr min-height */
+}
+
+/* Tailwind 4 levert de basislaag; hier alleen wat de huisstijl zelf vastlegt. */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: 1.7;
+    color: var(--color-ink);
+    background: var(--color-surface);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-head);
+    line-height: 1.25;
+    font-weight: 600;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+
+  h1 {
+    font-size: var(--text-h1);
+  }
+  h2 {
+    font-size: var(--text-h2);
+  }
+  h3 {
+    font-size: var(--text-h3);
+  }
+  h4 {
+    font-size: var(--text-h4);
+  }
+
+  a {
+    color: var(--color-brand-dark);
+    text-underline-offset: 0.18em;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  /* Zichtbare focus, dezelfde vorm als de huidige site maar met genoeg contrast. */
+  :focus-visible {
+    outline: 3px solid var(--color-brand);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Op donkere vlakken is de lichte ring beter zichtbaar. */
+  .on-dark :focus-visible {
+    outline-color: var(--color-brand-light);
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

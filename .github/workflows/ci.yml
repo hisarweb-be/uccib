@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bouw-en-keur:
+    name: Bouwen en keuren
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Ophalen
+        uses: actions/checkout@v4
+
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Afhankelijkheden
+        run: npm ci
+
+      - name: Typen en sjablonen
+        run: npm run check
+
+      - name: Bouwen
+        run: npm run build
+
+      - name: Keuren (veertien slugs x drie talen)
+        run: npm run verify
+
+      - name: Linkcontrole
+        run: npm run verify:links
+
+      - name: Bewijs bewaren
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 7
+          if-no-files-found: ignore

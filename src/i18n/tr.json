@@ -1,0 +1,107 @@
+{
+  "lang": "tr",
+  "siteName": "UCCIB",
+  "siteTagline": "Belçika İslam Kültür Merkezleri Birliği Vakfı",
+  "siteTaglineAlt": "Union des Centres Culturels Islamiques Belgium",
+  "skipToContent": "İçeriğe geç",
+  "navLabel": "Ana menü",
+  "footerNavLabel": "Alt bağlantılar",
+  "langLabel": "Dil seçin",
+  "logoAlt": "UCCIB — Belçika İslam Kültür Merkezleri Birliği Vakfı",
+  "donateCta": "Bağış yap",
+  "footer": {
+    "address": "Adres",
+    "contact": "İletişim",
+    "phone": "Telefon",
+    "email": "E-posta",
+    "rights": "© 2026 | UCCIB — Union des Centres Culturels Islamiques Belgium"
+  },
+  "nav": {
+    "home": "Anasayfa",
+    "hakkimizda": "Hakkımızda",
+    "haberler": "Güncel & Basın",
+    "bolge-derneklerimiz": "Bölge Derneklerimiz",
+    "subelerimiz": "Şubelerimiz",
+    "namaz-vakitleri": "Namaz Vakitleri",
+    "cuma-hutbesi": "Cuma Hutbesi",
+    "bagislar": "Bağış",
+    "iletisim": "İletişim",
+    "disclameer": "Künye",
+    "cerez-politikasi-cookie-policy": "Gizlilik Kuralları",
+    "hizmetlerimiz": "Hizmetlerimiz",
+    "baharkermesi-menu": "Bahar Kermesi Menü",
+    "bagis-onayi": "Bağış Onayı"
+  },
+  "pages": {
+    "": {
+      "title": "UCCIB — İslam Kültür Merkezleri Birliği",
+      "description": "UCCIB, Belçika İslam Kültür Merkezleri Birliği Vakfı. 1979'dan beri Belçika'da dini, sosyal ve kültürel hizmetler.",
+      "h1": "Union des Centres Culturels Islamiques Belgium"
+    },
+    "hakkimizda": {
+      "title": "Hakkımızda",
+      "description": "1979'da Brüksel'de kurulan UCCIB Vakfı: bağımsız, partiler üstü, belediye, il ve federal yönetimlerle iş birliği içinde.",
+      "h1": "Hakkımızda"
+    },
+    "hizmetlerimiz": {
+      "title": "Hizmetlerimiz",
+      "description": "UCCIB'nin yedi hizmeti: namaz vakitleri, cuma hutbesi, şubeler, bağış, eğitim ve gençlik, cami tanıtım programları ve açık cami günü.",
+      "h1": "Hizmetlerimiz"
+    },
+    "haberler": {
+      "title": "Güncel & Basın",
+      "description": "UCCIB'den haberler ve basın açıklamaları, en yenisi başta.",
+      "h1": "Güncel & Basın"
+    },
+    "iletisim": {
+      "title": "İletişim",
+      "description": "UCCIB iletişim: Rue Charles Demeer 3, 1020 Brüksel. Telefon, e-posta, WhatsApp ve yol tarifi.",
+      "h1": "İletişim"
+    },
+    "bagislar": {
+      "title": "Bağış",
+      "description": "UCCIB'ye bağış yapın: 5, 10, 25, 50, 100, 250, 500 ve 1.000 euro ya da kendi tutarınız. Dini, sosyal ve kültürel hizmetler için.",
+      "h1": "Bağış"
+    },
+    "bagis-onayi": {
+      "title": "Bağış Onayı",
+      "description": "Bağışınız için teşekkür ederiz. Desteğiniz UCCIB'nin dini, sosyal ve kültürel hizmetlerini mümkün kılıyor.",
+      "h1": "Bağış Onayı"
+    },
+    "subelerimiz": {
+      "title": "Şubelerimiz",
+      "description": "UCCIB şubeleri: adres, telefon ve harita üzerinde konum.",
+      "h1": "Şubelerimiz"
+    },
+    "bolge-derneklerimiz": {
+      "title": "Bölge Derneklerimiz",
+      "description": "UCCIB bölge dernekleri, bölgeye göre gruplanmış.",
+      "h1": "Bölge Derneklerimiz"
+    },
+    "namaz-vakitleri": {
+      "title": "Namaz Vakitleri",
+      "description": "Brüksel için günlük namaz vakitleri: imsak, güneş, öğle, ikindi, akşam ve yatsı.",
+      "h1": "Namaz Vakitleri"
+    },
+    "cuma-hutbesi": {
+      "title": "Cuma Hutbesi",
+      "description": "Cuma hutbeleri arşivi, en yeni hutbe başta, her hutbe için metin ve isteğe bağlı pdf.",
+      "h1": "Cuma Hutbesi"
+    },
+    "disclameer": {
+      "title": "Künye",
+      "description": "UCCIB künye, sorumluluk reddi ve yayın bilgileri.",
+      "h1": "Künye"
+    },
+    "cerez-politikasi-cookie-policy": {
+      "title": "Çerez Politikası",
+      "description": "Bu site çerez kullanmaz. Bu sayfa hangi verilerin işlendiğini ve hangilerinin işlenmediğini açıklar.",
+      "h1": "Çerez Politikası"
+    },
+    "baharkermesi-menu": {
+      "title": "Bahar Kermesi Menü",
+      "description": "Bahar kermesinin menüsü ve fiyatları.",
+      "h1": "Bahar Kermesi Menü"
+    }
+  }
+}

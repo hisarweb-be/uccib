@@ -1,0 +1,85 @@
+---
+import '@fontsource-variable/open-sans/wght.css';
+import '@fontsource-variable/noto-serif/wght.css';
+import '../styles/tokens.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE } from '../data/site';
+import { LOCALES, LOCALE_TAGS, type Locale, getDictionary } from '../i18n';
+import { pagePath } from '../i18n/config';
+import type { Slug } from '../data/site';
+
+interface Props {
+  locale: Locale;
+  slug: Slug;
+  title: string;
+  description: string;
+}
+
+const { locale, slug, title, description } = Astro.props;
+const t = getDictionary(locale);
+const canonical = new URL(pagePath(locale, slug), SITE.url).href;
+
+/** Zelfde pagina in elke taal, voor de hreflang-verwijzingen. */
+const alternates = LOCALES.map((other) => ({
+  hreflang: LOCALE_TAGS[other].html,
+  href: new URL(pagePath(other, slug), SITE.url).href,
+}));
+---
+
+<!doctype html>
+<html lang={LOCALE_TAGS[locale].html}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {
+      alternates.map((alt) => (
+        <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
+      ))
+    }
+    <link rel="alternate" hreflang="x-default" href={alternates[0]?.href} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={t.siteName} />
+    <meta property="og:locale" content={LOCALE_TAGS[locale].og} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="theme-color" content={SITE.themeColor} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <a class="skip-link" href="#hw-main">{t.skipToContent}</a>
+    <Header locale={locale} slug={slug} />
+    <main id="hw-main" tabindex="-1" class="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+      <slot />
+    </main>
+    <Footer locale={locale} />
+  </body>
+</html>
+
+<style>
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 100;
+    padding: 0.75rem 1.25rem;
+    background: var(--color-brand-dark);
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .skip-link:focus {
+    left: 0.5rem;
+    top: 0.5rem;
+    text-decoration: underline;
+  }
+
+  main:focus {
+    outline: none;
+  }
+</style>
