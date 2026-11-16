@@ -80,3 +80,20 @@ wil terugdraaien, ziet hier waarom het zo staat.
 | 41 | Geen GSAP of scrollcinema | Plan §3 zet dat in F4; nu zou het de laadtijd zonder inhoud meten. |
 | 42 | Geen cookiebar | Plan §4: de site plaatst geen cookies, dus geen toestemmingsvraag. |
 | 43 | Geen database, geen PHP, geen VPS | Plan §3: alles statisch op Cloudflare Pages Free. |
+
+## CMS en Studio (F2)
+
+| # | Besluit | Reden |
+|---|---|---|
+| 44 | De Studio wordt bij elke bouw gemaakt, niet in de repo gezet | 22 MB en 787 bestanden; de map is een bouwproduct net als `dist/`. `npm run build` draait eerst `scripts/build-studio.mjs` (het `prebuild`-script), dus Cloudflare maakt `/beheer` zelf. Een map in de repo zou bij elke schemawijziging honderden bestanden in de historie zetten. |
+| 45 | `sanity/` is een eigen npm-pakket met eigen `package-lock.json` | De Studio heeft Sanity 6, React 19 en styled-components nodig; die horen niet in de afhankelijkheden van de site. De bouwstap installeert ze één keer met `npm ci` als ze ontbreken. |
+| 46 | `basePath: '/beheer'` staat op twee plekken: `sanity.config.ts` en `sanity.cli.ts` | Het eerste stuurt de router, het tweede de paden in de gebouwde HTML. Zonder het tweede schrijft de bouw `/static/...` en zoekt de browser de scripts op de wortel van de site. |
+| 47 | Alle tekst uit `scripts/content/` komt één keer in de repo en gaat van daaruit twee kanten op | Naar `src/data/cms-fallback.json` en naar Sanity via `cms:import`. De site kan daardoor nooit iets anders tonen dan wat er in het CMS staat, en de offline kopie is per definitie gelijk. |
+| 48 | De veertien pagina's staan er als 42 documenten (14 × 3 talen), elk met vaste `_id` | Eén document per combinatie; een dubbele slug kan niet ontstaan en een tweede import werkt bij in plaats van te verdubbelen. NL en FR hebben titel, h1 en beschrijving uit `src/i18n`; de body blijft Turks tot de redactie vertaalt. |
+| 49 | De negen doneerbedragen zijn `sponsorblok`-documenten, geen proza op `/bagislar` | Het zijn knoppen met een betaallink; de redactie moet een bedrag kunnen uitzetten zonder de paginatekst te raken. |
+| 50 | `getSponsorblokken()` valt bij een lege CMS-lijst terug op de offline kopie | Een verkeerd ingestelde filter of een half gevulde dataset mag de doneerknoppen niet laten verdwijnen. |
+| 51 | `_redirects` bevat één regel: `/beheer` → `/beheer/` met status 301 | Cloudflare past `_redirects` toe vóór het zoeken van een bestand ("Redirects are always followed, regardless of whether or not an asset matches"). Een regel `/beheer/*` zou dus ook de 787 eigen js- en css-bestanden van de Studio vangen en hem leeg achterlaten. Diepe paden lost de bouw op met `public/beheer/404.html`, en de vier faviconpaden zet `scripts/build-studio.mjs` zelf recht naar `/beheer/static/...`. Beide staan met hun meting in `public/_redirects`. |
+| 52 | Geen `404.html` voor de site in deze fase, wel `/beheer/404.html` | De Studio heeft er een nodig: Cloudflare zoekt bij een onbekend pad de dichtstbijzijnde `404.html` in de map zelf en anders omhoog, dus `/beheer/structuur/pagina` tekent de Studio en de router neemt het pad over. Voor de site zelf hoort een echte 404 met inhoud bij F3, samen met de paginatekst. |
+| 53 | `sanity/structure.ts` heet `sanity/structuur.ts` | Een bestand met die naam naast het pakket `sanity` laat TypeScript `sanity/structure` als zichzelf oplossen: "Circular definition of import alias". Met een eigen naam kan die botsing niet ontstaan. |
+| 54 | De wortel-`tsconfig.json` sluit `sanity/` uit | De Studio heeft eigen instellingen en eigen afhankelijkheden (`sanity/tsconfig.json`); `astro check` keurt de site, `npm run sanity:typecheck` keurt de Studio. |
+| 55 | Een mislukte Studio-bouw stopt de hele bouw | Een site zonder werkende `/beheer` is niet wat uitgerold moet worden; stil doorgaan zou een groene uitrol met een kapot CMS geven. |

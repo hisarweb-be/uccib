@@ -9,12 +9,20 @@
   },
   "scripts": {
     "dev": "astro dev",
+    "prebuild": "node scripts/build-studio.mjs",
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
     "verify": "node scripts/verify-alle.mjs",
     "verify:page": "node scripts/verify-pagina.mjs",
-    "verify:links": "node scripts/verify-links.mjs"
+    "verify:links": "node scripts/verify-links.mjs",
+    "cms:fallback": "node scripts/build-fallback.mjs",
+    "cms:import": "node scripts/import-sanity.mjs",
+    "cms:verify": "node scripts/verify-cms.mjs",
+    "cms:verify:offline": "node scripts/verify-cms.mjs --offline",
+    "sanity:dev": "npm --prefix sanity run dev",
+    "sanity:build": "node scripts/build-studio.mjs",
+    "sanity:typecheck": "npm --prefix sanity run typecheck"
   },
   "dependencies": {
     "@astrojs/react": "^4.4.2",

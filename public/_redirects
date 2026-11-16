@@ -1,0 +1,50 @@
+# Cloudflare Pages: één regel, en verder niets.
+
+/beheer  /beheer/  301
+
+## Waarom zo weinig
+
+De verleiding is een regel die elk pad onder `/beheer` naar de Studio-html stuurt,
+zodat een bladwijzer of een verversing midden in de Studio blijft werken. Dat mag
+hier niet, en wel hierom: Cloudflare past `_redirects` toe vóór het zoeken van een
+bestand. Letterlijk, uit de documentatie van 16 november 2026:
+
+    "Redirects are always followed, regardless of whether or not an asset
+     matches the incoming request."
+
+Een regel `/beheer/*` vangt dus ook de 787 eigen js- en css-bestanden van de
+Studio, die onder `/beheer/static/...` staan. De Studio laadt dan zijn eigen
+programma niet meer en blijft leeg. Een uitzondering maken kan niet: `_redirects`
+kent geen "behalve".
+
+Daarom staat het diepe-padprobleem niet hier maar in de bouw: `scripts/build-studio.mjs`
+zet na elke Studio-bouw een kopie van de Studio-html neer als `public/beheer/404.html`.
+Cloudflare zoekt bij een onbekend pad de dichtstbijzijnde `404.html` in de map zelf
+en anders omhoog in de mappenboom. `/beheer/structuur/pagina` vindt zo
+`/beheer/404.html`, de browser tekent de Studio en de router neemt het pad over.
+Dat is lokaal na te meten in `dist/` en heeft geen regel nodig die je pas live
+kunt bewijzen.
+
+De enige regel die overblijft is de map zonder schuine streep aan het eind:
+`/beheer` wordt `/beheer/`. Dat is een gewone omleiding van het adres in de
+adresbalk, geen herschrijving van inhoud, en ze raakt geen enkel bestand.
+
+## Wat hier bewust niet staat
+
+- **Geen `/*  /index.html  200`.** Om dezelfde reden als hierboven: dat zou de
+  hele site naar de Studio-html sturen, inclusief `/beeld/...` en `/hakkimizda`.
+- **Geen regels op `/static/...`.** De Studio-html verwijst voor favicon en
+  manifest naar `/static/...` terwijl de bestanden onder `/beheer/static/...`
+  staan. Die vier verwijzingen worden in de bouw zelf rechtgezet
+  (`scripts/build-studio.mjs`); een regel op `/static/` zou paden van de site
+  zelf kapen.
+- **Geen 404-afhandeling voor de site.** De site heeft geen eigen `404.html` en
+  dat blijft zo in deze fase; een echte 404-pagina hoort bij F3, samen met de
+  inhoud. Let op: `public/beheer/404.html` geldt alleen binnen `/beheer`.
+
+## Wat je na een uitrol meet
+
+1. `https://uccib.pages.dev/beheer` toont de Studio (of de inlogmelding).
+2. `https://uccib.pages.dev/beheer/structuur/pagina` ververst zonder lege pagina.
+3. `https://uccib.pages.dev/beheer/static/favicon.svg` geeft het icoon, geen html.
+4. `https://uccib.pages.dev/hakkimizda` toont nog steeds de site, niet de Studio.

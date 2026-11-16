@@ -1,0 +1,27 @@
+{
+  "name": "uccib-sanity",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Sanity Studio voor uccib.com — eigen pakket, bouwt naar ../public/beheer",
+  "scripts": {
+    "dev": "sanity dev",
+    "build": "sanity build ../public/beheer --yes",
+    "deploy": "sanity deploy",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@sanity/locale-fr-fr": "1.2.37",
+    "@sanity/locale-nl-nl": "1.1.40",
+    "@sanity/locale-tr-tr": "1.2.38",
+    "@sanity/vision": "6.23.0",
+    "react": "19.2.9",
+    "react-dom": "19.2.9",
+    "sanity": "6.23.0",
+    "styled-components": "^6.1.19"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "typescript": "^5.9.3"
+  }
+}
