@@ -1,0 +1,13 @@
+# Alles in deze repo is LF. Windows-tools schrijven soms CRLF, en dan wordt elke
+# wijziging een volledig herschreven bestand: de diff wordt onleesbaar en de
+# keuring ziet verschillen die er niet zijn. Git zet het bij het inchecken goed.
+* text=auto eol=lf
+
+# Binaire bestanden nooit aanraken.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.avif binary
+*.woff2 binary
+*.ico binary

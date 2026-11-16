@@ -1,5 +1,11 @@
 ---
-import LeegPagina from '../components/LeegPagina.astro';
+/**
+ * Concept: deze pagina heeft nog geen eigen inhoud (zie CONCEPT_SLUGS in
+ * src/data/site.ts). De route blijft bestaan (geen 404 voor inkomende links),
+ * maar staat nergens in de navigatie, draagt noindex en toont één rustige
+ * mededeling. F3 vervangt dit bestand door de echte pagina.
+ */
+import InAanbouw from '../components/InAanbouw.astro';
 ---
 
-<LeegPagina locale="tr" slug="iletisim" />
+<InAanbouw locale="tr" slug="iletisim" path="/iletisim/" />

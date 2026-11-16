@@ -3,17 +3,23 @@ import { SITE } from '../data/site';
 import Logo from './Logo.astro';
 import { LOCALES, LOCALE_LABELS, LOCALE_TAGS, getDictionary, type Locale } from '../i18n';
 import { pagePath } from '../i18n/config';
-import type { Slug } from '../data/site';
+import { isActiveSlug, type Slug } from '../data/site';
 
 interface Props {
   locale: Locale;
-  slug: Slug;
+  /** Null op een pagina zonder eigen inhoud (404, concept): dan is er geen actief menu-item. */
+  slug: Slug | null;
 }
 
 const { locale, slug } = Astro.props;
 const t = getDictionary(locale);
 
-/** De zeven hoofditems, in dezelfde volgorde als het huidige menu. */
+/**
+ * De hoofditems in dezelfde volgorde als het huidige menu. Een concept dat nog
+ * geen inhoud heeft staat er niet in: een menulink naar een lege pagina is
+ * precies wat we niet willen. Zodra F3 de inhoud levert, komt het item vanzelf
+ * terug zodra de slug uit CONCEPT_SLUGS verdwijnt.
+ */
 const MAIN_NAV = [
   'home',
   'hakkimizda',
@@ -26,9 +32,15 @@ const MAIN_NAV = [
 
 const mainNav = MAIN_NAV.map((key) => ({
   key,
+  slug: (key === 'home' ? '' : key) as Slug,
   label: t.nav[key],
-  href: pagePath(locale, (key === 'home' ? '' : key) as Slug),
-}));
+}))
+  .filter((item) => isActiveSlug(item.slug))
+  .map((item) => ({ ...item, href: pagePath(locale, item.slug) }));
+
+/** De taalkiezer wijst op deze pagina; zonder slug (404) valt hij terug op de eigen taal. */
+const languageHref = (other: Locale) =>
+  slug === null ? (other === 'tr' ? '/' : `/${other}/`) : pagePath(other, slug);
 ---
 
 <header>
@@ -47,7 +59,7 @@ const mainNav = MAIN_NAV.map((key) => ({
           LOCALES.map((other) => (
             <a
               class:list={['topbar-link', { 'is-current': other === locale }]}
-              href={pagePath(other, slug)}
+              href={languageHref(other)}
               hreflang={LOCALE_TAGS[other].html}
               lang={LOCALE_TAGS[other].html}
               aria-current={other === locale ? 'true' : undefined}
@@ -86,7 +98,14 @@ const mainNav = MAIN_NAV.map((key) => ({
         </ul>
       </nav>
 
-      <a class="donate" href={pagePath(locale, 'bagislar')}>{t.donateCta}</a>
+      {
+        /* De doneerknop verschijnt pas als /bagislar/ echte inhoud heeft (F5).
+           Een opvallende knop naar een pagina die nog gebouwd wordt, kost meer
+           vertrouwen dan hij oplevert. */
+        isActiveSlug('bagislar') && (
+          <a class="donate" href={pagePath(locale, 'bagislar')}>{t.donateCta}</a>
+        )
+      }
     </div>
   </div>
 </header>

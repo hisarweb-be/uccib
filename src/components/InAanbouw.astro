@@ -1,0 +1,127 @@
+---
+/**
+ * De pagina die een concept toont zolang het nog geen eigen inhoud heeft.
+ *
+ * Bewust geen "binnenkort"-belofte en geen lege opmaak: één rustige mededeling,
+ * de organisatiegegevens die wel kloppen, en de weg terug.
+ *
+ * Over de statuscode, eerlijk: een statische bouw levert altijd 200. Cloudflare
+ * Pages kan met `_redirects` alleen 301, 302, 303, 307, 308 en 200, en 410 dus
+ * niet, en voor een echte 410 zou het project Cloudflare Functions nodig hebben.
+ * Daarom is de route niet gelinkt, draagt hij `noindex` en staat hij niet in de
+ * sitemap; hij blijft buiten elke index zonder extra machinerie.
+ */
+import Layout from '../layouts/Layout.astro';
+import { SITE } from '../data/site';
+import { getDictionary, type Locale } from '../i18n';
+import type { ConceptSlug } from '../data/site';
+
+interface Props {
+  locale: Locale;
+  slug: ConceptSlug;
+  /** Pad van deze route, bijvoorbeeld /nl/haberler/, voor de canonical. */
+  path: string;
+}
+
+const { locale, slug, path: routePath } = Astro.props;
+const t = getDictionary(locale);
+
+const TEKST: Record<Locale, { title: string; description: string; h1: string; body: string; home: string }> = {
+  tr: {
+    title: 'Sayfa yenileniyor',
+    description: 'Bu bölüm yenileniyor. UCCIB vakfının güncel bilgilerine ana sayfadan ulaşabilirsiniz.',
+    h1: 'Bu bölüm yenileniyor',
+    body: 'Sitemizi baştan sona yeniliyoruz. Bu sayfa kısa süre içinde yeni haliyle yayında olacak. Bu arada bize telefon veya e-posta ile ulaşabilirsiniz.',
+    home: 'Ana sayfaya dön',
+  },
+  nl: {
+    title: 'Pagina wordt vernieuwd',
+    description: 'Dit deel wordt vernieuwd. De actuele gegevens van de UCCIB-vzw vindt u op de hoofdpagina.',
+    h1: 'Dit deel wordt vernieuwd',
+    body: 'Wij bouwen de site volledig opnieuw. Deze pagina komt binnenkort in haar nieuwe vorm online. In de tussentijd bereikt u ons per telefoon of e-mail.',
+    home: 'Terug naar de hoofdpagina',
+  },
+  fr: {
+    title: 'Page en cours de rénovation',
+    description: 'Cette partie est en cours de rénovation. Les coordonnées actuelles de la fondation UCCIB se trouvent sur la page d’accueil.',
+    h1: 'Cette partie est en cours de rénovation',
+    body: 'Nous reconstruisons entièrement le site. Cette page sera bientôt en ligne dans sa nouvelle version. Entre-temps, vous pouvez nous joindre par téléphone ou par e-mail.',
+    home: 'Retour à la page d’accueil',
+  },
+};
+
+const tekst = TEKST[locale];
+const homeHref = locale === 'tr' ? '/' : `/${locale}/`;
+
+---
+<Layout
+  locale={locale}
+  slug={null}
+  path={routePath}
+  title={`${tekst.title} — ${t.siteName}`}
+  description={tekst.description}
+  noindex
+>
+  <div class="concept" data-concept={slug}>
+    <h1>{tekst.h1}</h1>
+    <p class="concept-body">{tekst.body}</p>
+
+    <dl class="concept-contact">
+      <div>
+        <dt>{t.footer.phone}</dt>
+        <dd><a href={`tel:${SITE.phoneHref}`}>{SITE.phone}</a></dd>
+      </div>
+      <div>
+        <dt>{t.footer.email}</dt>
+        <dd><a href={`mailto:${SITE.email}`}>{SITE.email}</a></dd>
+      </div>
+    </dl>
+
+    <p class="concept-home"><a href={homeHref}>{tekst.home}</a></p>
+  </div>
+</Layout>
+
+<style>
+  .concept {
+    max-width: 34rem;
+    padding: 2rem 0 4rem;
+  }
+
+  .concept-body {
+    margin-top: 1rem;
+    color: var(--color-ink-muted);
+  }
+
+  .concept-contact {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-line);
+    font-size: var(--text-small);
+  }
+
+  .concept-contact dt {
+    font-weight: 600;
+    color: var(--color-ink-muted);
+  }
+
+  .concept-home {
+    margin-top: 2rem;
+  }
+
+  .concept-home a {
+    display: inline-block;
+    padding: 12px 28px;
+    border-radius: var(--radius-pill);
+    background: var(--color-brand-dark);
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .concept-home a:hover,
+  .concept-home a:focus-visible {
+    background: var(--color-ink);
+  }
+</style>

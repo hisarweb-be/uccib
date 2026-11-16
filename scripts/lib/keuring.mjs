@@ -4,12 +4,17 @@
  * hetzelfde meten.
  */
 import { createServer } from 'node:http';
-import { readFile, stat } from 'node:fs/promises';
-import { extname, join, normalize, sep } from 'node:path';
+import { readdir, readFile, stat } from 'node:fs/promises';
+import { extname, join, normalize, relative, sep } from 'node:path';
 import { chromium } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
 
-export const SLUGS = [
+/**
+ * De veertien slugs uit plan §8. Hier staan ze allemaal, zodat de keuring weet
+ * wat een geldige route is; welke daarvan nu echte inhoud hebben, staat in
+ * ACTIVE_SLUGS. Houd deze twee lijsten gelijk aan src/data/site.ts.
+ */
+export const ALL_SLUGS = [
   '',
   'hakkimizda',
   'hizmetlerimiz',
@@ -25,6 +30,20 @@ export const SLUGS = [
   'cerez-politikasi-cookie-policy',
   'baharkermesi-menu',
 ];
+
+/**
+ * Pagina's met echte inhoud, de enige die de vijf paginacontroles hoeven te
+ * halen. De andere tien zijn concepten: die krijgen hun eigen, strengere
+ * controle in checkConcepten() hieronder, want een lege pagina die de
+ * paginakeuring haalt, is precies de verkeerde uitkomst.
+ */
+export const ACTIVE_SLUGS = ['', 'hakkimizda', 'disclameer', 'cerez-politikasi-cookie-policy'];
+
+/** Tien pagina's zonder eigen inhoud. Zie CONCEPT_SLUGS in src/data/site.ts. */
+export const CONCEPT_SLUGS = ALL_SLUGS.filter((slug) => !ACTIVE_SLUGS.includes(slug));
+
+/** Achterwaartse naam: verify-pagina.mjs gebruikt SLUGS als "alle geldige routes". */
+export const SLUGS = ALL_SLUGS;
 
 export const LOCALES = ['tr', 'nl', 'fr'];
 export const DEFAULT_LOCALE = 'tr';
@@ -297,4 +316,102 @@ export async function runChecks({ distDir, slugs, locales = LOCALES }) {
   }
 
   return { errors, checked };
+}
+
+/**
+ * Keurt de tien pagina's zonder eigen inhoud, maar met een andere meetlat dan de
+ * echte pagina's. Een lege pagina die de paginakeuring haalt is immers precies de
+ * verkeerde uitkomst. Wat hier moet kloppen:
+ *
+ *   1. de route bestaat, met precies één h1 (geen kapotte of half gevulde pagina);
+ *   2. hij draagt noindex, zodat een zoekmachine hem laat vallen;
+ *   3. geen enkele gebouwde pagina linkt ernaartoe (menu, footer, body, sitemap);
+ *   4. hij staat niet in de sitemap.
+ *
+ * Punt 3 is de belangrijkste: dat bewijst dat de navigatie de concepten echt
+ * verbergt en niet alleen dat het bestand toevallig bestaat.
+ */
+export async function checkConcepten({ distDir, slugs = CONCEPT_SLUGS, locales = LOCALES }) {
+  const errors = [];
+
+  // 4. De sitemap hoort geen concept te noemen. De sitemap is XML en geen .html,
+  //    dus die lezen we apart: <loc>-regels, niet een losse substring, want
+  //    "bagislar" zit ook in "bagis-onayi" als je slordig zoekt.
+  for (const naam of (await readdir(distDir)).filter((n) => /^sitemap.*\.xml$/.test(n))) {
+    const xml = await readFile(join(distDir, naam), 'utf8');
+    for (const [, url] of xml.matchAll(/<loc>([^<]*)<\/loc>/g)) {
+      const pad = url.replace(/^https?:\/\/[^/]+/i, '/');
+      for (const slug of slugs) {
+        for (const locale of locales) {
+          const route = pagePath(locale, slug);
+          if (pad === route || pad === route.slice(0, -1)) {
+            errors.push(`sitemap ${naam}: noemt het concept ${url}`);
+          }
+        }
+      }
+    }
+  }
+
+  // 3. Geen enkele pagina mag naar een concept linken. Alleen <body> telt: in
+  //    <head> staat de canonical van de pagina zelf, en een concept verwijst
+  //    eerlijk naar zichzelf. Lichaamlinks zijn de navigatie die een bezoeker
+  //    echt kan volgen, en dat is wat hier bewezen moet worden.
+  const bestanden = (await walkHtml(distDir)).filter((file) => !file.endsWith(`${sep}404.html`));
+  for (const file of bestanden) {
+    const html = await readFile(file, 'utf8');
+    const bodyStart = html.search(/<body\b/i);
+    const body = bodyStart === -1 ? html : html.slice(bodyStart);
+    for (const match of body.matchAll(/href\s*=\s*"([^"]*)"/gi)) {
+      const href = match[1];
+      const pad = href.replace(/^https?:\/\/uccib\.com/i, '').split(/[?#]/)[0];
+      for (const slug of slugs) {
+        for (const locale of locales) {
+          const route = pagePath(locale, slug);
+          if (pad === route || pad === route.slice(0, -1)) {
+            errors.push(`${relative(distDir, file)}: linkt naar het concept ${href}`);
+          }
+        }
+      }
+    }
+  }
+
+  // 1 en 2. De route bestaat, heeft één h1, draagt noindex en hangt niet aan de
+  //    hreflang-wissels van de echte pagina's.
+  for (const slug of slugs) {
+    for (const locale of locales) {
+      const route = pagePath(locale, slug);
+      const label = `concept ${locale} ${route}`;
+      const file = distFileFor(distDir, route);
+      let html;
+      try {
+        html = await readFile(file, 'utf8');
+      } catch {
+        errors.push(`${label}: route ontbreekt (${file})`);
+        continue;
+      }
+      const h1Count = (html.match(/<h1\b/gi) ?? []).length;
+      if (h1Count !== 1) {
+        errors.push(`${label}: verwacht precies één <h1>, gevonden ${h1Count}`);
+      }
+      if (!/<meta\s+name="robots"\s+content="[^"]*noindex/i.test(html)) {
+        errors.push(`${label}: mist <meta name="robots" content="noindex">`);
+      }
+      if (/rel="alternate"\s+hreflang=/i.test(html)) {
+        errors.push(`${label}: heeft hreflang-wissels, die horen bij echte pagina's`);
+      }
+    }
+  }
+
+  return { errors, checked: slugs.length * locales.length };
+}
+
+/** Alle .html-bestanden onder dist/, recursief en gesorteerd. */
+async function walkHtml(dir) {
+  const out = [];
+  for (const entry of await readdir(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...(await walkHtml(full)));
+    else if (entry.name.endsWith('.html')) out.push(full);
+  }
+  return out.sort();
 }
