@@ -4,11 +4,13 @@
  * bevatten; Astro controleert elk Markdown-bestand er tegen bij de bouw, en
  * Sveltia CMS leest dezelfde velden uit `public/admin/config.yml`.
  *
- * Twee collecties:
+ * Zes collecties:
  *   - `paginas`: één bestand per pagina per taal, `src/content/paginas/<taal>/<slug>.md`.
  *     Het bestand voor de startpagina heet `index.md` (dus `tr/index`), alle andere
  *     heten naar hun slug (`tr/hakkimizda`).
  *   - `sponsorblokken`: de bedragen op de doneerpagina, `src/content/sponsorblokken/NN.md`.
+ *   - `subeler`, `dernekler`, `vakitler`, `hutbeler`: de vier ledendiensten, elk
+ *     één bestand per regel die op de pagina komt. Zie `docs/ledendiensten.md`.
  *
  * De instellingen (sitenaam, adres, telefoon) staan bewust niet hier: die staan in
  * `src/data/site.ts` en zijn voor de klant geen knop maar een gegeven.
@@ -57,4 +59,95 @@ const sponsorblokken = defineCollection({
   }),
 });
 
-export const collections = { paginas, sponsorblokken };
+/**
+ * De vier ledendiensten. Elk onderdeel is een eigen collectie met één bestand
+ * per regel op de pagina, zodat de vereniging zelf vestigingen, regionale
+ * verenigingen, een maandelijkse tijdstabel en het preekarchief kan bijhouden
+ * zonder in de code te komen. De velden staan in één taal: een naam, een adres
+ * en een telefoonnummer zijn eigennamen en hoeven niet drie keer vertaald.
+ *
+ * Bewust géén inhoud in de repo: zolang een collectie leeg is, toont
+ * `src/components/LedenDienst.astro` niets en blijft de pagina dicht.
+ */
+const dienstBasis = {
+  /** Volgorde in de lijst; de CMS bewaart die mee. */
+  order: z.number().default(0),
+  /** Eén regel uitzetten verbergt hem zonder hem te wissen. */
+  active: z.boolean().default(true),
+};
+
+const subeler = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/subeler' }),
+  schema: z.object({
+    ...dienstBasis,
+    /** Naam van de vestiging. */
+    name: z.string(),
+    street: z.string().default(''),
+    postalCode: z.string().default(''),
+    city: z.string().default(''),
+    phone: z.string().default(''),
+    email: z.string().default(''),
+    /** Vrije tekst, bijvoorbeeld "Her gün 09:00-18:00". */
+    openingHours: z.string().default(''),
+    /** Pad onder /beeld/ of een volledig adres; leeg betekent geen foto. */
+    photo: z.string().default(''),
+  }),
+});
+
+const dernekler = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/dernekler' }),
+  schema: z.object({
+    ...dienstBasis,
+    /** Naam van de regionale vereniging. */
+    name: z.string(),
+    /** Regio of stad, bijvoorbeeld "Brabant" of "Gent". */
+    region: z.string().default(''),
+    /** Eén of twee zinnen over de vereniging; leeg betekent geen tekst. */
+    description: z.string().default(''),
+    contact: z.string().default(''),
+    phone: z.string().default(''),
+    email: z.string().default(''),
+    /** Volledig adres met https://; leeg betekent geen knop. */
+    website: z.string().default(''),
+    photo: z.string().default(''),
+  }),
+});
+
+const vakitler = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/vakitler' }),
+  schema: z.object({
+    ...dienstBasis,
+    /** Maand in de vorm 2026-11; één bestand per maand. */
+    month: z.string().regex(/^\d{4}-\d{2}$/, 'Gebruik JJJJ-MM, bijvoorbeeld 2026-11'),
+    /** Plaats of moskee waar de tijden voor gelden. */
+    place: z.string(),
+    /** Waar de tijden vandaan komen; leeg betekent geen bronregel. */
+    source: z.string().default(''),
+  }),
+});
+
+const hutbeler = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/hutbeler' }),
+  schema: z.object({
+    ...dienstBasis,
+    /** Titel van de preek. */
+    title: z.string(),
+    /** Datum waarop de preek is gehouden. */
+    date: z.coerce.date(),
+    /** Imam of spreker; leeg betekent geen naam. */
+    imam: z.string().default(''),
+    /** Taal van de preek, bijvoorbeeld "Türkçe". */
+    language: z.string().default(''),
+    /** Pad naar een PDF onder /beeld/; leeg betekent geen PDF-knop. */
+    file: z.string().default(''),
+  }),
+});
+
+export const collections = {
+  paginas,
+  sponsorblokken,
+  subeler,
+  dernekler,
+  vakitler,
+  hutbeler,
+};

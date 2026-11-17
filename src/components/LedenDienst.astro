@@ -1,0 +1,235 @@
+---
+/**
+ * Eén raamwerk voor de vier ledendiensten: de vestigingen, de regionale
+ * verenigingen, de gebedstijden en het preekarchief.
+ *
+ * De vereniging levert alleen tekst en beeld: elk onderdeel is een eigen
+ * collectie Markdown-bestanden die dhr. Omer in het bewerkscherm op /admin/
+ * vult. Dit onderdeel toont wat er staat en verder niets: geen verzonnen
+ * inhoud, geen voorbeeldregels. Zolang er geen enkel bestand in een collectie
+ * staat, levert dit onderdeel niets op en blijft de pagina dicht.
+ *
+ * De vier pagina's staan in `src/lib/actief.ts` op `active: false`; die
+ * schakelaar is en blijft de enige knop. Dit onderdeel zet niets aan.
+ */
+import { getCollection, render } from 'astro:content';
+
+interface Props {
+  slug: 'subelerimiz' | 'bolge-derneklerimiz' | 'namaz-vakitleri' | 'cuma-hutbesi';
+  locale: 'tr' | 'nl' | 'fr';
+}
+
+const { slug, locale } = Astro.props;
+
+/**
+ * De kop boven de lijst, in de taal van de pagina. De velden zelf (naam,
+ * adres, telefoon) zijn eigennamen en staan maar in één taal in de repo; ze
+ * worden dus niet vertaald.
+ */
+const KOPPEN: Record<Props['locale'], Record<Props['slug'], string>> = {
+  tr: {
+    subelerimiz: 'Şubelerimiz',
+    'bolge-derneklerimiz': 'Bölge derneklerimiz',
+    'namaz-vakitleri': 'Namaz vakitleri',
+    'cuma-hutbesi': 'Cuma hutbeleri',
+  },
+  nl: {
+    subelerimiz: 'Onze vestigingen',
+    'bolge-derneklerimiz': 'Regionale verenigingen',
+    'namaz-vakitleri': 'Gebedstijden',
+    'cuma-hutbesi': 'Preekarchief',
+  },
+  fr: {
+    subelerimiz: 'Nos antennes',
+    'bolge-derneklerimiz': 'Associations régionales',
+    'namaz-vakitleri': 'Heures de prière',
+    'cuma-hutbesi': 'Archive des sermons',
+  },
+};
+
+const zichtbaar = <T extends { data: { active: boolean; order: number } }>(rijen: T[]): T[] =>
+  rijen.filter((rij) => rij.data.active).sort((a, b) => a.data.order - b.data.order);
+
+const subeler = slug === 'subelerimiz' ? zichtbaar(await getCollection('subeler')) : [];
+
+const dernekler = slug === 'bolge-derneklerimiz' ? zichtbaar(await getCollection('dernekler')) : [];
+
+const vakitler =
+  slug === 'namaz-vakitleri'
+    ? await Promise.all(
+        zichtbaar(await getCollection('vakitler')).map(async (rij) => ({
+          ...rij,
+          inhoud: await render(rij),
+        })),
+      )
+    : [];
+
+const hutbeler =
+  slug === 'cuma-hutbesi'
+    ? await Promise.all(
+        zichtbaar(await getCollection('hutbeler')).map(async (rij) => ({
+          ...rij,
+          inhoud: await render(rij),
+        })),
+      )
+    : [];
+
+const leeg =
+  subeler.length + dernekler.length + vakitler.length + hutbeler.length === 0;
+const kop = KOPPEN[locale][slug];
+---
+
+{
+  !leeg && (
+    <section class="mb-10">
+      <h2>{kop}</h2>
+
+      {subeler.length > 0 && (
+        <ul class="mt-6 grid list-none gap-4 p-0 sm:grid-cols-2">
+          {subeler.map((rij) => (
+            <li class="rounded-2xl border border-line bg-surface-alt p-5">
+              {rij.data.photo ? (
+                <img
+                  src={rij.data.photo}
+                  alt={rij.data.name}
+                  width="640"
+                  height="360"
+                  loading="lazy"
+                  class="mb-4 aspect-video w-full rounded-xl object-cover"
+                />
+              ) : null}
+              <h3 class="text-lead">{rij.data.name}</h3>
+              <address class="mt-2 not-italic text-ink-muted">
+                {rij.data.street && <>{rij.data.street}<br /></>}
+                {[rij.data.postalCode, rij.data.city].filter(Boolean).join(' ')}
+              </address>
+              <dl class="mt-3 grid gap-1 text-small">
+                {rij.data.phone && (
+                  <>
+                    <dt class="sr-only">Telefon</dt>
+                    <dd>
+                      <a href={`tel:${rij.data.phone.replace(/\s+/g, '')}`}>{rij.data.phone}</a>
+                    </dd>
+                  </>
+                )}
+                {rij.data.email && (
+                  <>
+                    <dt class="sr-only">E-posta</dt>
+                    <dd>
+                      <a href={`mailto:${rij.data.email}`}>{rij.data.email}</a>
+                    </dd>
+                  </>
+                )}
+                {rij.data.openingHours && (
+                  <>
+                    <dt class="sr-only">Açılış saatleri</dt>
+                    <dd>{rij.data.openingHours}</dd>
+                  </>
+                )}
+              </dl>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {dernekler.length > 0 && (
+        <ul class="mt-6 grid list-none gap-4 p-0 sm:grid-cols-2">
+          {dernekler.map((rij) => (
+            <li class="rounded-2xl border border-line bg-surface-alt p-5">
+              {rij.data.photo ? (
+                <img
+                  src={rij.data.photo}
+                  alt={rij.data.name}
+                  width="640"
+                  height="360"
+                  loading="lazy"
+                  class="mb-4 aspect-video w-full rounded-xl object-cover"
+                />
+              ) : null}
+              <h3 class="text-lead">{rij.data.name}</h3>
+              {rij.data.region && <p class="mt-1 text-small text-ink-muted">{rij.data.region}</p>}
+              {rij.data.description && <p class="mt-3 text-ink-muted">{rij.data.description}</p>}
+              <dl class="mt-3 grid gap-1 text-small">
+                {rij.data.contact && (
+                  <>
+                    <dt class="sr-only">İlgili kişi</dt>
+                    <dd>{rij.data.contact}</dd>
+                  </>
+                )}
+                {rij.data.phone && (
+                  <>
+                    <dt class="sr-only">Telefon</dt>
+                    <dd>
+                      <a href={`tel:${rij.data.phone.replace(/\s+/g, '')}`}>{rij.data.phone}</a>
+                    </dd>
+                  </>
+                )}
+                {rij.data.email && (
+                  <>
+                    <dt class="sr-only">E-posta</dt>
+                    <dd>
+                      <a href={`mailto:${rij.data.email}`}>{rij.data.email}</a>
+                    </dd>
+                  </>
+                )}
+                {rij.data.website && (
+                  <>
+                    <dt class="sr-only">Web sitesi</dt>
+                    <dd>
+                      <a href={rij.data.website} rel="noopener">
+                        {rij.data.website.replace(/^https?:\/\//, '')}
+                      </a>
+                    </dd>
+                  </>
+                )}
+              </dl>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {vakitler.map((rij) => (
+        <article class="mt-6 rounded-2xl border border-line bg-surface-alt p-5">
+          <h3 class="text-lead">
+            {rij.data.month} · {rij.data.place}
+          </h3>
+          <div class="tekst mt-3 overflow-x-auto">
+            <rij.inhoud.Content />
+          </div>
+          {rij.data.source && (
+            <p class="mt-3 text-small text-ink-muted">
+              <a href={rij.data.source} rel="noopener">
+                {rij.data.source.replace(/^https?:\/\//, '')}
+              </a>
+            </p>
+          )}
+        </article>
+      ))}
+
+      {hutbeler.length > 0 && (
+        <ul class="mt-6 list-none space-y-4 p-0">
+          {hutbeler.map((rij) => (
+            <li class="rounded-2xl border border-line bg-surface-alt p-5">
+              <h3 class="text-lead">{rij.data.title}</h3>
+              <p class="mt-1 text-small text-ink-muted">
+                {rij.data.date.toISOString().slice(0, 10)}
+                {rij.data.imam && ` · ${rij.data.imam}`}
+                {rij.data.language && ` · ${rij.data.language}`}
+              </p>
+              <div class="tekst mt-3">
+                <rij.inhoud.Content />
+              </div>
+              {rij.data.file && (
+                <p class="mt-3">
+                  <a href={rij.data.file} class="inline-flex min-h-11 items-center">
+                    PDF
+                  </a>
+                </p>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}
