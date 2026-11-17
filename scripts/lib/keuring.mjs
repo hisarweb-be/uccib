@@ -9,10 +9,19 @@ import { extname, join, normalize, relative, sep } from 'node:path';
 import { chromium } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
 
+import { CONCEPT_SLUGS as SITE_CONCEPT_SLUGS } from '../../src/data/site.ts';
+
 /**
  * De veertien slugs uit plan §8. Hier staan ze allemaal, zodat de keuring weet
  * wat een geldige route is; welke daarvan nu echte inhoud hebben, staat in
- * ACTIVE_SLUGS. Houd deze twee lijsten gelijk aan src/data/site.ts.
+ * ACTIVE_SLUGS.
+ *
+ * De lijst met wat een concept is komt uit src/data/site.ts zelf, niet uit een
+ * tweede kopie hier. Node 22 leest die TypeScript-bron rechtstreeks, dus er is
+ * één schakelaar: haalt een fase een slug uit CONCEPT_SLUGS, dan verschuift de
+ * keuring mee zonder dat iemand hier iets aanpast. Tot 17-11 stond hier een
+ * tweede lijst en dan vergeet een fase er één, met een groene keuring op een
+ * pagina die niemand ziet als gevolg.
  */
 export const ALL_SLUGS = [
   '',
@@ -33,14 +42,18 @@ export const ALL_SLUGS = [
 
 /**
  * Pagina's met echte inhoud, de enige die de vijf paginacontroles hoeven te
- * halen. De andere tien zijn concepten: die krijgen hun eigen, strengere
- * controle in checkConcepten() hieronder, want een lege pagina die de
- * paginakeuring haalt, is precies de verkeerde uitkomst.
+ * halen. De andere zijn concepten: die krijgen hun eigen, strengere controle in
+ * checkConcepten() hieronder, want een lege pagina die de paginakeuring haalt,
+ * is precies de verkeerde uitkomst.
+ *
+ * De bron is CONCEPT_SLUGS uit src/data/site.ts; deze regel leiden we daaruit af
+ * en niet andersom.
  */
-export const ACTIVE_SLUGS = ['', 'hakkimizda', 'disclameer', 'cerez-politikasi-cookie-policy'];
+export const CONCEPT_SLUGS = ALL_SLUGS.filter((slug) =>
+  SITE_CONCEPT_SLUGS.includes(slug),
+);
 
-/** Tien pagina's zonder eigen inhoud. Zie CONCEPT_SLUGS in src/data/site.ts. */
-export const CONCEPT_SLUGS = ALL_SLUGS.filter((slug) => !ACTIVE_SLUGS.includes(slug));
+export const ACTIVE_SLUGS = ALL_SLUGS.filter((slug) => !CONCEPT_SLUGS.includes(slug));
 
 /** Achterwaartse naam: verify-pagina.mjs gebruikt SLUGS als "alle geldige routes". */
 export const SLUGS = ALL_SLUGS;
