@@ -83,6 +83,11 @@ wil terugdraaien, ziet hier waarom het zo staat.
 
 ## CMS en Studio (F2)
 
+> **Vervallen op 17 nov 2026.** De besluiten 44 tot en met 55 hieronder zijn
+> historie: Sanity is die dag uit het project gehaald en vervangen door Sveltia
+> CMS in `public/admin/` (besluit 56, onderaan dit bestand). Ze blijven staan
+> omdat ze laten zien waarom de Studio zo gebouwd was; niets ervan geldt nog.
+
 | # | Besluit | Reden |
 |---|---|---|
 | 44 | De Studio wordt bij elke bouw gemaakt, niet in de repo gezet | 22 MB en 787 bestanden; de map is een bouwproduct net als `dist/`. `npm run build` draait eerst `scripts/build-studio.mjs` (het `prebuild`-script), dus Cloudflare maakt `/beheer` zelf. Een map in de repo zou bij elke schemawijziging honderden bestanden in de historie zetten. |
@@ -97,3 +102,26 @@ wil terugdraaien, ziet hier waarom het zo staat.
 | 53 | `sanity/structure.ts` heet `sanity/structuur.ts` | Een bestand met die naam naast het pakket `sanity` laat TypeScript `sanity/structure` als zichzelf oplossen: "Circular definition of import alias". Met een eigen naam kan die botsing niet ontstaan. |
 | 54 | De wortel-`tsconfig.json` sluit `sanity/` uit | De Studio heeft eigen instellingen en eigen afhankelijkheden (`sanity/tsconfig.json`); `astro check` keurt de site, `npm run sanity:typecheck` keurt de Studio. |
 | 55 | Een mislukte Studio-bouw stopt de hele bouw | Een site zonder werkende `/beheer` is niet wat uitgerold moet worden; stil doorgaan zou een groene uitrol met een kapot CMS geven. |
+
+## Content layer en CMS (17 nov 2026)
+
+| # | Besluit | Reden |
+|---|---|---|
+| 56 | Sanity gaat eruit; het bewerkscherm is Sveltia CMS in `public/admin/` | Sanity vroeg een account, een Studio-bouw van 787 bestanden en een webhook; de redactie gebruikt nu één scherm dat rechtstreeks Markdown in deze repo schrijft. Zonder database kan de site niets tonen wat niet in de repo staat, en elke wijziging van de voorzitter is een commit in de geschiedenis. Gratis, geen tweede account, geen server. |
+| 57 | De inhoud staat als Markdown in `src/content/paginas/{tr,nl,fr}`, gelezen door `src/content.config.ts` | Eén bron voor de site en het bewerkscherm. `active: false` houdt een pagina op haar adres met noindex, buiten de sitemap en zonder link ernaartoe; `npm run verify` eist dat. |
+| 58 | Verwijderen en aanmaken staan uit in het bewerkscherm (`create` en `delete` op false) | De veertien pagina's hebben elk een eigen plek in de menubalk en een eigen ontworpen kop. Een vijftiende pagina is een ontwerpbeslissing, geen schakelaar. |
+
+### Vervallen door besluit 56 (Sanity eruit)
+
+Deze nummers gelden niet meer; ze staan hierboven alleen als historie:
+44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54 en 55.
+
+Wat elk nummer verving:
+- 44 tot en met 46 en 51 tot en met 55 gingen over de Studio-bouw, de paden en
+  de pakketten; die zijn met de map `sanity/` verdwenen.
+- 47 tot en met 50 gingen over de import vanuit `scripts/content/` naar Sanity en
+  de offline kopie `cms-fallback.json`; de Markdown-bestanden zijn nu de enige
+  bron (besluit 57).
+- De Deploy Hook uit `README-DEPLOY.md` is niet meer nodig: een commit van het
+  bewerkscherm is een push naar `main`, en die push is de trigger voor
+  Cloudflare.

@@ -153,16 +153,12 @@ const kaartUrl = `https://www.google.com/maps/search/?api=1&query=${SITE.geo.lat
           />
           <div class="relative mx-auto grid w-full max-w-6xl gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-14 lg:px-8 lg:py-24">
             <div>
-              <img
-                src={SITE.logo}
-                width={SITE.logoWidth}
-                height={SITE.logoHeight}
-                alt={t.logoAlt}
-                class="mb-8 h-auto w-[220px] max-w-full sm:w-[280px]"
-                loading="eager"
-                decoding="sync"
-                fetchpriority="high"
-              />
+              {/* Hier stond het logo nog een keer, 220 px op een telefoon en
+                  280 px op een scherm. Gemeten op 17-11 stond daarmee twee keer
+                  hetzelfde merk in één scherm: de kop draagt het al, en op een
+                  telefoon slokte het samen met de kop de bovenste helft van het
+                  eerste scherm op. De hero begint nu met de kleine regel en de
+                  h1; het logo staat één keer, bovenaan. */}
               <p class="mb-4 text-small font-semibold tracking-[0.18em] text-brand-dark uppercase">
                 {teksten.heroKlein}
               </p>

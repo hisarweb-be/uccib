@@ -240,25 +240,20 @@ async function main() {
       }
     }
 
-    // Elk concept zegt iets eigens. Tien pagina's met dezelfde tekst zijn voor
-    // een bezoeker één pagina, dus de titels moeten onderling verschillen. Dat
-    // elke titel ook echt bij zijn onderwerp hoort, bewaakt de losse keuring
-    // hierboven al: titel leeg, beschrijving leeg, noindex, hreflang en "toont
-    // de homepage" worden per pagina afgekeurd.
+    // Elke lege pagina zegt zijn eigen ding, en geen twee hetzelfde.
     //
-    // Tot F3 stond hier het omgekeerde (alle concepten deelden één titel). Dat
-    // kwam uit de tijd dat de vier pagina's één placeholdersjabloon kopieerden;
-    // sinds elk concept zijn eigen onderwerp noemt, keurde die eis de betere
-    // toestand af.
-    //
-    // Is de conceptlijst leeg, dan valt er niets te vergelijken en is dat de
-    // bedoelde eindstand: zonder deze regel keurt de toets zijn eigen succes af.
+    // Tot F3 stond hier het omgekeerde: alle concepten moesten één titel delen,
+    // want tien lege pagina's met dezelfde tekst is voor een bezoeker hetzelfde
+    // als één lege pagina. Sinds 17-11 hebben de vier lege pagina's elk hun eigen
+    // eerlijke mededeling (`leeg` in `src/i18n/f3.ts`: wat er nog niet is en waar
+    // de bezoeker het wel vindt). Vier keer hetzelfde zinnetje zou nu een
+    // terugval zijn, niet de bedoeling; de toets keert dus mee. Wat blijft gelden:
+    // elke lege pagina heeft een titel, en geen twee delen er een.
     for (const locale of LOCALES) {
       const perTaal = CONCEPT_SLUGS.map((slug) => conceptTitels[`${locale}/${slug}`]).filter(Boolean);
       const uniek = new Set(perTaal);
       meld(
-        CONCEPT_SLUGS.length === 0 ||
-          (perTaal.length === CONCEPT_SLUGS.length && uniek.size === CONCEPT_SLUGS.length),
+        CONCEPT_SLUGS.length === 0 || (perTaal.length === CONCEPT_SLUGS.length && uniek.size === perTaal.length),
         `${locale.padEnd(2)} concepttekst`,
         CONCEPT_SLUGS.length === 0
           ? `geen concepten, alle pagina’s hebben inhoud`
