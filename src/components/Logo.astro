@@ -17,9 +17,15 @@ interface Props {
   locale: Locale;
   /** Class voor het beeld zelf, bijvoorbeeld de maat in de kop of de voet. */
   class?: string;
+  /**
+   * Weergavebreedte in CSS-pixels. Bepaalt ook `sizes`, zodat de browser nooit
+   * breder laadt dan nodig. Zonder deze maat zou het beeld op zijn attribuut
+   * (560 px) staan: dat is de bronmaat, niet de plek waar hij in de kop past.
+   */
+  breedte?: number;
 }
 
-const { locale, class: className } = Astro.props;
+const { locale, class: className, breedte = 280 } = Astro.props;
 const t = getDictionary(locale);
 
 const BASE = '/beeld/logo/uccib-woordmerk';
@@ -28,14 +34,15 @@ const srcset = (ext: 'avif' | 'webp') =>
 ---
 
 <picture>
-  <source type="image/avif" srcset={srcset('avif')} sizes="(min-width: 640px) 280px, 220px" />
-  <source type="image/webp" srcset={srcset('webp')} sizes="(min-width: 640px) 280px, 220px" />
+  <source type="image/avif" srcset={srcset('avif')} sizes={`${breedte}px`} />
+  <source type="image/webp" srcset={srcset('webp')} sizes={`${breedte}px`} />
   <img
     src={SITE.logo}
     width={SITE.logoWidth}
     height={SITE.logoHeight}
     alt={t.logoAlt}
     class={className}
+    style={`width:${breedte}px`}
     decoding="async"
   />
 </picture>

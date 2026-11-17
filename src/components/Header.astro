@@ -76,7 +76,7 @@ const languageHref = (other: Locale) =>
   <div class="site-header">
     <div class="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-8 lg:px-8">
       <a class="logo-link" href={pagePath(locale, '')}>
-        <Logo locale={locale} />
+        <Logo locale={locale} breedte={200} />
       </a>
 
       <nav aria-label={t.navLabel}>
@@ -156,14 +156,14 @@ const languageHref = (other: Locale) =>
     display: inline-flex;
   }
 
-  /* 280 px breed is de maat waarop de beeldset van F1 is gemaakt; de hoogte
-     volgt vanzelf uit de verhouding 560:176. */
-  .logo-link img {
-    display: block;
-    width: 280px;
-    max-width: 100%;
-    height: auto;
-  }
+  /*
+    De maat van het logo staat op het beeld zelf (`breedte` op `<Logo>`), niet
+    hier. Gemeten op 17-11: deze regel raakte het logo nooit. Een scoped stijl
+    geldt alleen voor elementen uit dit bestand, en de `<img>` staat in
+    `Logo.astro`; het logo stond daardoor op zijn bronmaat van 560 px en vulde
+    de halve kop. Op een telefoon hield alleen de `max-width: 100%` van Tailwind
+    hem nog binnen, waardoor hij daar bijna het hele scherm breed werd.
+  */
 
   .nav-link {
     display: inline-block;

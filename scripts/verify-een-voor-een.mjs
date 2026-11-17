@@ -240,18 +240,20 @@ async function main() {
       }
     }
 
-    // Eén titel, één bericht per taal: tien lege pagina's met dezelfde tekst is
-    // voor een bezoeker hetzelfde als één lege pagina.
+    // Elke lege pagina zegt zijn eigen ding, en geen twee hetzelfde.
     //
-    // Sinds F3 is de conceptlijst leeg: alle veertien pagina's hebben inhoud. Er
-    // valt dan niets te vergelijken, en "nul concepten, nul titels" is geen fout
-    // maar de bedoelde eindstand. Zonder deze regel keurt de toets zijn eigen
-    // succes af. Zodra er weer een concept bij komt, geldt de vergelijking weer.
+    // Tot F3 stond hier het omgekeerde: alle concepten moesten één titel delen,
+    // want tien lege pagina's met dezelfde tekst is voor een bezoeker hetzelfde
+    // als één lege pagina. Sinds 17-11 hebben de vier lege pagina's elk hun eigen
+    // eerlijke mededeling (`leeg` in `src/i18n/f3.ts`: wat er nog niet is en waar
+    // de bezoeker het wel vindt). Vier keer hetzelfde zinnetje zou nu een
+    // terugval zijn, niet de bedoeling; de toets keert dus mee. Wat blijft gelden:
+    // elke lege pagina heeft een titel, en geen twee delen er een.
     for (const locale of LOCALES) {
       const perTaal = CONCEPT_SLUGS.map((slug) => conceptTitels[`${locale}/${slug}`]).filter(Boolean);
       const uniek = new Set(perTaal);
       meld(
-        CONCEPT_SLUGS.length === 0 || (perTaal.length === CONCEPT_SLUGS.length && uniek.size === 1),
+        CONCEPT_SLUGS.length === 0 || (perTaal.length === CONCEPT_SLUGS.length && uniek.size === perTaal.length),
         `${locale.padEnd(2)} concepttekst`,
         CONCEPT_SLUGS.length === 0
           ? `geen concepten, alle pagina’s hebben inhoud`
