@@ -2,6 +2,7 @@
 import '@fontsource-variable/open-sans/wght.css';
 import '@fontsource-variable/noto-serif/wght.css';
 import '../styles/tokens.css';
+import '../styles/cinema.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import WhatsApp from '../components/WhatsApp.astro';
@@ -101,6 +102,24 @@ const xDefault = alternates[0]?.href;
     <link rel="icon" href="/beeld/logo/icon-192.png" type="image/png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/beeld/logo/icon-192.png" />
     <link rel="manifest" href="/site.webmanifest" />
+    {/*
+      De schakelaar van de bewegingslaag (F4). Deze regel staat bewust inline en
+      vóór alles wat tekent: zo is de beginstand van het podium er al bij de eerste
+      verf, zonder flits van de eindfoto. Vraagt de bezoeker minder beweging, dan
+      komt de klasse er niet en staat de site stil. De noodrem onderaan ruimt de
+      beginstand op als `src/scripts/cinema.ts` nooit geladen raakte.
+    */}
+    <script is:inline>
+      (function () {
+        var wortel = document.documentElement;
+        if (!window.matchMedia) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        wortel.classList.add('cinema-aan');
+        setTimeout(function () {
+          if (!window.__cinema) wortel.classList.remove('cinema-aan');
+        }, 2500);
+      })();
+    </script>
   </head>
   <body>
     <a class="skip-link" href="#hw-main">{t.skipToContent}</a>
@@ -118,6 +137,9 @@ const xDefault = alternates[0]?.href;
     </main>
     <Footer locale={locale} />
     <WhatsApp locale={locale} />
+    <script>
+      import '../scripts/cinema';
+    </script>
   </body>
 </html>
 

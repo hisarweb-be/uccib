@@ -1,0 +1,55 @@
+---
+/**
+ * Een eigen foto met het foto-cinema-gevoel van F4: een trage verschuiving van
+ * het beeld zelf en een korrel erover. De onthulling bij binnenkomst zit op het
+ * kader, niet op het beeld.
+ *
+ * Twee dingen die dit component bewust niet doet: het eerste beeld boven de vouw
+ * onthullen (dat is het LCP-beeld, en een beeld dat op 0 begint telt pas later)
+ * en tekst animeren (de keuring meet contrast op de eindstand, maar tekst hoort
+ * hier hoe dan ook niet in).
+ *
+ * Alles valt stil zonder de klasse `cinema-aan` op `<html>`: dan staat het beeld
+ * er gewoon, zonder korrel en zonder verschuiving.
+ */
+import Beeld from './Beeld.astro';
+
+interface Props {
+  slug: string;
+  alt: string;
+  sizes: string;
+  /** Ronding van het kader; het beeld zelf krijgt er geen, anders zie je de rand dubbel. */
+  klasse?: string;
+  /** Uitslag van de verschuiving als deel van de eigen hoogte; 0 zet hem uit. */
+  parallax?: number;
+  loading?: 'eager' | 'lazy';
+  prioriteit?: boolean;
+  /** Zacht in beeld komen. Uit op alles wat bij het openen al in het venster staat. */
+  onthul?: boolean;
+}
+
+const {
+  slug,
+  alt,
+  sizes,
+  klasse = 'rounded-2xl',
+  parallax = 0.06,
+  loading = 'lazy',
+  prioriteit = false,
+  onthul = true,
+} = Astro.props;
+---
+
+<div class:list={['cinema-beeld', klasse]} data-onthul={onthul ? '' : undefined}>
+  <div class="cinema-beeld-binnen" data-parallax={parallax > 0 ? String(parallax) : undefined}>
+    <Beeld
+      slug={slug}
+      alt={alt}
+      sizes={sizes}
+      klasse="h-auto w-full"
+      loading={loading}
+      prioriteit={prioriteit}
+    />
+  </div>
+  <span class="cinema-korrel" aria-hidden="true"></span>
+</div>
