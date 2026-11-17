@@ -362,6 +362,29 @@ async function main() {
         meld(/sveltia-cms/.test(html), 'beheer (laadt Sveltia CMS)', 'script van de cdn');
       }
       meld(await controleerBron('/admin/config.yml'), 'beheer (configuratie meegeleverd)', 'config.yml');
+
+      // Het oude adres mag na de verhuizing niets ouds blijven serveren. Toen
+      // `/beheer` uit de repo verdween, bleef de alias op de randcache een
+      // week lang de oude Sanity-pagina tonen (`s-maxage=604800`, `Age: 57352`,
+      // gemeten 17 nov 2026), terwijl de uitrol-URL zelf 404 gaf. Er staat nu
+      // een echte verhuispagina met `no-store`, zodat het pad meteen de nieuwe
+      // inhoud draagt. Wat hier bewezen wordt: het pad antwoordt, stuurt naar
+      // /admin/, vraagt geen indexering en komt niet uit de cache.
+      const oud = await haalPad('/beheer/');
+      const oudHtml = typeof oud === 'string' ? oud : null;
+      meld(
+        oudHtml !== null,
+        'beheer (/beheer/ stuurt door naar /admin/)',
+        oudHtml !== null ? '' : levend ? `status ${oud?.status ?? 'geen antwoord'}` : 'route ontbreekt',
+      );
+      if (oudHtml !== null) {
+        meld(/url=\/admin\//.test(oudHtml), 'beheer (verwijst naar /admin/)', '<meta http-equiv="refresh">');
+        meld(
+          /<meta\s+name="robots"\s+content="[^"]*noindex/i.test(oudHtml),
+          'beheer (het oude adres vraagt geen indexering)',
+          'meta robots',
+        );
+      }
     }
 
     // Elke bron die de pagina's noemen, één keer gemeten.
