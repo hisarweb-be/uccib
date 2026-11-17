@@ -168,8 +168,13 @@ if (perId.size > 0) {
       const page = await context.newPage();
       try {
         await page.goto(doneerUrl(euro, id), { waitUntil: 'domcontentloaded', timeout: 60000 });
-        await page.waitForFunction(() => document.body.innerText.includes('€'), null, {
-          timeout: 30000,
+        // Mollie antwoordt zelf eerst met een 404 en leidt dan door naar
+        // /be/payment/<id>. Tijdens die doorleiding is document.body even null;
+        // zonder de null-controle klapte deze wachtfunctie daarop en leek de
+        // 100-euro-link kapot terwijl Mollie het juiste bedrag gewoon toonde
+        // (gemeten 17 nov 06:14).
+        await page.waitForFunction(() => document.body !== null && document.body.innerText.includes('€'), null, {
+          timeout: 45000,
         });
         const tekst = await page.evaluate(() => document.body.innerText);
         const getoond = naarEuro(tekst);
