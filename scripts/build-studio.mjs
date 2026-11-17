@@ -24,12 +24,12 @@
  * uit de offline kopie en heeft het beheer niet nodig; de keuring eist dan ook
  * geen `/beheer`. Zie `scripts/lib/studio.mjs`.
  */
-import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { GEEN_PROJECT, heeftSanityProject } from './lib/studio.mjs';
+import { BEHEER_UIT, GEEN_PROJECT, heeftSanityProject } from './lib/studio.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const studio = join(root, 'sanity');
@@ -44,6 +44,10 @@ if (!existsSync(join(studio, 'package.json'))) {
 const uitMap = join(root, 'public', 'beheer');
 if (!heeftSanityProject()) {
   if (existsSync(uitMap)) rmSync(uitMap, { recursive: true, force: true });
+  // Wel een eigen bestand op dat pad: de randcache van Cloudflare hield zonder
+  // dat bestand een oude Studio-kopie een week vast (gemeten 17 nov 2026).
+  mkdirSync(uitMap, { recursive: true });
+  writeFileSync(join(uitMap, 'index.html'), BEHEER_UIT, 'utf8');
   console.log(GEEN_PROJECT);
   process.exit(0);
 }
