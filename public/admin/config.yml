@@ -30,9 +30,13 @@ backend:
 media_folder: public/beeld
 public_folder: /beeld
 
-site_url: https://uccib.com
-display_url: https://uccib.com
-logo_url: https://uccib.com/beeld/logo/uccib-vierkant/512.webp
+# Zolang uccib.com nog de oude WordPress-site is, wijzen deze drie naar het
+# adres waar de site en dit bewerkscherm echt staan. uccib.com heeft `/beeld/`
+# niet, dus een logo_url daar levert een gebroken beeld op in het bewerkscherm.
+# Zodra het domein om is (F6), gaan deze drie regels in één keer mee.
+site_url: https://uccib.pages.dev
+display_url: https://uccib.pages.dev
+logo_url: https://uccib.pages.dev/beeld/logo/uccib-vierkant/512.webp
 
 i18n:
   structure: multiple_folders

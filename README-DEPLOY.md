@@ -42,23 +42,29 @@ Elke pull request krijgt een eigen adres van de vorm
 `https://<commit-hash>.uccib.pages.dev`. Dat is het adres waarop F1 en F2 keuren
 voordat er iets naar het echte domein gaat.
 
-## Deploy Hook (voor F2)
+## Publiceren zonder Deploy Hook (17 nov 2026)
 
-De keten uit plan §4 is: voorzitter publiceert in Sanity, Sanity stuurt een
-webhook, Cloudflare bouwt opnieuw. Daarvoor is één Deploy Hook nodig.
+Sinds de herbouw van 17 november 2026 is Sanity vervallen (besluit 56 in
+`docs/BESLUITEN.md`) en is er geen Deploy Hook meer nodig. De redactie werkt in
+Sveltia CMS op `/admin/`, en dat schrijft rechtstreeks naar deze repo:
 
-1. Open het project in Cloudflare, kies **Settings** en dan **Builds & deployments**.
-2. Scrol naar **Deploy hooks** en kies **Add deploy hook**.
-3. Naam: `sanity-publicatie`. Branch: `main`.
-4. Cloudflare toont één keer een adres van de vorm
-   `https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/<id>`.
-   Kopieer dat meteen; het is daarna niet meer volledig zichtbaar.
-5. Bewaar het adres als geheim in Sanity (of in de webhook-instelling van Sanity),
-   nooit in deze repo. Zet het in `D:/paperclip`-kluisbeheer zoals de andere
-   sleutels, niet in een bestand hier.
+1. De voorzitter bewerkt een pagina in `https://uccib.pages.dev/admin/`.
+2. Sveltia doet een commit op `main` (via de GitHub-token in het bewerkscherm).
+3. Cloudflare ziet de push en bouwt opnieuw. Doorlooptijd 45 tot 90 seconden.
 
-Een lege push of een nieuwe publicatie in Sanity start daarna binnen enkele
-seconden een bouw. De doorlooptijd is volgens plan §4 45 tot 90 seconden.
+Er is dus geen webhook, geen geheim en geen instelling in Cloudflare voor nodig:
+de push naar `main` is de trigger. Wie handmatig wil uitrollen, kan dat met
+`npx --yes wrangler@4.97.0 pages deploy dist --project-name uccib --branch main`.
+
+De oude Sanity-keten staat hieronder als historie; die is niet meer van
+toepassing.
+
+### Vervallen: Deploy Hook via Sanity
+
+De keten uit plan §4 was: voorzitter publiceert in Sanity, Sanity stuurt een
+webhook, Cloudflare bouwt opnieuw. Daarvoor was één Deploy Hook nodig
+(`sanity-publicatie`, branch `main`). Met Sanity eruit is die hook nergens meer
+voor nodig; hij kan in Cloudflare worden ingetrokken.
 
 ## Eigen domein (F2, niet in F0)
 
@@ -76,12 +82,21 @@ Pas doen als de site op het preview-adres gekeurd is:
 | Stap | Commando | Wat het doet |
 |---|---|---|
 | Typen | `npm run check` | Controleert de `.astro`- en `.ts`-bestanden |
-| Bouwen | `npm run build` | Maakt 42 pagina's in `dist/` (veertien slugs in drie talen) |
+| Bouwen | `npm run build` | Veertien slugs in drie talen (42 routes) plus een 404; de bouw meldt 43 pagina's. `dist/admin/` komt uit `public/` |
 | Keuren | `npm run verify` | Titel, beschrijving, één h1, afbeeldingen, interne links, canonical, drie hreflang en axe-core |
 | Links | `npm run verify:links` | Elke interne verwijzing in `dist/` moet bestaan |
+| Server | `npm run verify:server` | De statische server zelf, met een tegenproef die MOET afkeuren |
+| Elke pagina | `npm run verify:elke` | Elke pagina apart met een eigen regel in de uitkomst, ook tegen de levende site (`--basis`) |
+| Telefoon | `npm run verify:mobiel` | Tikdoelen van 44 px, niets buiten het scherm, scrollen met een echte vinger |
+| Scherm | `npm run verify:scherm` | Het eerste scherm in pixels: gemiddelde helderheid en spreiding, met drie tegenproeven |
 
-Op Cloudflare draait alleen `npm run build`; de keuringen draaien in GitHub
-Actions (`.github/workflows/ci.yml`) en zijn de poort voor samenvoegen.
+Op Cloudflare draait alleen `npm run build`. In GitHub Actions
+(`.github/workflows/ci.yml`) draaien `check`, `build`, `verify` en
+`verify:links`; die vier zijn de poort voor samenvoegen. De vier zware poorten
+eronder (`verify:server`, `verify:elke`, `verify:mobiel`, `verify:scherm`)
+vragen een browser en draaien op de laptop vóór de uitrol. Een groene CI zegt dus
+niets over het eerste scherm; die meting staat in `verify:scherm` en hoort bij
+elke oplevering.
 
 ## Lokaal naspelen
 
