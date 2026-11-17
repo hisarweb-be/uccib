@@ -1,0 +1,75 @@
+---
+/**
+ * De gebouwonthulling: een vastgepinde sectie van 200vh waarin de foto zich
+ * opbouwt van niets tot eindbeeld (F4, plan §6).
+ *
+ * Vier lagen op één plek, van onder naar boven: de lijncontour, de massa, de
+ * foto, en daarboven korrel met een vignet. `src/scripts/cinema.ts` zet per
+ * scrollframe één `opacity` per laag; verder beweegt hier niets. De volgorde is
+ * bewust: de massa groeit over de contourlijnen heen, en de foto dekt aan het
+ * eind alles af, zodat wat je ziet altijd naar de echte foto toe werkt.
+ *
+ * De lijncontour is geen tweede beeldbestand: het is een Laplacian-rand die de
+ * browser zelf op dezelfde foto berekent (zie het filter hieronder). Daarmee
+ * blijft het bij één download en is er geen gegenereerd beeld aan te pas gekomen.
+ *
+ * Zonder beweging (geen JavaScript, of `prefers-reduced-motion: reduce`) is dit
+ * geen 200vh leegte maar een stilstaande band met de eindfoto: de CSS zet de
+ * sectie dan op 60svh en de foto op volle sterkte. Zie `src/styles/cinema.css`.
+ */
+import Beeld from './Beeld.astro';
+
+interface Props {
+  /** Beeld uit het manifest; dit is de eindfoto van de onthulling. */
+  slug: string;
+  /** Wat er op de foto te zien is; de enige tekst die een schermlezer hier krijgt. */
+  alt: string;
+}
+
+const { slug, alt } = Astro.props;
+---
+
+<div class="cinema-podium" data-cinema role="img" aria-label={alt}>
+  <div class="cinema-vast">
+    <div class="cinema-lagen">
+      {/*
+        Alle drie de lagen zijn dezelfde foto. Ze krijgen daarom alle drie dezelfde
+        alt-tekst: de keuring van dit project eist een gevulde alt op elke <img>
+        in de gebouwde pagina, ook op een decoratief beeld. Dubbel voorlezen
+        gebeurt niet, want de lagen staan op `aria-hidden` en de schermlezer
+        hoort de beschrijving één keer via `aria-label` op het podium hierboven.
+      */}
+      <div class="cinema-laag cinema-kontour" data-laag="kontour" aria-hidden="true">
+        <Beeld slug={slug} alt={alt} sizes="100vw" />
+      </div>
+      <div class="cinema-laag cinema-massa" data-laag="massa" aria-hidden="true">
+        <Beeld slug={slug} alt={alt} sizes="100vw" />
+      </div>
+      <div class="cinema-laag" data-laag="foto" aria-hidden="true">
+        <Beeld slug={slug} alt={alt} sizes="100vw" loading="eager" prioriteit />
+      </div>
+      <div class="cinema-korrel" data-laag="korrel" aria-hidden="true"></div>
+      <div class="cinema-vignet" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  {/*
+    Het randfilter. `saturate 0` maakt het beeld kleurloos, de convolutie met
+    `0 -1 0 -1 4 -1 0 -1 0` is de Laplacian die randen overhoudt, en de
+    componentoverdracht met helling 7 zet die randen hard. Wat overblijft is
+    zwart met witte lijnen; `mix-blend-mode: screen` legt dat over de ondergrond
+    zodat alleen de lijnen licht geven. `preserveAlpha` houdt de rand van het
+    beeld heel.
+  */}
+  <svg aria-hidden="true" focusable="false" width="0" height="0" class="absolute">
+    <filter id="uccib-kontour" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feColorMatrix type="saturate" values="0" />
+      <feConvolveMatrix order="3" preserveAlpha="true" kernelMatrix="0 -1 0 -1 4 -1 0 -1 0" />
+      <feComponentTransfer>
+        <feFuncR type="linear" slope="7" />
+        <feFuncG type="linear" slope="7" />
+        <feFuncB type="linear" slope="7" />
+      </feComponentTransfer>
+    </filter>
+  </svg>
+</div>

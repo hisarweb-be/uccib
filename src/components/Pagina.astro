@@ -15,6 +15,8 @@ import KopBand from './KopBand.astro';
 import LegeStaat from './LegeStaat.astro';
 import PortableTekst from './PortableTekst.astro';
 import Beeld from './Beeld.astro';
+import CinemaBeeld from './CinemaBeeld.astro';
+import GebouwCinema from './GebouwCinema.astro';
 import { getDictionary, type Locale } from '../i18n';
 import { pagePath, isSlug } from '../i18n/config';
 import { SITE, type Slug } from '../data/site';
@@ -183,6 +185,8 @@ const kaartUrl = `https://www.google.com/maps/search/?api=1&query=${SITE.geo.lat
           </div>
         </section>
 
+        <GebouwCinema slug="mescit" alt={ALT.mescit} />
+
         <section class="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
           <div class="flex flex-wrap items-end justify-between gap-4">
             <h2>{teksten.dienstenKop}</h2>
@@ -226,20 +230,14 @@ const kaartUrl = `https://www.google.com/maps/search/?api=1&query=${SITE.geo.lat
         <section class="mx-auto w-full max-w-6xl px-4 pb-14 sm:px-6 lg:px-8">
           <div class="grid gap-4 sm:grid-cols-2">
             <figure class="m-0">
-              <Beeld
+              <CinemaBeeld
                 slug="interieur"
                 alt={ALT.interieur}
                 sizes="(min-width: 640px) 50vw, 100vw"
-                klasse="h-auto w-full rounded-2xl"
               />
             </figure>
             <figure class="m-0">
-              <Beeld
-                slug="mescit"
-                alt={ALT.mescit}
-                sizes="(min-width: 640px) 50vw, 100vw"
-                klasse="h-auto w-full rounded-2xl"
-              />
+              <CinemaBeeld slug="mescit" alt={ALT.mescit} sizes="(min-width: 640px) 50vw, 100vw" />
             </figure>
           </div>
         </section>
@@ -290,11 +288,11 @@ const kaartUrl = `https://www.google.com/maps/search/?api=1&query=${SITE.geo.lat
                       </a>
                     </div>
                     {foto ? (
-                      <Beeld
+                      <CinemaBeeld
                         slug={foto}
                         alt={ALT[foto]}
                         sizes="(min-width: 768px) 340px, 100vw"
-                        klasse="h-auto w-full rounded-xl"
+                        klasse="rounded-xl"
                       />
                     ) : (
                       <span
