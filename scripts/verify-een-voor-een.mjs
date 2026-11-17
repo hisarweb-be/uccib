@@ -27,7 +27,6 @@ import { join, resolve } from 'node:path';
 import {
   ACTIVE_SLUGS,
   CONCEPT_SLUGS,
-  DEFAULT_LOCALE,
   LOCALES,
   SITE_URL,
   checkPage,
