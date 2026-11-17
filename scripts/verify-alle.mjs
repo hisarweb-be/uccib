@@ -23,6 +23,7 @@ import {
   checkConcepten,
   runChecks,
   LOCALES,
+  SLUGS as ALL_SLUGS,
 } from './lib/keuring.mjs';
 
 const distDir = resolve('dist');
@@ -56,7 +57,12 @@ if (errors.length > 0) {
 console.log(
   `OK ${actief.checked} pagina's met inhoud gekeurd (${ACTIVE_SLUGS.length} slugs x ${LOCALES.length} talen).`,
 );
+// Bij een lege conceptlijst valt er niets te verbergen. "OK 0 conceptpagina's
+// verborgen" zou dan klinken als een geslaagde controle op niets; zeg liever
+// wat er echt aan de hand is.
 console.log(
-  `OK ${concept.checked} conceptpagina's verborgen (${CONCEPT_SLUGS.length} slugs x ${LOCALES.length} talen): route bestaat, noindex, nergens gelinkt, niet in de sitemap.`,
+  CONCEPT_SLUGS.length === 0
+    ? `OK geen concepten: alle ${ALL_SLUGS.length} slugs hebben eigen inhoud, dus niets te verbergen.`
+    : `OK ${concept.checked} conceptpagina's verborgen (${CONCEPT_SLUGS.length} slugs x ${LOCALES.length} talen): route bestaat, noindex, nergens gelinkt, niet in de sitemap.`,
 );
 console.log('OK 404: dist/404.html bestaat en draagt noindex.');
