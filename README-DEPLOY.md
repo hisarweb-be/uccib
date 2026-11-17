@@ -38,9 +38,15 @@ aangemaakt en niets aan het domein gewijzigd; dat gebeurt in F2 samen met Altune
 
 ## Preview-adressen
 
-Elke pull request krijgt een eigen adres van de vorm
-`https://<commit-hash>.uccib.pages.dev`. Dat is het adres waarop F1 en F2 keuren
-voordat er iets naar het echte domein gaat.
+Elke pull request die Cloudflare bouwt, krijgt een eigen adres van de vorm
+`https://<uitrol-id>.uccib.pages.dev`, waarbij de uitrol-id de eerste acht tekens
+van de uitrol zijn (`f7d228ef` bijvoorbeeld). Dat is het adres waarop F1 en F2
+keuren voordat er iets naar het echte domein gaat.
+
+Het is niet het commit-hash-adres: `https://<commit-hash>.uccib.pages.dev` geeft
+404 (gemeten 17 nov 2026 op `14dc567`). De id staat in Cloudflare onder
+**Deployments**, of komt uit
+`npx --yes wrangler@4.97.0 pages deployment list --project-name uccib`.
 
 ## Publiceren zonder Deploy Hook (17 nov 2026)
 

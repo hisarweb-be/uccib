@@ -3,6 +3,12 @@
 Elke keuze die tijdens F0 is gemaakt, met de reden in één regel. Wie later iets
 wil terugdraaien, ziet hier waarom het zo staat.
 
+> **Actueel besluit: 56 en verder.** Besluit 56 haalt Sanity eruit en zet Sveltia
+> CMS in de plaats. De nummers 44 tot en met 55 zijn daardoor komen te vervallen;
+> ze staan hieronder alleen nog als historie, in de sectie
+> [Vervallen door besluit 56](#vervallen-door-besluit-56-sanity-eruit). Lees die
+> nummers niet als geldende regel.
+
 ## Repo en werkmap
 
 | # | Besluit | Reden |
