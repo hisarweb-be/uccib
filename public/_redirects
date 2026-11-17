@@ -38,9 +38,13 @@ adresbalk, geen herschrijving van inhoud, en ze raakt geen enkel bestand.
   staan. Die vier verwijzingen worden in de bouw zelf rechtgezet
   (`scripts/build-studio.mjs`); een regel op `/static/` zou paden van de site
   zelf kapen.
-- **Geen 404-afhandeling voor de site.** De site heeft geen eigen `404.html` en
-  dat blijft zo in deze fase; een echte 404-pagina hoort bij F3, samen met de
-  inhoud. Let op: `public/beheer/404.html` geldt alleen binnen `/beheer`.
+- **Geen 404-regel voor de site.** Sinds 17 november 2026 heeft de site een eigen
+  `src/pages/404.astro`, die als `dist/404.html` meegaat in de uitrol. Cloudflare
+  Pages pakt dat bestand zelf: een onbekend pad geeft dan status 404 met
+  `dist/404.html` eronder. Zonder dat bestand gaf elk onbekend pad status 200 met
+  de homepage, en daar is geen `_redirects`-regel voor nodig. Let op:
+  `public/beheer/404.html` is een kopie van de Studio-html en geldt alleen
+  binnen `/beheer`.
 
 ## Wat je na een uitrol meet
 
