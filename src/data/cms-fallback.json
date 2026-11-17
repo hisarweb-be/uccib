@@ -1,5 +1,5 @@
 {
-  "bron": "scripts/content/paginas.tr.mjs",
+  "bron": "scripts/content/paginas.tr.mjs + paginas.nl.mjs + paginas.fr.mjs",
   "paginas": [
     {
       "_id": "pagina.home.tr",
@@ -1909,7 +1909,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "UCCİB - İslam Kültür Merkezleri Birliği Sitesine Hoşgeldiniz.",
+              "text": "Welkom op de site van UCCIB, de Unie van Islamitische Culturele Centra.",
               "marks": [],
               "_key": "k0c0"
             }
@@ -1923,7 +1923,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Web Sitemize Hoşgeldiniz. İslam Kültür Merkezleri Birliği’ne ilginizden dolayı teşekkür ederiz. Umuma hadim ve dini cemaat statüsüne sahip olan bir dernek olarak dini, sosyal ve kültürel alanlarda hizmet vermekteyiz. Belçika’da yaşayan müslümanlara hususiyetle dini konularda kapsamlı bir şekilde yardımcı olmaktayız. Ayrıca toplumsal dayanışma ve barış içerisinde yaşama hususunda destek vermekteyiz.",
+              "text": "Welkom op onze website. Dank u voor uw belangstelling voor de Unie van Islamitische Culturele Centra. Als vereniging met de hoedanigheid van dienst aan het publiek en van religieuze gemeenschap werken wij op religieus, sociaal en cultureel vlak. Wij helpen moslims in België in het bijzonder op religieus gebied, op een brede en grondige manier. Daarnaast ondersteunen wij de maatschappelijke solidariteit en het samenleven in vrede.",
               "marks": [],
               "_key": "k1c0"
             }
@@ -1943,7 +1943,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Hakkımızda →",
+              "text": "Over ons →",
               "marks": [
                 "l0"
               ],
@@ -1959,7 +1959,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Güncel & Basın",
+              "text": "Nieuws & pers",
               "marks": [],
               "_key": "k3c0"
             }
@@ -1973,7 +1973,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Yakında haberler burada yayınlanacaktır.",
+              "text": "Binnenkort verschijnen hier de nieuwsberichten.",
               "marks": [],
               "_key": "k4c0"
             }
@@ -1993,7 +1993,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Tüm Güncel",
+              "text": "Al het nieuws",
               "marks": [
                 "l0"
               ],
@@ -2009,7 +2009,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Sosyal Faaliyetlerimiz",
+              "text": "Onze sociale activiteiten",
               "marks": [],
               "_key": "k6c0"
             }
@@ -2029,7 +2029,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Namaz Vakitleri",
+              "text": "Gebedstijden",
               "marks": [
                 "l0"
               ],
@@ -2051,7 +2051,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Hutbe",
+              "text": "Vrijdagpreek",
               "marks": [
                 "l0"
               ],
@@ -2073,7 +2073,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Şubelerimiz",
+              "text": "Onze afdelingen",
               "marks": [
                 "l0"
               ],
@@ -2095,7 +2095,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Bağış",
+              "text": "Doneren",
               "marks": [
                 "l0"
               ],
@@ -2111,7 +2111,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Eğitim ve Gençlik Hizmetleri",
+              "text": "Onderwijs- en jeugdwerking",
               "marks": [],
               "_key": "k11c0"
             }
@@ -2125,7 +2125,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Şubelerimizde çocuklarımıza ve gençlerimize dini ve ahlaki eğitimin yanı sıra okul derslerine destek, sosyal ve kültürel faaliyetler sunmaktayız.",
+              "text": "In onze afdelingen bieden wij kinderen en jongeren naast godsdienstige en morele vorming ook ondersteuning bij hun schoolvakken, en sociale en culturele activiteiten.",
               "marks": [],
               "_key": "k12c0"
             }
@@ -2145,7 +2145,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Daha fazla bilgi",
+              "text": "Meer informatie",
               "marks": [
                 "l0"
               ],
@@ -2161,7 +2161,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Cami Tanıtım Programları",
+              "text": "Voorlichtingsprogramma’s over de moskee",
               "marks": [],
               "_key": "k14c0"
             }
@@ -2175,7 +2175,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Okullar, kurumlar ve ilgilenen herkes için cami ziyaretleri düzenliyoruz. Ziyaretler için en yakın şubemizle iletişime geçebilirsiniz.",
+              "text": "Voor scholen, instellingen en iedereen die interesse heeft, organiseren wij bezoeken aan de moskee. Neem voor een bezoek contact op met uw dichtstbijzijnde afdeling.",
               "marks": [],
               "_key": "k15c0"
             }
@@ -2195,7 +2195,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Şubelerimiz için buraya tıklayınız!",
+              "text": "Klik hier voor onze afdelingen!",
               "marks": [
                 "l0"
               ],
@@ -2211,7 +2211,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Açık Cami Günü",
+              "text": "Open Moskeedag",
               "marks": [],
               "_key": "k17c0"
             }
@@ -2225,7 +2225,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Her yıl düzenlenen Açık Cami Günü’nde kapılarımızı tüm komşularımıza açıyor, tanışma ve diyalog ortamı oluşturuyoruz.",
+              "text": "Tijdens de Open Moskeedag, die elk jaar plaatsvindt, openen wij onze deuren voor al onze buren en creëren wij een ontmoeting en dialoog.",
               "marks": [],
               "_key": "k18c0"
             }
@@ -2245,7 +2245,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Daha fazla bilgi için tıklayınız!",
+              "text": "Klik hier voor meer informatie!",
               "marks": [
                 "l0"
               ],
@@ -2278,7 +2278,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "UCCİB - İslam Kültür Merkezleri Birliği Sitesine Hoşgeldiniz.",
+              "text": "Welkom op de site van UCCIB, de Unie van Islamitische Culturele Centra.",
               "marks": [],
               "_key": "k0c0"
             }
@@ -2292,7 +2292,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "İslam Kültür Merkezleri Birliği 1979 senesinde Brüksel’de kurulmuş dini cemaat statüsüne sahip bir İslami teşkilattır. Bağımsız, partiler üstü ve umuma hadimdir. Derneğin amacı, Belçika’da yaşayan Müslümanlara dini, sosyal ve kültürel alanlarda kapsamlı hizmetler sunmaktır. Bir diğer temel görev ise, İslam’ın ve Müslümanların Avrupa toplumunun birer parçası olarak kabul edilmeleri ve kültürlerarası iletişimin sağlanmasıdır. Bu amaçla UCCİB, Federal Belçika Devleti’nde belediye, eyalet ve federal düzeyde birçok dini, sosyal ve devlet kurumuyla ortak çalışmalarda bulunmaktadır.",
+              "text": "De Unie van Islamitische Culturele Centra is in 1979 in Brussel opgericht als islamitische organisatie met de hoedanigheid van religieuze gemeenschap. Zij is onafhankelijk, partijloos en dienstbaar aan het publiek. Het doel van de vereniging is moslims in België een breed aanbod aan religieuze, sociale en culturele diensten te bieden. Een tweede kerntaak is dat de islam en de moslims erkend worden als deel van de Europese samenleving en dat de interculturele dialoog tot stand komt. Met dat doel werkt UCCIB samen met heel wat religieuze, sociale en overheidsinstellingen op gemeentelijk, provinciaal en federaal niveau in de Belgische federale staat.",
               "marks": [],
               "_key": "k1c0"
             }
@@ -2339,7 +2339,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Birliğimizle ilgili en güncel haberleri, duyuruları ve basın bildirilerini bu sayfada bulabilirsiniz.",
+              "text": "Op deze pagina vindt u de meest recente nieuwsberichten, aankondigingen en persberichten over onze Unie.",
               "marks": [],
               "_key": "k0c0"
             }
@@ -2353,7 +2353,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Bu kategoride henüz haber bulunmuyor.",
+              "text": "In deze categorie zijn er nog geen nieuwsberichten.",
               "marks": [],
               "_key": "k1c0"
             }
@@ -3764,7 +3764,7 @@
           "asset": {
             "_ref": "/beeld/logo/uccib-affice/960.webp"
           },
-          "alt": "UCCIB logosu",
+          "alt": "Logo van UCCIB",
           "_key": "k0"
         },
         {
@@ -3772,7 +3772,7 @@
           "asset": {
             "_ref": "/beeld/menukaart-bahar-kermesi/960.webp"
           },
-          "alt": "Bahar Kermesi menükaartı",
+          "alt": "Menukaart van de Bahar Kermesi",
           "_key": "k1"
         }
       ],
@@ -3799,7 +3799,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "UCCİB - İslam Kültür Merkezleri Birliği Sitesine Hoşgeldiniz.",
+              "text": "Bienvenue sur le site de l’UCCIB, l’Union des Centres Culturels Islamiques.",
               "marks": [],
               "_key": "k0c0"
             }
@@ -3813,7 +3813,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Web Sitemize Hoşgeldiniz. İslam Kültür Merkezleri Birliği’ne ilginizden dolayı teşekkür ederiz. Umuma hadim ve dini cemaat statüsüne sahip olan bir dernek olarak dini, sosyal ve kültürel alanlarda hizmet vermekteyiz. Belçika’da yaşayan müslümanlara hususiyetle dini konularda kapsamlı bir şekilde yardımcı olmaktayız. Ayrıca toplumsal dayanışma ve barış içerisinde yaşama hususunda destek vermekteyiz.",
+              "text": "Bienvenue sur notre site. Nous vous remercions de l’intérêt que vous portez à l’Union des Centres Culturels Islamiques. En tant qu’association jouissant du statut de service au public et de communauté religieuse, nous œuvrons dans les domaines religieux, social et culturel. Nous aidons les musulmans de Belgique de manière approfondie, en particulier sur les questions religieuses. Nous soutenons également la solidarité sociale et la vie en paix.",
               "marks": [],
               "_key": "k1c0"
             }
@@ -3833,7 +3833,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Hakkımızda →",
+              "text": "À propos →",
               "marks": [
                 "l0"
               ],
@@ -3849,7 +3849,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Güncel & Basın",
+              "text": "Actualités & presse",
               "marks": [],
               "_key": "k3c0"
             }
@@ -3863,7 +3863,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Yakında haberler burada yayınlanacaktır.",
+              "text": "Les actualités seront publiées ici prochainement.",
               "marks": [],
               "_key": "k4c0"
             }
@@ -3883,7 +3883,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Tüm Güncel",
+              "text": "Toutes les actualités",
               "marks": [
                 "l0"
               ],
@@ -3899,7 +3899,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Sosyal Faaliyetlerimiz",
+              "text": "Nos activités sociales",
               "marks": [],
               "_key": "k6c0"
             }
@@ -3919,7 +3919,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Namaz Vakitleri",
+              "text": "Heures de prière",
               "marks": [
                 "l0"
               ],
@@ -3941,7 +3941,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Hutbe",
+              "text": "Prêche du vendredi",
               "marks": [
                 "l0"
               ],
@@ -3963,7 +3963,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Şubelerimiz",
+              "text": "Nos sections",
               "marks": [
                 "l0"
               ],
@@ -3985,7 +3985,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Bağış",
+              "text": "Faire un don",
               "marks": [
                 "l0"
               ],
@@ -4001,7 +4001,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Eğitim ve Gençlik Hizmetleri",
+              "text": "Enseignement et jeunesse",
               "marks": [],
               "_key": "k11c0"
             }
@@ -4015,7 +4015,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Şubelerimizde çocuklarımıza ve gençlerimize dini ve ahlaki eğitimin yanı sıra okul derslerine destek, sosyal ve kültürel faaliyetler sunmaktayız.",
+              "text": "Dans nos sections, nous offrons aux enfants et aux jeunes, outre une éducation religieuse et morale, un soutien pour leurs cours scolaires ainsi que des activités sociales et culturelles.",
               "marks": [],
               "_key": "k12c0"
             }
@@ -4035,7 +4035,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Daha fazla bilgi",
+              "text": "Plus d’informations",
               "marks": [
                 "l0"
               ],
@@ -4051,7 +4051,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Cami Tanıtım Programları",
+              "text": "Programmes de découverte de la mosquée",
               "marks": [],
               "_key": "k14c0"
             }
@@ -4065,7 +4065,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Okullar, kurumlar ve ilgilenen herkes için cami ziyaretleri düzenliyoruz. Ziyaretler için en yakın şubemizle iletişime geçebilirsiniz.",
+              "text": "Nous organisons des visites de la mosquée pour les écoles, les institutions et toute personne intéressée. Pour une visite, contactez la section la plus proche.",
               "marks": [],
               "_key": "k15c0"
             }
@@ -4085,7 +4085,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Şubelerimiz için buraya tıklayınız!",
+              "text": "Cliquez ici pour nos sections !",
               "marks": [
                 "l0"
               ],
@@ -4101,7 +4101,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Açık Cami Günü",
+              "text": "Journée portes ouvertes",
               "marks": [],
               "_key": "k17c0"
             }
@@ -4115,7 +4115,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Her yıl düzenlenen Açık Cami Günü’nde kapılarımızı tüm komşularımıza açıyor, tanışma ve diyalog ortamı oluşturuyoruz.",
+              "text": "Lors de la Journée portes ouvertes, organisée chaque année, nous ouvrons nos portes à tous nos voisins et créons un espace de rencontre et de dialogue.",
               "marks": [],
               "_key": "k18c0"
             }
@@ -4135,7 +4135,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Daha fazla bilgi için tıklayınız!",
+              "text": "Cliquez ici pour plus d’informations !",
               "marks": [
                 "l0"
               ],
@@ -4168,7 +4168,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "UCCİB - İslam Kültür Merkezleri Birliği Sitesine Hoşgeldiniz.",
+              "text": "Bienvenue sur le site de l’UCCIB, l’Union des Centres Culturels Islamiques.",
               "marks": [],
               "_key": "k0c0"
             }
@@ -4182,7 +4182,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "İslam Kültür Merkezleri Birliği 1979 senesinde Brüksel’de kurulmuş dini cemaat statüsüne sahip bir İslami teşkilattır. Bağımsız, partiler üstü ve umuma hadimdir. Derneğin amacı, Belçika’da yaşayan Müslümanlara dini, sosyal ve kültürel alanlarda kapsamlı hizmetler sunmaktır. Bir diğer temel görev ise, İslam’ın ve Müslümanların Avrupa toplumunun birer parçası olarak kabul edilmeleri ve kültürlerarası iletişimin sağlanmasıdır. Bu amaçla UCCİB, Federal Belçika Devleti’nde belediye, eyalet ve federal düzeyde birçok dini, sosyal ve devlet kurumuyla ortak çalışmalarda bulunmaktadır.",
+              "text": "L’Union des Centres Culturels Islamiques a été fondée en 1979 à Bruxelles comme organisation islamique jouissant du statut de communauté religieuse. Elle est indépendante, sans appartenance politique et au service du public. L’objectif de l’association est d’offrir aux musulmans de Belgique des services complets dans les domaines religieux, social et culturel. Une autre mission essentielle est que l’islam et les musulmans soient reconnus comme partie intégrante de la société européenne et que le dialogue interculturel soit établi. À cette fin, l’UCCIB collabore avec de nombreuses institutions religieuses, sociales et publiques aux niveaux communal, provincial et fédéral de l’État fédéral belge.",
               "marks": [],
               "_key": "k1c0"
             }
@@ -4229,7 +4229,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Birliğimizle ilgili en güncel haberleri, duyuruları ve basın bildirilerini bu sayfada bulabilirsiniz.",
+              "text": "Vous trouverez sur cette page les actualités, annonces et communiqués de presse les plus récents concernant notre Union.",
               "marks": [],
               "_key": "k0c0"
             }
@@ -4243,7 +4243,7 @@
           "children": [
             {
               "_type": "span",
-              "text": "Bu kategoride henüz haber bulunmuyor.",
+              "text": "Il n’y a pas encore d’actualité dans cette catégorie.",
               "marks": [],
               "_key": "k1c0"
             }
@@ -5654,7 +5654,7 @@
           "asset": {
             "_ref": "/beeld/logo/uccib-affice/960.webp"
           },
-          "alt": "UCCIB logosu",
+          "alt": "Logo de l’UCCIB",
           "_key": "k0"
         },
         {
@@ -5662,7 +5662,7 @@
           "asset": {
             "_ref": "/beeld/menukaart-bahar-kermesi/960.webp"
           },
-          "alt": "Bahar Kermesi menükaartı",
+          "alt": "Carte du menu de la Bahar Kermesi",
           "_key": "k1"
         }
       ],

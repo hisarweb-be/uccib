@@ -1,0 +1,18 @@
+---
+/**
+ * Elke inhoudspagina in het Frans. De lijst met slugs staat in
+ * `src/i18n/f3.ts`; `/bagislar/` en `/bagis-onayi/` houden hun eigen route,
+ * want die vult F5.
+ */
+import Pagina from '../../components/Pagina.astro';
+import { F3_PAGINAS } from '../../i18n/f3';
+import type { Slug } from '../../data/site';
+
+export function getStaticPaths() {
+  return F3_PAGINAS.filter((slug) => slug !== '').map((slug) => ({ params: { slug } }));
+}
+
+const slug = Astro.params.slug as Slug;
+---
+
+<Pagina locale="fr" slug={slug} />

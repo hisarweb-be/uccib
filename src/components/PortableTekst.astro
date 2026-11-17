@@ -1,0 +1,340 @@
+---
+/**
+ * Portable Text uit het CMS, met de opmaak van de huisstijl.
+ *
+ * Twee dingen gebeurt hier bewust:
+ * - Een reeks opeenvolgende linkparagrafen wordt één knoppenrij. De oude site
+ *   zette die links los onder elkaar; als rij leest het als een menukaart.
+ * - Een link naar een concept verdwijnt als anker en blijft als tekst staan.
+ *   De keuring eist dat een concept nergens gelinkt wordt; zodra de slug actief
+ *   wordt, komt de link vanzelf terug (zie `src/lib/concepten.ts`).
+ */
+import Beeld from './Beeld.astro';
+import { beeldUrl } from '../lib/sanity';
+import { isConceptHref } from '../lib/concepten';
+
+interface Props {
+  body: unknown[];
+}
+
+const { body } = Astro.props;
+
+type Span = { text?: string; marks?: string[] };
+type MarkDef = { _key?: string; _type?: string; href?: string };
+type Blok = {
+  _type?: string;
+  style?: string;
+  listItem?: string;
+  markDefs?: MarkDef[];
+  children?: Span[];
+  alt?: string;
+  onderschrift?: string;
+  asset?: { _ref?: string };
+};
+
+type Node =
+  | { soort: 'kop'; niveau: 2 | 3; html: string }
+  | { soort: 'alinea'; html: string }
+  | { soort: 'citaat'; html: string }
+  | { soort: 'lijst'; type: 'ul' | 'ol'; items: string[] }
+  | {
+      soort: 'beeld';
+      slug?: string;
+      /** Alleen bij een beeld uit het CMS: de volledige URL, al gecontroleerd. */
+      url?: string;
+      alt: string;
+      onderschrift?: string;
+    }
+  | { soort: 'knoppen'; items: { label: string; href: string }[] };
+
+const escapeHtml = (tekst: string) =>
+  tekst
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+
+const escapeAttr = (tekst: string) => escapeHtml(tekst).replace(/'/g, '&#39;');
+
+function inlineHtml(blok: Blok): string {
+  const markDefs = blok.markDefs ?? [];
+  return (blok.children ?? [])
+    .map((child) => {
+      let html = escapeHtml(child.text ?? '');
+      for (const mark of child.marks ?? []) {
+        if (mark === 'strong') html = `<strong>${html}</strong>`;
+        else if (mark === 'em') html = `<em>${html}</em>`;
+        else {
+          const def = markDefs.find((kandidaat) => kandidaat._key === mark);
+          if (def?._type === 'link' && def.href && !isConceptHref(def.href)) {
+            html = `<a href="${escapeAttr(def.href)}">${html}</a>`;
+          }
+        }
+      }
+      return html;
+    })
+    .join('');
+}
+
+/** Een alinea die uit precies één link bestaat, is in de oude site een knop. */
+function linkVan(blok: Blok): { label: string; href: string } | null {
+  if (blok._type !== 'block' || (blok.style ?? 'normal') !== 'normal' || blok.listItem) return null;
+  const children = blok.children ?? [];
+  const eerste = children[0];
+  if (children.length !== 1 || !eerste?.marks?.length) return null;
+  const def = blok.markDefs?.find((kandidaat) => kandidaat._key === eerste.marks?.[0]);
+  if (def?._type !== 'link' || !def.href) return null;
+  return { label: eerste.text ?? '', href: def.href };
+}
+
+const LOKAAL_BEELD = /^\/beeld\/(.+)\/\d+\.(?:avif|webp)$/;
+
+const blokken = body as Blok[];
+const nodes: Node[] = [];
+let i = 0;
+
+while (i < blokken.length) {
+  const blok = blokken[i]!;
+
+  if (blok._type === 'image') {
+    const ref = blok.asset?._ref ?? '';
+    const lokaal = LOKAAL_BEELD.exec(ref);
+    const url = lokaal?.[1] ? null : beeldUrl(ref, 960);
+    // Een beeld zonder bron zou een lege `src` opleveren; de keuring eist een
+    // bestaande bron, dus zo'n blok valt weg in plaats van half te renderen.
+    if (lokaal?.[1] || url) {
+      nodes.push({
+        soort: 'beeld',
+        ...(lokaal?.[1] ? { slug: lokaal[1] } : { url: url ?? undefined }),
+        alt: blok.alt ?? '',
+        ...(blok.onderschrift ? { onderschrift: blok.onderschrift } : {}),
+      });
+    }
+    i += 1;
+    continue;
+  }
+
+  if (linkVan(blok)) {
+    let rij: { label: string; href: string }[] = [];
+    while (i < blokken.length) {
+      const volgende = linkVan(blokken[i]!);
+      if (!volgende) break;
+      if (isConceptHref(volgende.href)) {
+        if (rij.length) {
+          nodes.push({ soort: 'knoppen', items: rij });
+          rij = [];
+        }
+        nodes.push({ soort: 'alinea', html: escapeHtml(volgende.label) });
+      } else {
+        rij.push(volgende);
+      }
+      i += 1;
+    }
+    if (rij.length) nodes.push({ soort: 'knoppen', items: rij });
+    continue;
+  }
+
+  if (blok.listItem) {
+    const type = blok.listItem === 'number' ? 'ol' : 'ul';
+    const items: string[] = [];
+    while (i < blokken.length && blokken[i]!.listItem) {
+      items.push(inlineHtml(blokken[i]!));
+      i += 1;
+    }
+    nodes.push({ soort: 'lijst', type, items });
+    continue;
+  }
+
+  const style = blok.style ?? 'normal';
+  if (style === 'h2' || style === 'h3') {
+    nodes.push({ soort: 'kop', niveau: style === 'h2' ? 2 : 3, html: inlineHtml(blok) });
+  } else if (style === 'blockquote') {
+    nodes.push({ soort: 'citaat', html: inlineHtml(blok) });
+  } else {
+    nodes.push({ soort: 'alinea', html: inlineHtml(blok) });
+  }
+  i += 1;
+}
+---
+
+<div class="tekst">
+  {
+    nodes.map((node) => {
+      switch (node.soort) {
+        case 'kop':
+          return node.niveau === 2 ? (
+            <h2 set:html={node.html} />
+          ) : (
+            <h3 set:html={node.html} />
+          );
+        case 'alinea':
+          return <p set:html={node.html} />;
+        case 'citaat':
+          return (
+            <blockquote>
+              <p set:html={node.html} />
+            </blockquote>
+          );
+        case 'lijst':
+          return node.type === 'ol' ? (
+            <ol>
+              {node.items.map((item) => (
+                <li set:html={item} />
+              ))}
+            </ol>
+          ) : (
+            <ul>
+              {node.items.map((item) => (
+                <li set:html={item} />
+              ))}
+            </ul>
+          );
+        case 'beeld':
+          return (
+            <figure class="beeld">
+              {node.slug ? (
+                <Beeld
+                  slug={node.slug}
+                  alt={node.alt}
+                  sizes="(min-width: 768px) 640px, 100vw"
+                  klasse="h-auto w-full rounded-2xl"
+                />
+              ) : (
+                <img
+                  src={node.url ?? ''}
+                  alt={node.alt}
+                  class="h-auto w-full rounded-2xl"
+                  loading="lazy"
+                  decoding="async"
+                />
+              )}
+              {node.onderschrift ? <figcaption>{node.onderschrift}</figcaption> : null}
+            </figure>
+          );
+        case 'knoppen':
+          return (
+            <div class="knoppen">
+              {node.items.map((item) => (
+                <a href={item.href}>{item.label}</a>
+              ))}
+            </div>
+          );
+      }
+    })
+  }
+</div>
+
+<style>
+  .tekst {
+    max-width: 68ch;
+  }
+
+  .tekst > * + * {
+    margin-top: 1.15em;
+  }
+
+  .tekst h2 {
+    margin-top: 2.4em;
+    font-size: var(--text-h2);
+  }
+
+  .tekst > h2:first-child {
+    margin-top: 0;
+  }
+
+  .tekst h2::after {
+    content: '';
+    display: block;
+    width: 2.5rem;
+    height: 2px;
+    margin-top: 0.7rem;
+    border-radius: 2px;
+    background: var(--color-brand);
+  }
+
+  .tekst h3 {
+    margin-top: 2em;
+    font-size: var(--text-h3);
+  }
+
+  .tekst :global(a) {
+    color: var(--color-brand-dark);
+  }
+
+  .tekst :global(strong) {
+    font-weight: 600;
+  }
+
+  .tekst blockquote {
+    margin: 2em 0;
+    padding: 1.25rem 1.5rem;
+    border-left: 3px solid var(--color-brand);
+    border-radius: 0 12px 12px 0;
+    background: var(--color-brand-light);
+  }
+
+  .tekst blockquote p {
+    margin: 0;
+  }
+
+  .tekst ul,
+  .tekst ol {
+    padding-left: 1.4rem;
+  }
+
+  .tekst ul {
+    list-style: disc;
+  }
+
+  .tekst ol {
+    list-style: decimal;
+  }
+
+  .tekst li + li {
+    margin-top: 0.4rem;
+  }
+
+  .tekst .beeld {
+    margin: 2.5em 0;
+  }
+
+  .tekst .beeld figcaption {
+    margin-top: 0.6rem;
+    font-size: var(--text-small);
+    color: var(--color-ink-muted);
+  }
+
+  .knoppen {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+  }
+
+  .knoppen :global(a) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.5rem 1.15rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    color: var(--color-brand-dark);
+    font-size: var(--text-nav);
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      background-color 0.18s ease,
+      border-color 0.18s ease;
+  }
+
+  .knoppen :global(a:hover) {
+    border-color: var(--color-brand);
+    background: var(--color-brand-light);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .knoppen :global(a) {
+      transition: none;
+    }
+  }
+</style>

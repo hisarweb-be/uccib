@@ -45,35 +45,21 @@ export type Slug = (typeof SLUGS)[number];
 /**
  * Pagina's die tijdelijk geen eigen inhoud hebben.
  *
- * Gemeten op 16 november 2026 in het contentmodel: deze tien concepten bevatten
- * nul tot twee korte blokken, samen onder de 150 tekens, plus een verwijzing
- * "yakında" (binnenkort). Vier pagina's hebben echte inhoud: de hoofdpagina,
- * Hakkımızda (643 tekens), Künye (1.939) en het cookiebeleid (10.952).
+ * F3 heeft de acht pagina's die hier stonden gevuld en eruit gehaald; die staan
+ * nu in de navigatie, de sitemap en de keuring. Wat overblijft zijn de twee
+ * pagina's van F5: het doneerformulier en het bedankscherm erna.
  *
  * Zolang ze leeg zijn, staan ze niet in de navigatie en antwoorden ze met een
  * rustige mededeling plus noindex, zodat een bezoeker nooit een lege pagina
  * ziet en een zoekmachine de pagina laat vallen. De route blijft bestaan, zodat
  * een inkomende link geen 404 wordt. (Een echt 410 kan niet: Cloudflare Pages
- * kent in _redirects alleen 301, 302, 303, 307, 308 en 200.) F3 vult ze met de
- * echte tekst en haalt ze hier weg; dan komen ze vanzelf terug in menu, sitemap
- * en keuring.
+ * kent in _redirects alleen 301, 302, 303, 307, 308 en 200.)
  */
-export const CONCEPT_SLUGS = [
-  'hizmetlerimiz',
-  'haberler',
-  'iletisim',
-  'bagislar',
-  'bagis-onayi',
-  'subelerimiz',
-  'bolge-derneklerimiz',
-  'namaz-vakitleri',
-  'cuma-hutbesi',
-  'baharkermesi-menu',
-] as const;
+export const CONCEPT_SLUGS = ['bagislar', 'bagis-onayi'] as const;
 
 export type ConceptSlug = (typeof CONCEPT_SLUGS)[number];
 
-/** De pagina's die nu echt bestaan: veertien min de tien lege concepten. */
+/** De pagina's die nu echt bestaan: veertien min de twee concepten van F5. */
 export type ActiveSlug = Exclude<Slug, ConceptSlug>;
 
 export const ACTIVE_SLUGS: readonly ActiveSlug[] = SLUGS.filter(

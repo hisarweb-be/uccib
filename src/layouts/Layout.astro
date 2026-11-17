@@ -4,6 +4,7 @@ import '@fontsource-variable/noto-serif/wght.css';
 import '../styles/tokens.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import WhatsApp from '../components/WhatsApp.astro';
 import { SITE } from '../data/site';
 import { LOCALES, LOCALE_TAGS, type Locale, getDictionary } from '../i18n';
 import { pagePath } from '../i18n/config';
@@ -23,9 +24,23 @@ interface Props {
   description: string;
   /** Houd deze pagina buiten de zoekmachines. Geldt voor 404 en conceptpagina's. */
   noindex?: boolean;
+  /**
+   * Laat `main` zonder eigen breedtebegrenzing. Nodig voor pagina's met een
+   * band die van rand tot rand loopt (de held op de homepage); die pagina zet
+   * zijn eigen `max-w-6xl`-kolom binnen de band.
+   */
+  volleBreedte?: boolean;
 }
 
-const { locale, slug, path, title, description, noindex = false } = Astro.props;
+const {
+  locale,
+  slug,
+  path,
+  title,
+  description,
+  noindex = false,
+  volleBreedte = false,
+} = Astro.props;
 const t = getDictionary(locale);
 
 const routePath = path ?? (slug === null ? '/' : pagePath(locale, slug as Slug));
@@ -90,10 +105,19 @@ const xDefault = alternates[0]?.href;
   <body>
     <a class="skip-link" href="#hw-main">{t.skipToContent}</a>
     <Header locale={locale} slug={slug} />
-    <main id="hw-main" tabindex="-1" class="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+    <main
+      id="hw-main"
+      tabindex="-1"
+      class={
+        volleBreedte
+          ? 'w-full'
+          : 'mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8'
+      }
+    >
       <slot />
     </main>
     <Footer locale={locale} />
+    <WhatsApp locale={locale} />
   </body>
 </html>
 

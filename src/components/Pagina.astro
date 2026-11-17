@@ -1,0 +1,412 @@
+---
+/**
+ * De inhoud van de twaalf pagina's die F3 vult.
+ *
+ * Waarom één component en niet twaalf: de pagina's verschillen in secties, niet
+ * in opbouw. Eén plek die per slug kiest welke secties er komen, is te lezen in
+ * één oogopslag en houdt de koppen, het beeld en de keuring consequent.
+ *
+ * De tekst komt uit Sanity (F2) via `getPagina`; wat het origineel leeg liet,
+ * staat in `src/i18n/f3.ts` en noemt nooit een adres, telefoonnummer of
+ * bestuurssamenstelling die niet in `src/data/site.ts` staat.
+ */
+import Layout from '../layouts/Layout.astro';
+import KopBand from './KopBand.astro';
+import LegeStaat from './LegeStaat.astro';
+import PortableTekst from './PortableTekst.astro';
+import Beeld from './Beeld.astro';
+import { getDictionary, type Locale } from '../i18n';
+import { pagePath, isSlug } from '../i18n/config';
+import { SITE, type Slug } from '../data/site';
+import { isConceptHref } from '../lib/concepten';
+import { f3 } from '../i18n/f3';
+import { getPagina, getSponsorblokken } from '../lib/sanity';
+
+interface Props {
+  locale: Locale;
+  slug: Slug;
+}
+
+const { locale, slug } = Astro.props;
+const t = getDictionary(locale);
+const teksten = f3(locale);
+const pagina = t.pages[slug];
+const inhoud = await getPagina(locale, slug);
+const body = inhoud?.body ?? [];
+const h1 = inhoud?.h1 ?? pagina.h1;
+
+/**
+ * Een tegel of knop wijst op een pad zonder taalprefix. Voor nl en fr zet
+ * `pagePath` de juiste prefix ervoor, en zolang een doel nog een concept is
+ * (F5 werkt aan `/bagislar/`) leiden we naar de contactpagina in plaats van
+ * naar een lege pagina.
+ */
+function doel(href: string): string {
+  if (isConceptHref(href)) return pagePath(locale, 'iletisim');
+  const kaal = href.replace(/^\//, '');
+  if (kaal === '') return pagePath(locale, '');
+  return isSlug(kaal) ? pagePath(locale, kaal) : pagePath(locale, 'iletisim');
+}
+
+const LEeg = {
+  subelerimiz: `tel:${SITE.phoneHref}`,
+  'bolge-derneklerimiz': `mailto:${SITE.email}`,
+  'namaz-vakitleri': pagePath(locale, 'subelerimiz'),
+  'cuma-hutbesi': pagePath(locale, 'iletisim'),
+} as const;
+
+const isLeeg = slug in LEeg;
+
+/**
+ * Pagina's die hun tekst in eigen secties zetten in plaats van als lopende
+ * tekst: de diensten op /hizmetlerimiz/, het adresblok op /iletisim/ en de
+ * tijdlijn op /hakkimizda/. Bij die laatste is het geen keuze maar noodzaak:
+ * de vijf zinnen van die pagina zijn de vijf mijlpalen, dus de body eronder
+ * zou dezelfde tekst een tweede keer tonen.
+ */
+const EIGEN_SECTIES: ReadonlySet<Slug> = new Set(['hizmetlerimiz', 'iletisim', 'hakkimizda']);
+
+/**
+ * Eerlijke alt-teksten bij de eigen foto's uit de set van F1.
+ *
+ * Wat er in het manifest bij een beeld staat (`notitie`) zegt alleen waar de
+ * foto voor bedoeld is, niet wat erop te zien is. Daarom beschrijft elke regel
+ * hieronder wat de foto zelf toont, en niets meer: `gebouw` is een zaal met
+ * lange tafels, geen gevel, en `interieur` is de eetzaal, niet de gebedsruimte.
+ */
+const ALT = {
+  gebouw: 'Een vergaderzaal met lange houten tafels en stoelen, met daglicht door het raam.',
+  interieur:
+    'De eetzaal met houten tafels en stoelen in verschillende kleuren, met de trap naar de verdieping.',
+  mescit: 'De lege gebedsruimte met de mihrab, de preekstoel en een witte zuil.',
+} as const;
+
+/** Beeld per blok op /hizmetlerimiz/: alleen waar een foto echt iets toont. */
+const DIENST_BEELD: Record<number, keyof typeof ALT> = {
+  0: 'mescit',
+  4: 'interieur',
+  5: 'gebouw',
+};
+
+const sponsorblokken = slug === '' ? await getSponsorblokken() : [];
+const steun = [...sponsorblokken]
+  .filter((blok) => blok.actief !== false)
+  .sort((a, b) => (a.volgorde ?? 0) - (b.volgorde ?? 0));
+
+/** Gestructureerde gegevens: de organisatie zelf, op de homepage en bij contact. */
+const ngo =
+  slug === '' || slug === 'iletisim'
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'NGO',
+        name: 'Union des Centres Culturels Islamiques Belgium',
+        alternateName: 'UCCIB',
+        url: SITE.url,
+        logo: new URL(SITE.logo, SITE.url).href,
+        foundingDate: SITE.founded,
+        telephone: SITE.phone,
+        email: SITE.email,
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: SITE.street,
+          postalCode: SITE.postalCode,
+          addressLocality: SITE.city,
+          addressCountry: SITE.country,
+        },
+        geo: {
+          '@type': 'GeoCoordinates',
+          latitude: SITE.geo.lat,
+          longitude: SITE.geo.lng,
+        },
+        areaServed: { '@type': 'Country', name: 'Belgium' },
+      }
+    : null;
+
+const kaartUrl = `https://www.google.com/maps/search/?api=1&query=${SITE.geo.lat},${SITE.geo.lng}`;
+---
+
+<Layout
+  locale={locale}
+  slug={slug}
+  title={pagina.title}
+  description={pagina.description}
+  volleBreedte={slug === ''}
+>
+  {
+    slug === '' ? (
+      <>
+        <section class="relative overflow-hidden border-b border-line bg-surface-alt">
+          <div
+            aria-hidden="true"
+            class="pointer-events-none absolute -top-40 right-[-8rem] h-96 w-96 rounded-full bg-brand-light blur-3xl"
+          />
+          <div class="relative mx-auto grid w-full max-w-6xl gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-14 lg:px-8 lg:py-24">
+            <div>
+              <img
+                src={SITE.logo}
+                width={SITE.logoWidth}
+                height={SITE.logoHeight}
+                alt={t.logoAlt}
+                class="mb-8 h-auto w-[220px] max-w-full sm:w-[280px]"
+                loading="eager"
+                decoding="sync"
+                fetchpriority="high"
+              />
+              <p class="mb-4 text-small font-semibold tracking-[0.18em] text-brand-dark uppercase">
+                {teksten.heroKlein}
+              </p>
+              <h1>{h1}</h1>
+              <p class="mt-5 max-w-[46ch] text-ink-muted">{t.siteTagline}</p>
+              <div class="mt-8 flex flex-wrap gap-3">
+                <a
+                  href={pagePath(locale, 'hakkimizda')}
+                  class="inline-flex min-h-[48px] items-center rounded-pill bg-brand-dark px-6 text-nav font-semibold text-surface no-underline transition-colors hover:bg-ink"
+                >
+                  {teksten.heroCta}
+                </a>
+                <a
+                  href={pagePath(locale, 'namaz-vakitleri')}
+                  class="inline-flex min-h-[48px] items-center rounded-pill border border-line bg-surface px-6 text-nav font-semibold text-brand-dark no-underline transition-colors hover:border-brand hover:bg-brand-light"
+                >
+                  {teksten.heroCtaSecundair}
+                </a>
+              </div>
+            </div>
+            <Beeld
+              slug="gebouw"
+              alt={ALT.gebouw}
+              sizes="(min-width: 1024px) 520px, (min-width: 640px) 90vw, 100vw"
+              klasse="h-auto w-full rounded-3xl shadow-sm"
+              loading="eager"
+              prioriteit
+            />
+          </div>
+        </section>
+
+        <section class="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
+          <div class="flex flex-wrap items-end justify-between gap-4">
+            <h2>{teksten.dienstenKop}</h2>
+            <a
+              href={pagePath(locale, 'hizmetlerimiz')}
+              class="text-nav font-semibold text-brand-dark"
+            >
+              {teksten.dienstenAlle} →
+            </a>
+          </div>
+          <ul class="mt-8 grid list-none gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
+            {teksten.diensten.map((dienst) => (
+              <li>
+                <a
+                  href={doel(dienst.href)}
+                  class="flex h-full min-h-[44px] flex-col rounded-2xl border border-line bg-surface p-5 no-underline transition-colors hover:border-brand hover:bg-brand-light"
+                >
+                  <span class="text-h4 text-brand-dark">{dienst.titel}</span>
+                  <span class="mt-2 text-small text-ink-muted">{dienst.tekst}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <div class="mx-auto w-full max-w-6xl px-4 pb-14 sm:px-6 lg:px-8">
+          <PortableTekst body={body} />
+        </div>
+
+        <section class="mx-auto w-full max-w-6xl px-4 pb-14 sm:px-6 lg:px-8">
+          <div class="grid gap-4 sm:grid-cols-2">
+            <figure class="m-0">
+              <Beeld
+                slug="interieur"
+                alt={ALT.interieur}
+                sizes="(min-width: 640px) 50vw, 100vw"
+                klasse="h-auto w-full rounded-2xl"
+              />
+            </figure>
+            <figure class="m-0">
+              <Beeld
+                slug="mescit"
+                alt={ALT.mescit}
+                sizes="(min-width: 640px) 50vw, 100vw"
+                klasse="h-auto w-full rounded-2xl"
+              />
+            </figure>
+          </div>
+        </section>
+      </>
+    ) : (
+      <>
+        <KopBand
+          h1={h1}
+          intro={slug === 'hizmetlerimiz' ? teksten.dienstenIntro : null}
+          beeldSlug={slug === 'hakkimizda' ? 'gebouw' : undefined}
+          beeldAlt={ALT.gebouw}
+        />
+        <div class="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+          {isLeeg ? (
+            <LegeStaat
+              titel={teksten.leeg[slug as keyof typeof teksten.leeg].titel}
+              tekst={teksten.leeg[slug as keyof typeof teksten.leeg].tekst}
+              actieLabel={teksten.leeg[slug as keyof typeof teksten.leeg].actie}
+              actieHref={LEeg[slug as keyof typeof LEeg]}
+            />
+          ) : null}
+
+          {slug === 'hizmetlerimiz' ? (
+            <ol class="m-0 grid list-none gap-6 p-0">
+              {teksten.diensten.map((dienst, index) => {
+                const foto = DIENST_BEELD[index];
+                return (
+                  <li class="grid items-center gap-6 rounded-2xl border border-line bg-surface p-5 sm:p-6 md:grid-cols-[minmax(0,1fr)_minmax(0,0.55fr)]">
+                    <div>
+                      <h2 class="text-h3">{dienst.titel}</h2>
+                      <p class="mt-3 max-w-[62ch] text-ink-muted">{dienst.tekst}</p>
+                      <a
+                        href={doel(dienst.href)}
+                        class="mt-4 inline-flex min-h-[44px] items-center text-nav font-semibold text-brand-dark"
+                      >
+                        {teksten.dienstenMeer} →
+                      </a>
+                    </div>
+                    {foto ? (
+                      <Beeld
+                        slug={foto}
+                        alt={ALT[foto]}
+                        sizes="(min-width: 768px) 340px, 100vw"
+                        klasse="h-auto w-full rounded-xl"
+                      />
+                    ) : (
+                      <span
+                        aria-hidden="true"
+                        class="hidden text-[5rem] leading-none font-light text-ink-muted md:flex md:items-center md:justify-center"
+                      >
+                        {String(index + 1).padStart(2, '0')}
+                      </span>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+          ) : null}
+
+          {slug === 'hakkimizda' ? (
+            <section class="mt-12">
+              <h2>{teksten.mijlpalenKop}</h2>
+              <ol class="mt-8 ml-0 grid list-none gap-0 p-0">
+                {teksten.mijlpalen.map((mijlpaal) => (
+                  <li class="relative border-l-2 border-line pb-8 pl-6 last:pb-0 sm:pl-8">
+                    <span
+                      aria-hidden="true"
+                      class="absolute top-1 -left-[9px] h-4 w-4 rounded-full border-2 border-surface bg-brand"
+                    />
+                    <p class="text-small font-semibold tracking-[0.14em] text-brand-dark uppercase">
+                      {mijlpaal.jaar} · {mijlpaal.label}
+                    </p>
+                    <p class="mt-2 max-w-[64ch]">{mijlpaal.tekst}</p>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          ) : null}
+
+          {slug === 'iletisim' ? (
+            <div class="grid gap-6 md:grid-cols-2">
+              <dl class="m-0 grid gap-5 rounded-2xl border border-line bg-surface-alt p-6 sm:p-8">
+                <div>
+                  <dt class="text-small font-semibold tracking-[0.14em] text-brand-dark uppercase">
+                    {teksten.labelAdres}
+                  </dt>
+                  <dd class="mt-1 m-0">
+                    {SITE.street}
+                    <br />
+                    {SITE.postalCode} {SITE.city}
+                  </dd>
+                </div>
+                <div>
+                  <dt class="text-small font-semibold tracking-[0.14em] text-brand-dark uppercase">
+                    {teksten.labelTelefoon}
+                  </dt>
+                  <dd class="mt-1 m-0">
+                    <a href={`tel:${SITE.phoneHref}`}>{SITE.phone}</a>
+                  </dd>
+                </div>
+                <div>
+                  <dt class="text-small font-semibold tracking-[0.14em] text-brand-dark uppercase">
+                    {teksten.labelEmail}
+                  </dt>
+                  <dd class="mt-1 m-0">
+                    <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+                  </dd>
+                </div>
+                <div>
+                  <dt class="text-small font-semibold tracking-[0.14em] text-brand-dark uppercase">
+                    {teksten.labelUren}
+                  </dt>
+                  <dd class="mt-1 m-0">{SITE.openingHours}</dd>
+                </div>
+              </dl>
+              <div class="flex flex-col gap-3">
+                <a
+                  class="inline-flex min-h-[48px] items-center justify-center rounded-pill bg-brand-dark px-6 text-nav font-semibold text-surface no-underline transition-colors hover:bg-ink"
+                  href={`https://wa.me/${SITE.whatsapp.replace('+', '')}`}
+                  rel="noopener"
+                  target="_blank"
+                >
+                  {teksten.whatsappLabel}
+                </a>
+                <a
+                  class="inline-flex min-h-[48px] items-center justify-center rounded-pill border border-line bg-surface px-6 text-nav font-semibold text-brand-dark no-underline transition-colors hover:border-brand hover:bg-brand-light"
+                  href={kaartUrl}
+                  rel="noopener"
+                  target="_blank"
+                >
+                  {teksten.labelRoute}: {teksten.routeTekst}
+                </a>
+              </div>
+            </div>
+          ) : null}
+
+          {slug === 'disclameer' || slug === 'cerez-politikasi-cookie-policy' ? (
+            <p class="mb-8 rounded-2xl border border-line bg-surface-alt p-4 text-small text-ink-muted">
+              {teksten.juridischNoot}
+            </p>
+          ) : null}
+          {body.length > 0 && !isLeeg && !EIGEN_SECTIES.has(slug) ? (
+            <PortableTekst body={body} />
+          ) : null}
+        </div>
+      </>
+    )
+  }
+
+  {
+    slug === '' && steun.length > 0 ? (
+      <section class="border-t border-line bg-surface-alt">
+        <div class="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
+          <h2>{teksten.steunKop}</h2>
+          <p class="mt-3 max-w-[60ch] text-ink-muted">{teksten.steunTekst}</p>
+          <ul class="mt-8 grid list-none gap-3 p-0 sm:grid-cols-2 lg:grid-cols-3">
+            {steun.map((blok) => (
+              <li>
+                <a
+                  class="flex min-h-[56px] items-center justify-between rounded-2xl border border-line bg-surface px-5 no-underline transition-colors hover:border-brand hover:bg-brand-light"
+                  href={blok.link ?? pagePath(locale, 'iletisim')}
+                  rel="noopener"
+                  target="_blank"
+                >
+                  <span class="text-h4 text-brand-dark">{blok.bedrag ? blok.label : teksten.steunVrijBedrag}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+          <p class="mt-4 text-small text-ink-muted">{teksten.steunHint}</p>
+        </div>
+      </section>
+    ) : null
+  }
+
+  {
+    ngo ? (
+      <script type="application/ld+json" set:html={JSON.stringify(ngo)} />
+    ) : null
+  }
+</Layout>
