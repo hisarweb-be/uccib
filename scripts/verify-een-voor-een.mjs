@@ -24,6 +24,7 @@ import { existsSync } from 'node:fs';
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 
+import { heeftSanityProject } from './lib/studio.mjs';
 import {
   ACTIVE_SLUGS,
   CONCEPT_SLUGS,
@@ -321,17 +322,28 @@ async function main() {
       meld(ok, `vast bestand ${pad}`);
     }
 
-    // De Studio: het beheerscherm moet openen en zijn eigen programma laden.
-    const studio = await haalHtml('', 'beheer');
-    if (typeof studio === 'string') {
-      const assets = [...studio.matchAll(/\/beheer\/static\/[^"']+\.(?:js|css)/g)].map((m) => m[0]);
-      const kapot = [];
-      for (const asset of assets.slice(0, 40)) {
-        if (!(await controleerBron(asset))) kapot.push(asset);
+    // De Studio. Twee eerlijke standen, en de keuring eist de stand die bij deze
+    // bouw hoort. Zonder Sanity-project hoort /beheer er niet te zijn: een Studio
+    // zonder project opent en toont daarna "An error occurred", en dat is erger
+    // dan geen beheer. Met een project moet hij openen en zijn eigen programma
+    // laden. Zo kan een half gebouwde Studio er niet stil doorheen glippen.
+    if (heeftSanityProject()) {
+      const studio = await haalHtml('', 'beheer');
+      if (typeof studio === 'string') {
+        const assets = [...studio.matchAll(/\/beheer\/static\/[^"']+\.(?:js|css)/g)].map((m) => m[0]);
+        const kapot = [];
+        for (const asset of assets.slice(0, 40)) {
+          if (!(await controleerBron(asset))) kapot.push(asset);
+        }
+        meld(assets.length > 0 && kapot.length === 0, 'beheer (Studio opent)', `${assets.length} eigen bestanden${kapot.length ? ` | ${kapot.slice(0, 2).join(', ')}` : ''}`);
+      } else {
+        meld(false, 'beheer (Studio opent)', levend ? `status ${studio?.status ?? 'geen antwoord'}` : 'route ontbreekt');
       }
-      meld(assets.length > 0 && kapot.length === 0, 'beheer (Studio opent)', `${assets.length} eigen bestanden${kapot.length ? ` | ${kapot.slice(0, 2).join(', ')}` : ''}`);
     } else {
-      meld(false, 'beheer (Studio opent)', levend ? `status ${studio?.status ?? 'geen antwoord'}` : 'route ontbreekt');
+      // De tegentoets: zonder project mag /beheer juist niet bestaan.
+      const studio = await haalHtml('', 'beheer');
+      const bestaat = typeof studio === 'string' && /<title>Sanity Studio<\/title>/.test(studio);
+      meld(!bestaat, 'beheer (geen project, dus bewust weg)', bestaat ? 'de Studio staat er toch' : 'geen Studio in de bouw, zoals bedoeld');
     }
 
     // Elke bron die de pagina's noemen, één keer gemeten.

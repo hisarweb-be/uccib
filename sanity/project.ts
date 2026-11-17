@@ -23,3 +23,24 @@ export const dataset =
 
 /** True zolang er nog geen echt projectId is ingevuld. */
 export const isPlaceholder = projectId === PROJECT_ID_PLACEHOLDER;
+
+/**
+ * Wat er gebeurt zolang er geen project is, en waarom dat de juiste stand is.
+ *
+ * Tot 17 november 2026 bouwde de Studiostap gewoon door en stond er op /beheer
+ * een Studio die opende en daarna "An error occurred" toonde: hij had geen
+ * project om tegen te praten. Dat is de enige stand die erger is dan geen
+ * beheer, want de voorzitter ziet een scherm dat stuk lijkt.
+ *
+ * Zonder project bouwt de Studiostap daarom niets: geen /beheer, geen halve
+ * Studio. De site zelf hangt er niet aan en bouwt volledig uit de offline kopie
+ * (`src/data/cms-fallback.json`), dus de uitrol gaat gewoon door.
+ *
+ * Zodra Altuner het Sanity-project aanmaakt en `SANITY_STUDIO_PROJECT_ID` in
+ * `sanity/.env` zet (of hier het echte id invult), bouwt de Studio mee en eist
+ * de keuring dat /beheer opent. Zie sanity/README.md.
+ */
+export const GEEN_PROJECT_MELDING =
+  'OVER  geen Sanity-projectId (sanity/project.ts staat nog op de placeholder): ' +
+  '/beheer wordt niet gebouwd en de site bouwt uit de offline kopie. ' +
+  'Zet SANITY_STUDIO_PROJECT_ID in sanity/.env om het beheer aan te zetten.';

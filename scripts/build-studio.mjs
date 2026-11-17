@@ -16,11 +16,20 @@
  *
  * Mislukt de bouw van de Studio, dan stopt de hele bouw met exitcode 1: een
  * site zonder werkende `/beheer` is niet wat we willen uitrollen.
+ *
+ * Ontbreekt het Sanity-project zelf (nog geen projectId), dan wordt er niets
+ * gebouwd en blijft `/beheer` weg. Dat is geen fout maar de eerlijke stand: een
+ * Studio zonder project opent en toont daarna alleen "An error occurred"
+ * (gemeten op de echte site, 17 nov 2026). De site bouwt in dat geval volledig
+ * uit de offline kopie en heeft het beheer niet nodig; de keuring eist dan ook
+ * geen `/beheer`. Zie `scripts/lib/studio.mjs`.
  */
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { GEEN_PROJECT, heeftSanityProject } from './lib/studio.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const studio = join(root, 'sanity');
@@ -28,6 +37,15 @@ const studio = join(root, 'sanity');
 if (!existsSync(join(studio, 'package.json'))) {
   console.error('NG  sanity/package.json ontbreekt: de Studio kan niet gebouwd worden.');
   process.exit(1);
+}
+
+// Geen project, geen Studio. Een oude bouw uit een vorige keer moet ook weg,
+// anders staat er op /beheer een scherm dat bij deze bouw niet meer hoort.
+const uitMap = join(root, 'public', 'beheer');
+if (!heeftSanityProject()) {
+  if (existsSync(uitMap)) rmSync(uitMap, { recursive: true, force: true });
+  console.log(GEEN_PROJECT);
+  process.exit(0);
 }
 
 /**
@@ -57,7 +75,7 @@ if (!existsSync(join(studio, 'node_modules'))) {
 
 draai('npm', ['run', 'build'], studio);
 
-const outDir = join(root, 'public', 'beheer');
+const outDir = uitMap;
 const index = join(outDir, 'index.html');
 if (!existsSync(index)) {
   console.error(`NG  de Studio-bouw liet ${index} niet achter.`);
