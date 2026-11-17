@@ -15,6 +15,7 @@
     "check": "astro check",
     "verify": "node scripts/verify-alle.mjs",
     "verify:page": "node scripts/verify-pagina.mjs",
+    "verify:server": "node scripts/verify-server.mjs",
     "verify:links": "node scripts/verify-links.mjs",
     "verify:elke": "node scripts/verify-een-voor-een.mjs",
     "verify:live": "node scripts/verify-een-voor-een.mjs --basis=https://uccib.com",

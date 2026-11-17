@@ -5,7 +5,7 @@
  */
 import { createServer } from 'node:http';
 import { readdir, readFile, stat } from 'node:fs/promises';
-import { extname, join, normalize, relative, sep } from 'node:path';
+import { extname, join, normalize, relative, resolve, sep } from 'node:path';
 import { chromium } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
 
@@ -88,7 +88,12 @@ const MIME = {
 };
 
 /** Start een statische server op een vrije poort bovenop dist/. */
-export async function startStaticServer(root) {
+export async function startStaticServer(rootRaw) {
+  // `join()` maakt op Windows backslashes terwijl dezelfde `root` met schuine
+  // strepen binnenkomt. Zonder deze regel faalt de grenscontrole op elk pad en
+  // antwoordt de server 403 op alles, waarna de keuring naar een foutpagina
+  // kijkt. `resolve()` zet beide notaties op dezelfde vorm.
+  const root = resolve(rootRaw);
   const server = createServer(async (req, res) => {
     try {
       const url = new URL(req.url ?? '/', 'http://localhost');
@@ -111,11 +116,32 @@ export async function startStaticServer(root) {
     }
   });
 
-  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  await new Promise((klaar) => server.listen(0, '127.0.0.1', klaar));
   const { port } = server.address();
+  const baseUrl = `http://127.0.0.1:${port}`;
+
+  // Zelfcontrole: serveert deze server de eigen startpagina? Zo niet, dan zegt
+  // elke keuring daarna iets over een foutpagina in plaats van over de site.
+  // Liever hier hard stoppen dan groen melden op niets.
+  const proef = await fetch(`${baseUrl}/`);
+  if (proef.status !== 200) {
+    server.close();
+    throw new Error(
+      `startStaticServer serveert ${root} niet (status ${proef.status} op /). ` +
+        'De keuring zou naar een foutpagina kijken en toch groen melden.',
+    );
+  }
+
   return {
-    baseUrl: `http://127.0.0.1:${port}`,
-    close: () => new Promise((resolve) => server.close(resolve)),
+    baseUrl,
+    // `close()` alleen wacht tot elke open verbinding vanzelf sluit, en een
+    // keep-alive-verbinding doet dat niet: de keuring zou aan het eind blijven
+    // hangen. Eerst de open verbindingen sluiten, dan pas afronden.
+    close: () =>
+      new Promise((klaar) => {
+        server.closeAllConnections();
+        server.close(klaar);
+      }),
   };
 }
 
