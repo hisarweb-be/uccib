@@ -65,7 +65,15 @@ export interface F3Teksten {
   whatsappLabel: string;
   whatsappAria: string;
   juridischNoot: string;
-  leeg: Record<'subelerimiz' | 'bolge-derneklerimiz' | 'namaz-vakitleri' | 'cuma-hutbesi', LegeTekst>;
+  leeg: Record<
+    | 'subelerimiz'
+    | 'bolge-derneklerimiz'
+    | 'namaz-vakitleri'
+    | 'cuma-hutbesi'
+    | 'haberler'
+    | 'baharkermesi-menu',
+    LegeTekst
+  >;
 }
 
 const TR: F3Teksten = {
@@ -184,6 +192,16 @@ const TR: F3Teksten = {
       titel: 'Hutbe arşivi hazırlanıyor',
       tekst:
         'Haftalık hutbelerimizi metin ve isteğe bağlı pdf ile arşivleyeceğiz, en yeni hutbe başta. Şu an için hutbeler camilerimizde okunmaktadır.',
+    },
+    haberler: {
+      titel: 'Haberler bölümü hazırlanıyor',
+      tekst:
+        'Sitenin haberler bölümünü yeniden kuruyoruz. O zamana kadar duyurularımızı ve etkinliklerimizi iletişim sayfasından veya telefonla öğrenebilirsiniz.',
+    },
+    'baharkermesi-menu': {
+      titel: 'Bahar çarşısı menüsü arşivde',
+      tekst:
+        '2026 bahar çarşısı geride kaldı. O günün menüsünü arşiv olarak saklıyoruz. Derneğimiz yeni tarihi belirlediğinde güncel menü burada yayımlanacak.',
     },
   },
 };
@@ -310,6 +328,16 @@ const NL: F3Teksten = {
       tekst:
         'Wij archiveren de wekelijkse preken met de tekst en optioneel een pdf, de nieuwste eerst. Voorlopig worden de preken in onze moskeeën gehouden.',
     },
+    haberler: {
+      titel: 'De nieuwsrubriek wordt opgebouwd',
+      tekst:
+        'Wij bouwen de nieuwsrubriek van de site opnieuw op. Tot dan leest u onze aankondigingen en activiteiten via de contactpagina of hoort u ze aan de telefoon.',
+    },
+    'baharkermesi-menu': {
+      titel: 'Het menu van de lentejaarmarkt is archief',
+      tekst:
+        'De lentejaarmarkt van 2026 is voorbij. Het menu van die dag bewaren wij als archief. Zodra de vereniging de nieuwe datum vastlegt, staat het nieuwe menu hier.',
+    },
   },
 };
 
@@ -434,6 +462,16 @@ const FR: F3Teksten = {
       titel: 'Les archives des prêches se constituent',
       tekst:
         'Nous archivons les prêches hebdomadaires avec le texte et, si disponible, un pdf, le plus récent en premier. Pour l’instant, les prêches sont donnés dans nos mosquées.',
+    },
+    haberler: {
+      titel: 'La rubrique actualités est en préparation',
+      tekst:
+        'Nous reconstruisons la rubrique actualités du site. D’ici là, nos annonces et nos activités sont disponibles via la page de contact ou par téléphone.',
+    },
+    'baharkermesi-menu': {
+      titel: 'Le menu du marché de printemps est archivé',
+      tekst:
+        'Le marché de printemps 2026 est terminé. Nous conservons le menu de cette journée comme archive. Dès que l’association fixe la nouvelle date, le nouveau menu paraîtra ici.',
     },
   },
 };
