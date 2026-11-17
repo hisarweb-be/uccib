@@ -45,21 +45,23 @@ export type Slug = (typeof SLUGS)[number];
 /**
  * Pagina's die tijdelijk geen eigen inhoud hebben.
  *
- * F3 heeft de acht pagina's die hier stonden gevuld en eruit gehaald; die staan
- * nu in de navigatie, de sitemap en de keuring. Wat overblijft zijn de twee
- * pagina's van F5: het doneerformulier en het bedankscherm erna.
+ * Deze lijst is de enige schakelaar. Wat erin staat krijgt noindex, komt niet in
+ * de navigatie en niet in de sitemap, en wordt door de keuring als concept
+ * gekeurd in plaats van als pagina met inhoud.
  *
- * Zolang ze leeg zijn, staan ze niet in de navigatie en antwoorden ze met een
- * rustige mededeling plus noindex, zodat een bezoeker nooit een lege pagina
- * ziet en een zoekmachine de pagina laat vallen. De route blijft bestaan, zodat
- * een inkomende link geen 404 wordt. (Een echt 410 kan niet: Cloudflare Pages
- * kent in _redirects alleen 301, 302, 303, 307, 308 en 200.)
+ * Sinds F3 hebben alle veertien pagina's eigen inhoud, dus de lijst is leeg. Hij
+ * blijft bestaan omdat de sitemap, de navigatie en de keuring erop leunen: komt
+ * er ooit een pagina bij die nog gevuld moet worden, dan is één regel hier
+ * genoeg om hem netjes te verbergen.
+ *
+ * De geschiedenis is dezelfde regel in omgekeerde beweging: tien slugs bij F1,
+ * acht nadat F5 `bagislar` en `bagis-onayi` vulde, en nu nul.
  */
-export const CONCEPT_SLUGS = ['bagislar', 'bagis-onayi'] as const;
+export const CONCEPT_SLUGS = [] as const;
 
 export type ConceptSlug = (typeof CONCEPT_SLUGS)[number];
 
-/** De pagina's die nu echt bestaan: veertien min de twee concepten van F5. */
+/** De pagina's die nu echt bestaan: alle veertien, er is geen concept meer. */
 export type ActiveSlug = Exclude<Slug, ConceptSlug>;
 
 export const ACTIVE_SLUGS: readonly ActiveSlug[] = SLUGS.filter(
