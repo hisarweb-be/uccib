@@ -7,26 +7,35 @@ order: 11
 active: true
 ---
 
-## (1) Sorumluluk Reddi
+## (1) Sorumlu yayıncı
 
-Bu sayfada uccib.com’un “Union des Centres Culturels Islamiques Belgium” tarafından sunulan feragatnameyi bulacaksınız. Bu sorumluluk reddinde, web sitemizdeki bilgileri size hangi rezervasyon altında sunduğumuzu belirtiyoruz.
+Bu web sitesi uccib.com, Union des Centres Culturels Islamiques Belgium (UCCIB) derneği tarafından yayımlanmaktadır.
 
-## (2) Fikri Mülkiyet
+- Adres: Rue Charles Demeer 3, 1020 Brüksel, Belçika
+- Kayıt numarası (KBO/BTW): BE 0843.891.981
+- E-posta: info@uccib.com
+- Telefon: +32 493 344 665
 
-Bu web sitesindeki bilgilerin kullanımı, bu bilgileri kopyalamadığınız, dağıtmadığınız veya başka bir şekilde kullanmadığınız veya kötüye kullanmadığınız sürece ücretsizdir. Bu web sitesindeki bilgileri yalnızca zorunlu kanun düzenlemelerine uygun olarak yeniden kullanabilirsiniz.
+## (2) Sorumluluk reddi
 
-“Union des Centres Culturels Islamiques Belgium” nin açık yazılı izni olmadan bu web sitesinde yer alan yazı, fotoğraf veya diğer materyallerin yeniden kullanılması yasaktır. Fikri mülkiyet “Union des Centres Culturels Islamiques Belgium” ye aittir.
+Bu sitedeki bilgileri dikkatle ve güncel tutmaya çalışıyoruz. Yine de eksik, güncelliğini yitirmiş veya yanlış bir bilgiyle karşılaşabilirsiniz. Bu bilgilere dayanarak verdiğiniz kararlardan doğan zararlar için sorumluluk kabul etmiyoruz.
 
-## Doğruluk garantisi yok
+Sitede yer alan hiçbir şey bir teklif, bir sözleşme veya hukuki danışmanlık sayılmaz. Bağış, üyelik veya ziyaret konusunda bağlayıcı bilgi için dernekle doğrudan iletişime geçin.
 
-*Uygunsa:*
+## (3) Fikri mülkiyet
 
-Web sitemizdeki fiyatlar için, gerçekliğin ve hedeflenen fiyatların mümkün olan en doğru şekilde temsil edilmesi için çaba gösteriyoruz. Programlama veya yazım hataları olarak ortaya çıkan ve fark edilebilen hatalar hiçbir zaman “Union des Centres Culturels Islamiques Belgium” ile bir sözleşme veya anlaşma talep etmek veya üstlenmek için bir neden oluşturmaz.
+Sitedeki metinler, fotoğraflar, logo ve tasarım UCCIB derneğine aittir. Bu materyalleri kaynak göstererek ve değiştirmeden kullanabilirsiniz. Ticari kullanım veya tam kopyalama için önceden yazılı izin gerekir. İzni info@uccib.com adresinden isteyin.
 
-Union des Centres Culturels Islamiques Belgium, olabildiğince güncel bir web sitesi için çalışmaktadır. Bu çabalara rağmen, bu web sitesindeki bilgiler veya içerik eksik ve / veya yanlışsa, bunun için herhangi bir sorumluluk kabul edemeyiz.
+## (4) Bağlantılar
 
-Bu web sitesinde yer alan bilgiler ve / veya ürünler herhangi bir garanti ve / veya doğruluk iddiası olmaksızın sunulmaktadır. Bu malzemeleri önceden haber vermeksizin değiştirme, kaldırma veya yeniden yayınlama hakkımızı saklı tutuyoruz. “Union des Centres Culturels Islamiques Belgium”, hiper bağlantılarla atıfta bulunduğumuz web sitelerinde yer alan hiçbir bilgi için sorumluluk kabul etmez.
+Sitemiz başka web sitelerine bağlantı verebilir. Onları biz yönetmiyoruz ve içeriklerinden sorumlu değiliz. Bir bağlantıya tıkladığınızda o sitenin kendi gizlilik ve çerez kuralları geçerli olur.
 
-## Değişiklikler
+## (5) Geçerli hukuk
 
-Bu feragatnamenin değişmesi durumunda, uccib.com feragatnamesinin en son sürümünü bu sayfada bulacaksınız.
+Bu künye Belçika hukukuna tabidir. Bir anlaşmazlıkta Brüksel mahkemeleri yetkilidir.
+
+## (6) Değişiklikler
+
+Bu sayfanın en son sürümü her zaman bu adreste yayımlanır. Metin değiştiğinde güncelleme tarihini de değiştiririz.
+
+Son güncelleme: 17 Kasım 2026. Sorularınız için info@uccib.com adresine yazabilirsiniz.

@@ -163,7 +163,12 @@ const kaartUrl = `https://www.google.com/maps/search/?api=1&query=${SITE.geo.lat
                 {teksten.heroKlein}
               </p>
               <h1>{h1}</h1>
-              <p class="mt-5 max-w-[46ch] text-ink-muted">{t.siteTagline}</p>
+              {/* De regel onder de kop is de inleiding uit het CMS, niet de
+                  sitenaam: stond hier `t.siteTagline`, dan las de bezoeker de
+                  merknaam twee keer onder elkaar (op /fr/ letterlijk). */}
+              {entry.data.intro ? (
+                <p class="mt-5 max-w-[46ch] text-ink-muted">{entry.data.intro}</p>
+              ) : null}
               <div class="mt-8 flex flex-wrap gap-3">
                 <a
                   href={pagePath(locale, 'hakkimizda')}
