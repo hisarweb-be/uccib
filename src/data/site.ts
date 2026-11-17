@@ -45,10 +45,11 @@ export type Slug = (typeof SLUGS)[number];
 /**
  * Pagina's die tijdelijk geen eigen inhoud hebben.
  *
- * Gemeten op 16 november 2026 in het contentmodel: deze tien concepten bevatten
- * nul tot twee korte blokken, samen onder de 150 tekens, plus een verwijzing
- * "yakında" (binnenkort). Vier pagina's hebben echte inhoud: de hoofdpagina,
- * Hakkımızda (643 tekens), Künye (1.939) en het cookiebeleid (10.952).
+ * Gemeten op 16 november 2026 in het contentmodel: deze pagina's bevatten nul
+ * tot twee korte blokken, samen onder de 150 tekens, plus een verwijzing
+ * "yakında" (binnenkort). Zes pagina's hebben echte inhoud: de hoofdpagina,
+ * Hakkımızda (643 tekens), Künye (1.939), het cookiebeleid (10.952) en sinds F5
+ * de donatiepagina met de Mollie-knoppen en de bedankpagina erachter.
  *
  * Zolang ze leeg zijn, staan ze niet in de navigatie en antwoorden ze met een
  * rustige mededeling plus noindex, zodat een bezoeker nooit een lege pagina
@@ -62,8 +63,6 @@ export const CONCEPT_SLUGS = [
   'hizmetlerimiz',
   'haberler',
   'iletisim',
-  'bagislar',
-  'bagis-onayi',
   'subelerimiz',
   'bolge-derneklerimiz',
   'namaz-vakitleri',
@@ -73,7 +72,7 @@ export const CONCEPT_SLUGS = [
 
 export type ConceptSlug = (typeof CONCEPT_SLUGS)[number];
 
-/** De pagina's die nu echt bestaan: veertien min de tien lege concepten. */
+/** De pagina's die nu echt bestaan: veertien min de acht lege concepten. */
 export type ActiveSlug = Exclude<Slug, ConceptSlug>;
 
 export const ACTIVE_SLUGS: readonly ActiveSlug[] = SLUGS.filter(

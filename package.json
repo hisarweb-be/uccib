@@ -22,7 +22,8 @@
     "cms:verify:offline": "node scripts/verify-cms.mjs --offline",
     "sanity:dev": "npm --prefix sanity run dev",
     "sanity:build": "node scripts/build-studio.mjs",
-    "sanity:typecheck": "npm --prefix sanity run typecheck"
+    "sanity:typecheck": "npm --prefix sanity run typecheck",
+    "verify:sponsor": "node scripts/verify-sponsor.mjs"
   },
   "dependencies": {
     "@astrojs/react": "^4.4.2",

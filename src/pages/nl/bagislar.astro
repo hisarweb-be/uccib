@@ -1,11 +1,9 @@
 ---
 /**
- * Concept: deze pagina heeft nog geen eigen inhoud (zie CONCEPT_SLUGS in
- * src/data/site.ts). De route blijft bestaan (geen 404 voor inkomende links),
- * maar staat nergens in de navigatie, draagt noindex en toont één rustige
- * mededeling. F3 vervangt dit bestand door de echte pagina.
+ * De donatiepagina met de negen knoppen naar de bestaande Mollie-links (F5).
+ * De inhoud staat in components/Sponsor.astro, zodat de drie talen één bron delen.
  */
-import InAanbouw from '../../components/InAanbouw.astro';
+import Sponsor from '../../components/Sponsor.astro';
 ---
 
-<InAanbouw locale="nl" slug="bagislar" path="/nl/bagislar/" />
+<Sponsor locale="nl" pagina="bagislar" />
