@@ -26,10 +26,13 @@
  * contour vol) moet FOUT geven, ook al is de CSS dan "in orde". Zonder dat geval
  * bewijst groen niets (zelfde opzet als `verify-server.mjs`).
  *
- * De schermafbeeldingen blijven bewaard in `D:/tmp/win/uccib-scherm/`, zodat het
+ * De schermafbeeldingen blijven bewaard (standaard `D:/tmp/win/uccib-scherm/` op
+ * de laptop, `os.tmpdir()` elders, en `UCCIB_BEELD` wint altijd), zodat het
  * oordeel altijd met een verse afbeelding naast de cijfers te controleren is.
  */
 import { mkdir } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 import { helderheid } from './lib/beeldhelderheid.mjs';
 import { openBrowser, startStaticServer } from './lib/keuring.mjs';
@@ -50,7 +53,17 @@ const LAT = {
   eind: { gemiddelde: 60, spreiding: 30 },
 };
 
-const UIT = 'D:/tmp/win/uccib-scherm';
+/**
+ * Waar de schermafbeeldingen heen gaan. Op de laptop `D:/tmp/win` (nooit op C:,
+ * zie §20); op de CI-server bestaat dat pad niet, dus daar de tijdmap van het
+ * systeem. `UCCIB_BEELD` wint in beide gevallen, zodat een run zijn bewijs zelf
+ * kan aanwijzen (de CI@workflow doet dat met de bewaarmap van de actie).
+ */
+const UIT =
+  process.env.UCCIB_BEELD ??
+  (process.platform === 'win32'
+    ? 'D:/tmp/win/uccib-scherm'
+    : join(tmpdir(), 'uccib-scherm'));
 const SCHERMEN = [
   ['desktop', { width: 1440, height: 900 }],
   ['mobiel', { width: 390, height: 844 }],
@@ -112,19 +125,98 @@ const TEGENTOETS_VLAK = `<!DOCTYPE html><html lang="nl"><head><meta charset="utf
 <style>html,body{margin:0;height:100%;background:#1e2424}</style></head>
 <body></body></html>`;
 
+/**
+ * Een pagina waarvan het scrollen traag tot stilstand komt, zoals de echte site.
+ *
+ * Zonder deze controle bewijst een groene schermkeuring niets over de wachttijd:
+ * een schermafbeelding midden in de beweging kan dezelfde cijfers geven als een
+ * rustig beeld. Deze pagina lost dat op door `window.scrollTo` te vervangen door
+ * een eigen beweging van 1200 ms, zodat de traagheid niet afhangt van hoe snel
+ * Chromium zelf scrollt. Het vlak over de pagina is fel zolang het scrollen de
+ * doelhoogte niet heeft gehaald en wordt daarna een beeld met structuur.
+ *
+ * Met de wachttijd van `naarPodium` is het beeld dus rustig en haalt het de lat;
+ * met de oude vaste 700 ms valt de schermafbeelding midden in de beweging, is het
+ * vlak nog fel en zakt de spreiding naar bijna nul. Dat tweede geval is de
+ * eigenlijke bewijslast: het toont dat de controle een race kán vangen.
+ */
+const CONTROLE_BEWEGING = `<!DOCTYPE html><html lang="nl"><head><meta charset="utf-8">
+<style>
+  html,body{margin:0;background:#0b0f0f}
+  [data-cinema]{height:200vh}
+  .staart{height:200vh}
+  #linnen{position:fixed;inset:0;z-index:9;background:#f2f5f5}
+  #linnen.stil{background:repeating-linear-gradient(115deg,#0d1212 0 18px,#b9c6c6 18px 34px)}
+</style></head><body>
+<div data-cinema></div><div class="staart"></div><div id="linnen"></div>
+<script>
+  const ECHT = window.scrollTo.bind(window);
+  const DUUR = 1200;
+  window.scrollTo = (x, y) => {
+    const van = window.scrollY;
+    const naar = typeof y === 'number' ? y : 0;
+    const start = performance.now();
+    window.__schermpoortBeweegt = true;
+    const stap = () => {
+      const d = Math.min(1, (performance.now() - start) / DUUR);
+      ECHT(0, van + (naar - van) * d);
+      if (d < 1) requestAnimationFrame(stap);
+      else { window.__schermpoortBeweegt = false; }
+    };
+    requestAnimationFrame(stap);
+  };
+  const linnen = document.getElementById('linnen');
+  const podium = document.querySelector('[data-cinema]');
+  const doel = () => podium.getBoundingClientRect().height - window.innerHeight;
+  const kijk = () => {
+    linnen.classList.toggle('stil', !window.__schermpoortBeweegt && window.scrollY >= doel() - 1);
+    requestAnimationFrame(kijk);
+  };
+  requestAnimationFrame(kijk);
+</script></body></html>`;
+
 /** De oude stand van 17-11: de donkere foto uit beeld, de contour vol. */
 const OUDE_STAND = 'html.cinema-aan .cinema-laag[data-laag="massa"]{opacity:0!important}';
 
-/** Scrollt naar het podium en zet de voortgang op `deel` (0 = opening, 1 = eind). */
+/**
+ * Scrollt naar een stand van het podium en wacht tot de pagina daar stil staat.
+ *
+ * `html { scroll-behavior: smooth }` laat `window.scrollTo` uitlopen: gemeten op
+ * 17-11 deed die beweging er 0,65 tot 0,75 s over. Een vaste wachttijd van 700 ms
+ * was daardoor een wedstrijd op het scherp van de snede, en in de rij van acht
+ * poorten achter elkaar verloor die wedstrijd: de schermafbeelding viel midden in
+ * de beweging. `cinema.ts` rekent de stand uit `getBoundingClientRect()`, dus een
+ * half opgebouwd podium gaf een veel te licht beeld (gemiddelde 253 in plaats van
+ * 117). Deze functie wacht tot `window.scrollY` de doelhoogte heeft gehaald en
+ * twee opeenvolgende beelden gelijk blijft, met 4000 ms als plafond. Staat de
+ * pagina meteen stil (voorkeur voor minder beweging), dan gaat het direct door.
+ * De doelhoogte wordt in de pagina zelf begrensd op wat er te scrollen valt, dus
+ * een kortere pagina geeft geen wachttijd die afloopt.
+ */
 async function naarPodium(page, deel) {
-  await page.evaluate((d) => {
+  const doel = await page.evaluate((d) => {
     const el = document.querySelector('[data-cinema]');
-    if (!el) return;
+    if (!el) return null;
     const top = el.getBoundingClientRect().top + window.scrollY;
     const span = Math.max(0, el.getBoundingClientRect().height - window.innerHeight);
-    window.scrollTo(0, top + span * d);
+    const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    const y = Math.min(Math.max(0, top + span * d), max);
+    delete window.__schermpoortY;
+    window.scrollTo(0, y);
+    return y;
   }, deel);
-  await page.waitForTimeout(700);
+  if (doel === null) return;
+
+  await page.waitForFunction(
+    (y) => {
+      const nu = window.scrollY;
+      const vorige = window.__schermpoortY;
+      window.__schermpoortY = nu;
+      return vorige !== undefined && Math.abs(nu - vorige) < 0.5 && Math.abs(nu - y) < 1.5;
+    },
+    doel,
+    { timeout: 4000, polling: 'raf' },
+  );
 }
 
 async function schiet(page, naam) {
@@ -143,6 +235,43 @@ async function tegentoets(browser, baseUrl) {
     await schiet(page, 'tegentoets-' + naam);
     oordeel(!m.goed, 'tegentoets ' + naam + ' wordt afgekeurd: ' + cijfers(m, LAT.opening));
     await context.close();
+  }
+
+  // De wachttijd zelf: een pagina die pas donker wordt als het scrollen stil
+  // staat, moet donker meten. En met de oude vaste wachttijd van 700 ms moet
+  // dezelfde pagina fel meten; zonder dat tweede geval zegt het eerste niets.
+  for (const [naam, vasteWacht, moetGoed] of [
+    ['met wachten tot stilstand', null, true],
+    ['met de oude vaste 700 ms', 700, false],
+  ]) {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const page = await context.newPage();
+    try {
+      await page.setContent(CONTROLE_BEWEGING, { waitUntil: 'load' });
+      if (vasteWacht === null) {
+        await naarPodium(page, 1);
+      } else {
+        await page.evaluate(() => {
+          const el = document.querySelector('[data-cinema]');
+          const span = Math.max(0, el.getBoundingClientRect().height - window.innerHeight);
+          window.scrollTo(0, span);
+        });
+        await page.waitForTimeout(vasteWacht);
+      }
+      // Hier telt het gemiddelde en niet de lat van de foto. Het vlak over deze
+      // pagina is fel zolang er bewogen wordt en rustig daarna; de lat van
+      // `LAT.eind` vraagt ook spreiding, en die haalt een effen vlak nooit. Het
+      // gemiddelde scheidt de twee standen wel scherp: 101 tegen 241.
+      const m = meet(await page.screenshot(), LAT.eind);
+      await schiet(page, 'controle-beweging-' + (moetGoed ? 'wacht' : 'vast'));
+      const donker = m.gemiddelde < 150;
+      oordeel(
+        moetGoed ? donker : !donker,
+        'controle beweging ' + naam + ': ' + cijfers(m, LAT.eind),
+      );
+    } finally {
+      await context.close();
+    }
   }
 
   // De klacht op de echte pagina: de oude stand van 17-11 moet FOUT geven.

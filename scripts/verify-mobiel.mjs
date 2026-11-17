@@ -29,6 +29,7 @@
  * Draait met `npm run verify:mobiel`. Exitcode 1 bij elke afwijking.
  */
 import { mkdir, writeFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 import {
@@ -45,7 +46,13 @@ const MIN_TIK = 44;
 const FPS_VLOER = 30;
 
 const DIST = resolve('dist');
-const PROEF = 'D:/tmp/win/uccib-mobiel/proef';
+/** Zelfde regel als bij `verify:scherm`: op de laptop `D:/tmp/win`, elders de tijdmap. */
+const PROEF =
+  process.env.UCCIB_BEELD !== undefined
+    ? join(process.env.UCCIB_BEELD, 'mobiel', 'proef')
+    : process.platform === 'win32'
+      ? 'D:/tmp/win/uccib-mobiel/proef'
+      : join(tmpdir(), 'uccib-mobiel', 'proef');
 const TELEFOON = { width: 390, height: 844 };
 const KLEIN = { width: 320, height: 640 };
 

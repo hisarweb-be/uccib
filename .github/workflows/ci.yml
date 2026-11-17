@@ -41,11 +41,35 @@ jobs:
       - name: Bouwen
         run: npm run build
 
-      - name: Keuren (veertien slugs x drie talen)
+      - name: Keuren per pagina
+        run: npm run verify:elke
+
+      - name: Inhoud en 404
         run: npm run verify
 
       - name: Linkcontrole
         run: npm run verify:links
+
+      - name: Server en paden
+        run: npm run verify:server
+
+      - name: Schermafbeeldingen bewaren
+        run: echo "UCCIB_BEELD=$RUNNER_TEMP/uccib-beeld" >> "$GITHUB_ENV"
+
+      - name: Eerste scherm in pixels
+        run: npm run verify:scherm
+
+      - name: Mobiel met een echte vinger
+        run: npm run verify:mobiel
+
+      - name: Bewijs van de schermkeuring bewaren
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: schermafbeeldingen
+          path: ${{ runner.temp }}/uccib-beeld
+          retention-days: 7
+          if-no-files-found: ignore
 
       - name: Bewijs bewaren
         if: always()
