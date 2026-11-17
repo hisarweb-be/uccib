@@ -190,7 +190,18 @@ const kaartUrl = `https://www.google.com/maps/search/?api=1&query=${SITE.geo.lat
               href={pagePath(locale, 'hizmetlerimiz')}
               class="text-nav font-semibold text-brand-dark"
             >
-              {teksten.dienstenAlle} →
+              {teksten.dienstenAlle}
+              <svg
+                class="ml-1 inline-block h-[1em] w-[1em] align-[-0.125em]"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path d="M2 8h11M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
             </a>
           </div>
           <ul class="mt-8 grid list-none gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
@@ -264,7 +275,18 @@ const kaartUrl = `https://www.google.com/maps/search/?api=1&query=${SITE.geo.lat
                         href={doel(dienst.href)}
                         class="mt-4 inline-flex min-h-[44px] items-center text-nav font-semibold text-brand-dark"
                       >
-                        {teksten.dienstenMeer} →
+                        {teksten.dienstenMeer}
+                        <svg
+                          class="ml-1 inline-block h-[1em] w-[1em] align-[-0.125em]"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.75"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <path d="M2 8h11M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
                       </a>
                     </div>
                     {foto ? (
