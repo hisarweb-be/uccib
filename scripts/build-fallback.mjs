@@ -16,6 +16,9 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { PAGINAS } from './content/paginas.tr.mjs';
+import { PAGINAS_NL } from './content/paginas.nl.mjs';
+import { PAGINAS_FR } from './content/paginas.fr.mjs';
+import { sleutels } from './lib/portable.mjs';
 import { SLUGS, SITE } from '../src/data/site.ts';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -60,23 +63,29 @@ function pagina(slug, taal, bron) {
 }
 
 /**
- * Het Nederlands en Frans hebben hun eigen titel, h1 en beschrijving in
- * `src/i18n/*.json`; de body blijft voorlopig Turks, want er is nog geen
- * vertaling van de teksten. Dat is zichtbaar eerlijk: de taalwissel werkt, de
- * inhoud volgt zodra de redactie vertaalt.
+ * Het Nederlands en Frans hebben hun eigen titel, h1, beschrijving en body.
+ * De titel, h1 en beschrijving staan in `src/i18n/*.json` (het contract dat de
+ * keuringspoort leest); de body staat in `content/paginas.<taal>.mjs`, als
+ * vertaling van de Turkse bron. Heeft een taal geen vertaling voor een slug,
+ * dan blijft de Turkse body staan; dat is alleen nog het geval bij de twee
+ * juridische pagina's, en die zetten daar een zichtbare mededeling boven.
  */
 const { default: nl } = await import('../src/i18n/nl.json', { with: { type: 'json' } });
 const { default: fr } = await import('../src/i18n/fr.json', { with: { type: 'json' } });
 
 const dictionaries = { nl, fr };
+const bodies = { nl: PAGINAS_NL, fr: PAGINAS_FR };
 
 function paginaInTaal(slug, taal, bron) {
   const basis = pagina(slug, taal, bron);
   if (taal === 'tr') return basis;
+  const vertaald = bodies[taal]?.[slug];
+  const body = vertaald ? sleutels(vertaald) : basis.body;
   const page = dictionaries[taal].pages[slug];
-  if (!page) return basis;
+  if (!page) return { ...basis, body };
   return {
     ...basis,
+    body,
     titel: page.title,
     h1: page.h1,
     seo: { titel: page.title, beschrijving: page.description },
@@ -94,7 +103,7 @@ for (const taal of ['tr', 'nl', 'fr']) {
 
 const fallback = {
   /** Gegenereerd door scripts/build-fallback.mjs. Niet met de hand aanpassen. */
-  bron: 'scripts/content/paginas.tr.mjs',
+  bron: 'scripts/content/paginas.tr.mjs + paginas.nl.mjs + paginas.fr.mjs',
   paginas,
   nieuws: [],
   afdelingen: [],

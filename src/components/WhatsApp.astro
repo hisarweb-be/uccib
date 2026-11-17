@@ -1,0 +1,85 @@
+---
+/**
+ * De WhatsApp-knop, op elke pagina rechtsonder.
+ *
+ * Deed de oude site ook. Een bezoeker die belt of schrijft, is dichter bij hulp
+ * dan een formulier dat ergens in een mailbox verdwijnt; daarom staat er geen
+ * formulier op de contactpagina en wel deze knop.
+ */
+import { SITE } from '../data/site';
+import type { Locale } from '../i18n/config';
+import { f3 } from '../i18n/f3';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const teksten = f3(locale);
+const href = `https://wa.me/${SITE.whatsapp.replace('+', '')}`;
+---
+
+<!--
+  De knop staat in een `aside`, zodat hij een eigen landmark heeft: los in de
+  body hing hij buiten elk landmark en dat is een axe-fout (`region`).
+-->
+<aside class="wa-wrap" aria-label={teksten.whatsappAria}>
+  <a class="wa" href={href} rel="noopener" target="_blank" aria-label={teksten.whatsappAria}>
+    <svg
+    aria-hidden="true"
+    focusable="false"
+    width="26"
+    height="26"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+  >
+    <path
+      d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.13-.42-2.15-1.33-.8-.71-1.33-1.59-1.49-1.89-.15-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.03 1.01-1.03 2.46s1.06 2.85 1.2 3.05c.15.2 2.08 3.18 5.04 4.34 2.96 1.16 3.03.9 3.58.85.55-.05 1.78-.73 2.03-1.43.25-.7.25-1.31.17-1.43-.07-.13-.27-.2-.57-.35z"
+    ></path>
+    <path
+      d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zm0 18.15c-1.52 0-3.01-.41-4.3-1.18l-.31-.18-3.19.84.85-3.11-.2-.32a8.22 8.22 0 0 1-1.26-4.39c0-4.54 3.7-8.24 8.24-8.24s8.24 3.7 8.24 8.24-3.7 8.24-8.24 8.24z"
+    ></path>
+  </svg>
+    <span class="sr-only">{teksten.whatsappLabel}</span>
+  </a>
+</aside>
+
+<style>
+  .wa-wrap {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 40;
+  }
+
+  .wa {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 999px;
+    background: var(--color-brand-dark);
+    color: #fff;
+    box-shadow: 0 6px 20px rgb(15 107 102 / 35%);
+    transition:
+      transform 0.18s ease,
+      background-color 0.18s ease;
+  }
+
+  .wa:hover {
+    background: var(--color-ink);
+    transform: translateY(-2px);
+  }
+
+  .wa:focus-visible {
+    outline: 3px solid var(--color-brand);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wa {
+      transition: none;
+    }
+  }
+</style>

@@ -1,0 +1,56 @@
+---
+/**
+ * Eén beeld uit de set van F1: AVIF met WebP-terugval en een `srcset` uit het
+ * manifest. `sizes` is verplicht, zodat de browser nooit breder laadt dan het
+ * beeld op het scherm inneemt.
+ */
+import { beeld } from '../lib/beelden';
+
+interface Props {
+  slug: string;
+  alt: string;
+  sizes: string;
+  /** Weergavebreedte in CSS-pixels; de hoogte volgt uit de beeldverhouding. */
+  breedte?: number;
+  klasse?: string;
+  loading?: 'eager' | 'lazy';
+  prioriteit?: boolean;
+}
+
+const {
+  slug,
+  alt,
+  sizes,
+  breedte,
+  klasse = 'h-auto w-full',
+  loading = 'lazy',
+  prioriteit = false,
+} = Astro.props;
+
+const record = beeld(slug);
+if (!record) throw new Error(`Beeld "${slug}" staat niet in public/beeld/manifest.json`);
+
+const varianten = record.varianten;
+const laatste = varianten[varianten.length - 1];
+if (!laatste) throw new Error(`Beeld "${slug}" heeft geen varianten`);
+
+const weergaveBreedte = breedte ?? laatste.breedte;
+const weergaveHoogte = Math.round((laatste.hoogte / laatste.breedte) * weergaveBreedte);
+const srcset = (extensie: 'avif' | 'webp') =>
+  varianten.map((variant) => `${variant.pad}.${extensie} ${variant.breedte}w`).join(', ');
+---
+
+<picture>
+  <source type="image/avif" srcset={srcset('avif')} sizes={sizes} />
+  <source type="image/webp" srcset={srcset('webp')} sizes={sizes} />
+  <img
+    src={`${laatste.pad}.webp`}
+    width={weergaveBreedte}
+    height={weergaveHoogte}
+    alt={alt}
+    loading={loading}
+    decoding={loading === 'eager' ? 'sync' : 'async'}
+    fetchpriority={prioriteit ? 'high' : undefined}
+    class={klasse}
+  />
+</picture>

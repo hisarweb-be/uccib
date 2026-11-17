@@ -309,6 +309,26 @@ export async function checkPage({ browser, baseUrl, distDir, locale, slug }) {
       errors.push(`${label}: afbeelding laadt niet in de browser (${src})`);
     }
 
+    // Een inkom-animatie maakt de pagina even doorschijnend. axe keurt wat het
+    // op dat moment ziet, dus zonder deze regel meet de keuring willekeurig een
+    // moment halverwege zo'n animatie. Op 17-11 sloeg `color-contrast` op de h1
+    // van 24 pagina's aan in CI en op 0 pagina's lokaal: dezelfde code, alleen
+    // een andere snelheid. De h1 van 42 px zakt tijdens de fade door 3:1 en is
+    // daarna gewoon in orde.
+    //
+    // Het oordeel hoort over de eindstand te gaan. Wat permanent te weinig
+    // contrast heeft, valt na deze regel alsnog door.
+    await page.evaluate(() => {
+      for (const animatie of document.getAnimations()) {
+        try {
+          animatie.finish();
+        } catch {
+          // Oneindige animaties kun je niet afmaken; terug naar de ruststand.
+          animatie.cancel();
+        }
+      }
+    });
+
     const axe = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'])
       .analyze();

@@ -45,34 +45,23 @@ export type Slug = (typeof SLUGS)[number];
 /**
  * Pagina's die tijdelijk geen eigen inhoud hebben.
  *
- * Gemeten op 16 november 2026 in het contentmodel: deze pagina's bevatten nul
- * tot twee korte blokken, samen onder de 150 tekens, plus een verwijzing
- * "yakında" (binnenkort). Zes pagina's hebben echte inhoud: de hoofdpagina,
- * Hakkımızda (643 tekens), Künye (1.939), het cookiebeleid (10.952) en sinds F5
- * de donatiepagina met de Mollie-knoppen en de bedankpagina erachter.
+ * Deze lijst is de enige schakelaar. Wat erin staat krijgt noindex, komt niet in
+ * de navigatie en niet in de sitemap, en wordt door de keuring als concept
+ * gekeurd in plaats van als pagina met inhoud.
  *
- * Zolang ze leeg zijn, staan ze niet in de navigatie en antwoorden ze met een
- * rustige mededeling plus noindex, zodat een bezoeker nooit een lege pagina
- * ziet en een zoekmachine de pagina laat vallen. De route blijft bestaan, zodat
- * een inkomende link geen 404 wordt. (Een echt 410 kan niet: Cloudflare Pages
- * kent in _redirects alleen 301, 302, 303, 307, 308 en 200.) F3 vult ze met de
- * echte tekst en haalt ze hier weg; dan komen ze vanzelf terug in menu, sitemap
- * en keuring.
+ * Sinds F3 hebben alle veertien pagina's eigen inhoud, dus de lijst is leeg. Hij
+ * blijft bestaan omdat de sitemap, de navigatie en de keuring erop leunen: komt
+ * er ooit een pagina bij die nog gevuld moet worden, dan is één regel hier
+ * genoeg om hem netjes te verbergen.
+ *
+ * De geschiedenis is dezelfde regel in omgekeerde beweging: tien slugs bij F1,
+ * acht nadat F5 `bagislar` en `bagis-onayi` vulde, en nu nul.
  */
-export const CONCEPT_SLUGS = [
-  'hizmetlerimiz',
-  'haberler',
-  'iletisim',
-  'subelerimiz',
-  'bolge-derneklerimiz',
-  'namaz-vakitleri',
-  'cuma-hutbesi',
-  'baharkermesi-menu',
-] as const;
+export const CONCEPT_SLUGS = [] as const;
 
 export type ConceptSlug = (typeof CONCEPT_SLUGS)[number];
 
-/** De pagina's die nu echt bestaan: veertien min de acht lege concepten. */
+/** De pagina's die nu echt bestaan: alle veertien, er is geen concept meer. */
 export type ActiveSlug = Exclude<Slug, ConceptSlug>;
 
 export const ACTIVE_SLUGS: readonly ActiveSlug[] = SLUGS.filter(
