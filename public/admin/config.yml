@@ -85,3 +85,98 @@ collections:
       - { name: link, label: Mollie ödeme bağlantısı, widget: string }
       - { name: order, label: Sıra numarası, widget: number, default: 0 }
       - { name: active, label: Yayında, widget: boolean, default: true }
+
+  # ---------------------------------------------------------------------------
+  # De vier ledendiensten. Hier mag Omer wél regels toevoegen en verwijderen:
+  # een nieuwe vestiging, een nieuwe maand, een nieuwe preek is inhoud en geen
+  # ontwerpbeslissing. Daarom staat `create` en `delete` hier op true.
+  #
+  # De velden staan in één taal: een naam, een adres en een telefoonnummer zijn
+  # eigennamen. De kop boven de lijst komt uit de vertaling van de pagina zelf.
+  # ---------------------------------------------------------------------------
+
+  - name: subeler
+    label: Şubeler (vestigingen)
+    label_singular: Şube
+    folder: src/content/subeler
+    extension: md
+    format: frontmatter
+    create: true
+    delete: true
+    identifier_field: name
+    summary: "{{name}} · {{city}}"
+    sortable_fields: [order, name]
+    fields:
+      - { name: name, label: Şubenin adı, widget: string }
+      - { name: street, label: Sokak ve numara, widget: string, required: false }
+      - { name: postalCode, label: Posta kodu, widget: string, required: false }
+      - { name: city, label: Şehir, widget: string, required: false }
+      - { name: phone, label: Telefon, widget: string, required: false }
+      - { name: email, label: E-posta, widget: string, required: false }
+      - { name: openingHours, label: "Açılış saatleri (serbest metin)", widget: string, required: false }
+      - { name: photo, label: Fotoğraf, widget: image, required: false, media_folder: public/beeld, public_folder: /beeld }
+      - { name: order, label: Sıra numarası, widget: number, default: 0 }
+      - { name: active, label: Yayında, widget: boolean, default: true }
+
+  - name: dernekler
+    label: Bölge dernekleri (regionale verenigingen)
+    label_singular: Bölge derneği
+    folder: src/content/dernekler
+    extension: md
+    format: frontmatter
+    create: true
+    delete: true
+    identifier_field: name
+    summary: "{{name}} · {{region}}"
+    sortable_fields: [order, name]
+    fields:
+      - { name: name, label: Derneğin adı, widget: string }
+      - { name: region, label: Bölge veya şehir, widget: string, required: false }
+      - { name: description, label: Kısa tanıtım, widget: text, required: false }
+      - { name: contact, label: İlgili kişi, widget: string, required: false }
+      - { name: phone, label: Telefon, widget: string, required: false }
+      - { name: email, label: E-posta, widget: string, required: false }
+      - { name: website, label: "Web sitesi (https:// ile)", widget: string, required: false }
+      - { name: photo, label: Fotoğraf, widget: image, required: false, media_folder: public/beeld, public_folder: /beeld }
+      - { name: order, label: Sıra numarası, widget: number, default: 0 }
+      - { name: active, label: Yayında, widget: boolean, default: true }
+
+  - name: vakitler
+    label: Namaz vakitleri (gebedstijden)
+    label_singular: Aylık vakit çizelgesi
+    folder: src/content/vakitler
+    extension: md
+    format: frontmatter
+    create: true
+    delete: true
+    identifier_field: month
+    summary: "{{month}} · {{place}}"
+    sortable_fields: [month, place]
+    fields:
+      - { name: month, label: "Ay (YYYY-AA, örnek 2026-11)", widget: string }
+      - { name: place, label: Yer veya cami, widget: string }
+      - { name: source, label: "Kaynak (isteğe bağlı bağlantı)", widget: string, required: false }
+      - { name: body, label: "Çizelge (tablo)", widget: markdown }
+      - { name: order, label: Sıra numarası, widget: number, default: 0 }
+      - { name: active, label: Yayında, widget: boolean, default: true }
+
+  - name: hutbeler
+    label: Cuma hutbeleri (preekarchief)
+    label_singular: Cuma hutbesi
+    folder: src/content/hutbeler
+    extension: md
+    format: frontmatter
+    create: true
+    delete: true
+    identifier_field: title
+    summary: "{{title}} · {{date}}"
+    sortable_fields: [date, title]
+    fields:
+      - { name: title, label: Hutbenin başlığı, widget: string }
+      - { name: date, label: Tarih, widget: datetime, date_format: "DD.MM.YYYY", time_format: false, format: "YYYY-MM-DD" }
+      - { name: imam, label: İmam veya konuşmacı, widget: string, required: false }
+      - { name: language, label: "Dil (örnek Türkçe)", widget: string, required: false }
+      - { name: file, label: "PDF", widget: file, required: false, media_folder: public/beeld, public_folder: /beeld }
+      - { name: body, label: Hutbe metni, widget: markdown, required: false }
+      - { name: order, label: Sıra numarası, widget: number, default: 0 }
+      - { name: active, label: Yayında, widget: boolean, default: true }

@@ -19,6 +19,7 @@ import KopBand from './KopBand.astro';
 import Beeld from './Beeld.astro';
 import CinemaBeeld from './CinemaBeeld.astro';
 import GebouwCinema from './GebouwCinema.astro';
+import LedenDienst from './LedenDienst.astro';
 import { getDictionary, type Locale } from '../i18n';
 import { pagePath, isSlug } from '../i18n/config';
 import { SITE, type Slug } from '../data/site';
@@ -75,6 +76,21 @@ function doel(href: string): string {
  * zou dezelfde tekst een tweede keer tonen.
  */
 const EIGEN_SECTIES: ReadonlySet<Slug> = new Set(['hizmetlerimiz', 'iletisim']);
+
+/**
+ * De vier ledendiensten krijgen hun inhoud uit een eigen collectie in plaats
+ * van uit de body van de pagina. `LedenDienst` toont alleen wat de vereniging
+ * zelf heeft ingevuld; staat er niets, dan toont het onderdeel niets.
+ */
+const LEDEN_SLUGS = [
+  'subelerimiz',
+  'bolge-derneklerimiz',
+  'namaz-vakitleri',
+  'cuma-hutbesi',
+] as const;
+type LedenSlug = (typeof LEDEN_SLUGS)[number];
+const isLedenSlug = (waarde: Slug): waarde is LedenSlug =>
+  (LEDEN_SLUGS as readonly string[]).includes(waarde);
 
 /**
  * Eerlijke alt-teksten bij de eigen foto's uit de set van F1.
@@ -400,6 +416,7 @@ const kaartUrl = `https://www.google.com/maps/search/?api=1&query=${SITE.geo.lat
               {teksten.juridischNoot}
             </p>
           ) : null}
+          {isLedenSlug(slug) ? <LedenDienst slug={slug} locale={locale} /> : null}
           {heeftBody && !EIGEN_SECTIES.has(slug) ? (
             <div class="tekst">
               <Content />
