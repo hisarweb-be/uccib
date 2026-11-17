@@ -54,12 +54,19 @@ const TEKST: Record<Locale, { title: string; description: string; h1: string; bo
 const tekst = TEKST[locale];
 
 /**
- * De vier pagina's die leeg zijn, hebben elk hun eigen, eerlijke mededeling in
+ * De zes pagina's die leeg zijn, hebben elk hun eigen, eerlijke mededeling in
  * `src/i18n/f3.ts`: wat er nog niet is en waar de bezoeker het wel vindt. Die
  * tekst is concreter dan de algemene hierboven, dus hij gaat voor. Zet dhr. Omer
  * in de CMS een pagina aan, dan komt de echte pagina terug en valt deze route weg.
  */
-const LEEG_SLUGS = ['subelerimiz', 'bolge-derneklerimiz', 'namaz-vakitleri', 'cuma-hutbesi'] as const;
+const LEEG_SLUGS = [
+  'subelerimiz',
+  'bolge-derneklerimiz',
+  'namaz-vakitleri',
+  'cuma-hutbesi',
+  'haberler',
+  'baharkermesi-menu',
+] as const;
 
 const eigen = (LEEG_SLUGS as readonly string[]).includes(slug)
   ? f3(locale).leeg[slug as (typeof LEEG_SLUGS)[number]]
