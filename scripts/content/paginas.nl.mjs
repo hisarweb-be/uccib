@@ -26,7 +26,7 @@ export const PAGINAS_NL = {
     p(
       'Welkom op onze website. Dank u voor uw belangstelling voor de Unie van Islamitische Culturele Centra. Als vereniging met de hoedanigheid van dienst aan het publiek en van religieuze gemeenschap werken wij op religieus, sociaal en cultureel vlak. Wij helpen moslims in België in het bijzonder op religieus gebied, op een brede en grondige manier. Daarnaast ondersteunen wij de maatschappelijke solidariteit en het samenleven in vrede.'
     ),
-    linkParagraaf('Over ons →', '/hakkimizda'),
+    linkParagraaf('Over ons', '/hakkimizda'),
     h2('Nieuws & pers'),
     p('Binnenkort verschijnen hier de nieuwsberichten.'),
     linkParagraaf('Al het nieuws', '/haberler'),

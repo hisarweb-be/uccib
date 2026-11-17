@@ -27,7 +27,7 @@ export const PAGINAS_FR = {
     p(
       'Bienvenue sur notre site. Nous vous remercions de l’intérêt que vous portez à l’Union des Centres Culturels Islamiques. En tant qu’association jouissant du statut de service au public et de communauté religieuse, nous œuvrons dans les domaines religieux, social et culturel. Nous aidons les musulmans de Belgique de manière approfondie, en particulier sur les questions religieuses. Nous soutenons également la solidarité sociale et la vie en paix.'
     ),
-    linkParagraaf('À propos →', '/hakkimizda'),
+    linkParagraaf('À propos', '/hakkimizda'),
     h2('Actualités & presse'),
     p('Les actualités seront publiées ici prochainement.'),
     linkParagraaf('Toutes les actualités', '/haberler'),

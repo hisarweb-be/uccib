@@ -52,7 +52,7 @@ export const PAGINAS = {
       p(
         'Web Sitemize Hoşgeldiniz. İslam Kültür Merkezleri Birliği’ne ilginizden dolayı teşekkür ederiz. Umuma hadim ve dini cemaat statüsüne sahip olan bir dernek olarak dini, sosyal ve kültürel alanlarda hizmet vermekteyiz. Belçika’da yaşayan müslümanlara hususiyetle dini konularda kapsamlı bir şekilde yardımcı olmaktayız. Ayrıca toplumsal dayanışma ve barış içerisinde yaşama hususunda destek vermekteyiz.'
       ),
-      linkParagraaf('Hakkımızda →', '/hakkimizda'),
+      linkParagraaf('Hakkımızda', '/hakkimizda'),
       h2('Güncel & Basın'),
       p('Yakında haberler burada yayınlanacaktır.'),
       linkParagraaf('Tüm Güncel', '/haberler'),
