@@ -116,6 +116,7 @@ wil terugdraaien, ziet hier waarom het zo staat.
 | 56 | Sanity gaat eruit; het bewerkscherm is Sveltia CMS in `public/admin/` | Sanity vroeg een account, een Studio-bouw van 787 bestanden en een webhook; de redactie gebruikt nu één scherm dat rechtstreeks Markdown in deze repo schrijft. Zonder database kan de site niets tonen wat niet in de repo staat, en elke wijziging van de voorzitter is een commit in de geschiedenis. Gratis, geen tweede account, geen server. |
 | 57 | De inhoud staat als Markdown in `src/content/paginas/{tr,nl,fr}`, gelezen door `src/content.config.ts` | Eén bron voor de site en het bewerkscherm. `active: false` houdt een pagina op haar adres met noindex, buiten de sitemap en zonder link ernaartoe; `npm run verify` eist dat. |
 | 58 | Verwijderen en aanmaken staan uit in het bewerkscherm (`create` en `delete` op false) | De veertien pagina's hebben elk een eigen plek in de menubalk en een eigen ontworpen kop. Een vijftiende pagina is een ontwerpbeslissing, geen schakelaar. |
+| 59 | Het oude beheeradres `/beheer/` krijgt een echte verhuispagina met `Cache-Control: no-store` | Toen het beheer van `/beheer` naar `/admin` verhuisde, antwoordde de alias `https://uccib.pages.dev/beheer/` nog steeds met **200** en de oude Sanity-pagina "Beheer staat uit", met `CF-Cache-Status: HIT`, `Age: 57352` en `s-maxage=604800` uit de randcache van Cloudflare, terwijl de verse uitrol-URL zelf **404** gaf (gemeten 17 nov 2026). Een pad dat uit de repo verdwijnt, verdwijnt niet uit de randcache. Daarom staat er nu een echt bestand op dat pad (`public/beheer/index.html`) dat met een `meta refresh` naar `/admin/` stuurt en geen indexering vraagt, plus een `no-store`-regel in `public/_headers`. `npm run verify:elke` eist dat het pad antwoordt, naar `/admin/` verwijst en `noindex` draagt. |
 
 ### Vervallen door besluit 56 (Sanity eruit)
 
@@ -124,7 +125,8 @@ Deze nummers gelden niet meer; ze staan hierboven alleen als historie:
 
 Wat elk nummer verving:
 - 44 tot en met 46 en 51 tot en met 55 gingen over de Studio-bouw, de paden en
-  de pakketten; die zijn met de map `sanity/` verdwenen.
+  de pakketten; die zijn met de map `sanity/` verdwenen. Het bestand
+  `public/_redirects` waar besluit 51 naar verwijst, bestaat niet meer.
 - 47 tot en met 50 gingen over de import vanuit `scripts/content/` naar Sanity en
   de offline kopie `cms-fallback.json`; de Markdown-bestanden zijn nu de enige
   bron (besluit 57).

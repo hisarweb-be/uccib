@@ -20,3 +20,13 @@
 
 /admin/*
   Cache-Control: no-store
+
+# Het oude beheeradres. Toen het beheer van /beheer naar /admin verhuisde,
+# bleef de alias https://uccib.pages.dev/beheer/ een oude kopie serveren met
+# `s-maxage=604800` (een week) en `Age: 57352`, terwijl de uitrol-URL zelf 404
+# gaf. Een echt bestand op dat pad verdringt die kopie meteen; `no-store` houdt
+# hem daarna uit de randcache. Gemeten 17 nov 2026, zie BESLUITEN 59.
+/beheer
+  Cache-Control: no-store
+/beheer/*
+  Cache-Control: no-store
