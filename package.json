@@ -16,6 +16,8 @@
     "verify": "node scripts/verify-alle.mjs",
     "verify:page": "node scripts/verify-pagina.mjs",
     "verify:links": "node scripts/verify-links.mjs",
+    "verify:elke": "node scripts/verify-een-voor-een.mjs",
+    "verify:live": "node scripts/verify-een-voor-een.mjs --basis=https://uccib.com",
     "cms:fallback": "node scripts/build-fallback.mjs",
     "cms:import": "node scripts/import-sanity.mjs",
     "cms:verify": "node scripts/verify-cms.mjs",
