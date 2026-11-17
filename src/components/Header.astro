@@ -3,7 +3,8 @@ import { SITE } from '../data/site';
 import Logo from './Logo.astro';
 import { LOCALES, LOCALE_LABELS, LOCALE_TAGS, getDictionary, type Locale } from '../i18n';
 import { pagePath } from '../i18n/config';
-import { isActiveSlug, type Slug } from '../data/site';
+import type { Slug } from '../data/site';
+import { isActiveSlug } from '../lib/actief';
 
 interface Props {
   locale: Locale;
@@ -18,7 +19,7 @@ const t = getDictionary(locale);
  * De hoofditems in dezelfde volgorde als het huidige menu. Een concept dat nog
  * geen inhoud heeft staat er niet in: een menulink naar een lege pagina is
  * precies wat we niet willen. Zodra F3 de inhoud levert, komt het item vanzelf
- * terug zodra de slug uit CONCEPT_SLUGS verdwijnt.
+ * terug zodra de pagina in de CMS op actief staat.
  */
 const MAIN_NAV = [
   'home',
@@ -120,6 +121,20 @@ const languageHref = (other: Locale) =>
   .topbar-link {
     color: #fff;
     text-decoration: none;
+  }
+
+  /*
+    Op een telefoon is de bovenbalk het eerste wat een duim tegenkomt. Daar is
+    elke link 44 px hoog, de maat waar een vinger op mikt; met een muis blijft de
+    balk compact. Gemeten op 17-11: de links waren 24 px hoog en dus net te klein
+    (WCAG 2.5.8 vraagt 24, onze eigen lat staat op 44).
+  */
+  @media (pointer: coarse), (max-width: 767px) {
+    .topbar-link {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
   }
 
   .topbar-link:hover,

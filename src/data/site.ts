@@ -43,31 +43,7 @@ export const SLUGS = [
 export type Slug = (typeof SLUGS)[number];
 
 /**
- * Pagina's die tijdelijk geen eigen inhoud hebben.
- *
- * Deze lijst is de enige schakelaar. Wat erin staat krijgt noindex, komt niet in
- * de navigatie en niet in de sitemap, en wordt door de keuring als concept
- * gekeurd in plaats van als pagina met inhoud.
- *
- * Sinds F3 hebben alle veertien pagina's eigen inhoud, dus de lijst is leeg. Hij
- * blijft bestaan omdat de sitemap, de navigatie en de keuring erop leunen: komt
- * er ooit een pagina bij die nog gevuld moet worden, dan is één regel hier
- * genoeg om hem netjes te verbergen.
- *
- * De geschiedenis is dezelfde regel in omgekeerde beweging: tien slugs bij F1,
- * acht nadat F5 `bagislar` en `bagis-onayi` vulde, en nu nul.
+ * Welke pagina's aan of uit staan, staat sinds 17-11 niet meer hier. De schakelaar
+ * is de front-matter van `src/content/paginas/tr/<slug>.md` (`active: false`), zodat
+ * dhr. Omer hem in Sveltia CMS kan omzetten zonder code. Zie `src/lib/actief.ts`.
  */
-export const CONCEPT_SLUGS = [] as const;
-
-export type ConceptSlug = (typeof CONCEPT_SLUGS)[number];
-
-/** De pagina's die nu echt bestaan: alle veertien, er is geen concept meer. */
-export type ActiveSlug = Exclude<Slug, ConceptSlug>;
-
-export const ACTIVE_SLUGS: readonly ActiveSlug[] = SLUGS.filter(
-  (slug): slug is ActiveSlug => !(CONCEPT_SLUGS as readonly string[]).includes(slug),
-);
-
-export function isActiveSlug(slug: Slug): slug is ActiveSlug {
-  return (ACTIVE_SLUGS as readonly string[]).includes(slug);
-}

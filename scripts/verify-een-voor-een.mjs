@@ -24,7 +24,6 @@ import { existsSync } from 'node:fs';
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 
-import { heeftSanityProject } from './lib/studio.mjs';
 import {
   ACTIVE_SLUGS,
   CONCEPT_SLUGS,
@@ -97,6 +96,23 @@ async function haalHtml(locale, slug) {
     }
   }
   const antwoord = await fetch(`${siteBasis}${route}`, { redirect: 'follow' });
+  if (antwoord.status !== 200) return { status: antwoord.status };
+  return antwoord.text();
+}
+
+/**
+ * Een pagina of bestand buiten de paginaroutes, bijvoorbeeld `/admin/`.
+ * Zelfde vorm als `haalHtml`: tekst bij succes, `null` of `{status}` anders.
+ */
+async function haalPad(pad) {
+  if (!levend) {
+    try {
+      return await readFile(distFileFor(distDir, pad), 'utf8');
+    } catch {
+      return null;
+    }
+  }
+  const antwoord = await fetch(`${siteBasis}${pad}`, { redirect: 'follow' });
   if (antwoord.status !== 200) return { status: antwoord.status };
   return antwoord.text();
 }
@@ -322,31 +338,28 @@ async function main() {
       meld(ok, `vast bestand ${pad}`);
     }
 
-    // De Studio. Twee eerlijke standen, en de keuring eist de stand die bij deze
-    // bouw hoort. Zonder Sanity-project hoort /beheer er niet te zijn: een Studio
-    // zonder project opent en toont daarna "An error occurred", en dat is erger
-    // dan geen beheer. Met een project moet hij openen en zijn eigen programma
-    // laden. Zo kan een half gebouwde Studio er niet stil doorheen glippen.
-    if (heeftSanityProject()) {
-      const studio = await haalHtml('', 'beheer');
-      if (typeof studio === 'string') {
-        const assets = [...studio.matchAll(/\/beheer\/static\/[^"']+\.(?:js|css)/g)].map((m) => m[0]);
-        const kapot = [];
-        for (const asset of assets.slice(0, 40)) {
-          if (!(await controleerBron(asset))) kapot.push(asset);
-        }
-        meld(assets.length > 0 && kapot.length === 0, 'beheer (Studio opent)', `${assets.length} eigen bestanden${kapot.length ? ` | ${kapot.slice(0, 2).join(', ')}` : ''}`);
-      } else {
-        meld(false, 'beheer (Studio opent)', levend ? `status ${studio?.status ?? 'geen antwoord'}` : 'route ontbreekt');
+    // Het bewerkscherm van dhr. Omer. Sinds 17-11 is dat Sveltia CMS in
+    // `public/admin/`; de Sanity Studio op /beheer bestaat niet meer. Wat hier
+    // bewezen moet worden: het scherm en zijn configuratie gaan mee in de
+    // uitrol, het vraagt geen indexering aan, en het laadt Sveltia van de cdn
+    // in plaats van een eigen bundel van 22 MB.
+    {
+      const scherm = await haalPad('/admin/');
+      const html = typeof scherm === 'string' ? scherm : null;
+      meld(
+        html !== null,
+        'beheer (/admin/ bestaat)',
+        html !== null ? '' : levend ? `status ${scherm?.status ?? 'geen antwoord'}` : 'route ontbreekt',
+      );
+      if (html !== null) {
+        meld(
+          /<meta\s+name="robots"\s+content="[^"]*noindex/i.test(html),
+          'beheer (vraagt geen indexering)',
+          'meta robots',
+        );
+        meld(/sveltia-cms/.test(html), 'beheer (laadt Sveltia CMS)', 'script van de cdn');
       }
-    } else {
-      // De tegentoets: zonder project mag er geen Studio staan. Of het pad
-      // ontbreekt (plaatselijk) of er staat de eerlijke pagina dat het beheer
-      // uitstaat (uitgerold, zodat de randcache geen oude Studio vasthoudt).
-      const studio = await haalHtml('', 'beheer');
-      const echteStudio = typeof studio === 'string' && /<title>Sanity Studio<\/title>/.test(studio);
-      const eerlijkePagina = typeof studio === 'string' && /Beheer staat uit/i.test(studio);
-      meld(!echteStudio, 'beheer (geen project, dus geen Studio)', echteStudio ? 'de Studio staat er toch' : eerlijkePagina ? 'eerlijke melding dat het beheer uitstaat' : 'pad ontbreekt, zoals bedoeld');
+      meld(await controleerBron('/admin/config.yml'), 'beheer (configuratie meegeleverd)', 'config.yml');
     }
 
     // Elke bron die de pagina's noemen, één keer gemeten.

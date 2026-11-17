@@ -1,12 +1,10 @@
 {
   "extends": "astro/tsconfigs/strict",
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist", "sanity", "public/beheer"],
+  "exclude": ["dist"],
   "compilerOptions": {
     "strict": true,
     "noUncheckedIndexedAccess": true,
-    "jsx": "react-jsx",
-    "jsxImportSource": "react",
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]

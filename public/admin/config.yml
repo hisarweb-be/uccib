@@ -1,0 +1,83 @@
+# yaml-language-server: $schema=https://cdn.jsdelivr.net/npm/@sveltia/cms/schema/sveltia-cms.json
+#
+# Sveltia CMS: het bewerkscherm van dhr. Omer, op /admin/.
+#
+# Sveltia leest dit bestand uit de repo en bouwt daar het bewerkscherm van. Het
+# bewerkt dezelfde Markdown-bestanden die `npm run build` leest: geen database,
+# geen tweede kopie. Elke klik van Omer wordt een commit in deze repo, en
+# Cloudflare Pages bouwt die binnen twee minuten opnieuw. Zo ziet de voorzitter
+# elke wijziging in de geschiedenis staan.
+#
+# De labels staan in het Turks: dat is de taal van wie dit scherm gebruikt. De
+# veldnamen zelf zijn Engels, net als de rest van de code.
+#
+# Inloggen werkt vandaag via "Sign in with token": een fine-grained GitHub-token
+# met Contents read/write op hisarweb-be/uccib. Dat vraagt geen server en geen
+# tweede account. De knop "Sign in with GitHub" komt erbij zodra de Sveltia CMS
+# Authenticator op Cloudflare Workers Free staat; pas dan komt hier base_url bij.
+#
+# Waarom create/delete op false: de site heeft veertien vaste pagina's, elk met
+# een eigen plek in de menubalk en een eigen ontworpen kop. Een vijftiende pagina
+# erbij is een ontwerpbeslissing (menunaam in drie talen, kop, beeld), geen
+# schakelaar. Wat Omer wel zelf doet: de vier lege pagina's vullen en op actief
+# zetten.
+
+backend:
+  name: github
+  repo: hisarweb-be/uccib
+  branch: main
+
+media_folder: public/beeld
+public_folder: /beeld
+
+site_url: https://uccib.com
+display_url: https://uccib.com
+logo_url: https://uccib.com/beeld/logo/uccib-vierkant/512.webp
+
+i18n:
+  structure: multiple_folders
+  locales: [tr, nl, fr]
+  default_locale: tr
+
+collections:
+  - name: paginas
+    label: Sayfalar
+    label_singular: Sayfa
+    folder: src/content/paginas
+    extension: md
+    format: frontmatter
+    i18n: true
+    create: false
+    delete: false
+    identifier_field: title
+    summary: "{{title}} · {{order}}"
+    sortable_fields: [order, title]
+    view_filters:
+      - { label: Yayında, field: active, eq: true }
+      - { label: "Kapalı (pasif)", field: active, eq: false }
+    fields:
+      - { name: title, label: Sekme başlığı, widget: string }
+      - { name: h1, label: Sayfanın büyük başlığı, widget: string }
+      - { name: description, label: Google için açıklama, widget: text, required: false }
+      - { name: intro, label: Giriş metni (boş bırakılabilir), widget: text, required: false }
+      - { name: order, label: Sıra numarası, widget: number, default: 0, i18n: duplicate }
+      - { name: active, label: "Yayında (geldt voor alle drie de talen)", widget: boolean, default: true, i18n: duplicate }
+      - { name: body, label: Sayfa içeriği, widget: markdown }
+
+  - name: sponsorblokken
+    label: Bağış tutarları
+    label_singular: Bağış tutarı
+    folder: src/content/sponsorblokken
+    extension: md
+    format: frontmatter
+    create: false
+    delete: false
+    identifier_field: label
+    summary: "{{label}}"
+    sortable_fields: [order, amount]
+    fields:
+      - { name: amount, label: "Tutar (€, boş = serbest tutar)", widget: number, required: false }
+      - { name: label, label: Düğmede görünen yazı, widget: string }
+      - { name: link, label: Mollie ödeme bağlantısı, widget: string }
+      - { name: order, label: Sıra numarası, widget: number, default: 0 }
+      - { name: active, label: Yayında, widget: boolean, default: true }

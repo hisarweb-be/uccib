@@ -66,18 +66,35 @@ html.cinema-aan .cinema-laag {
 }
 
 /**
+ * De massa is de ondergrond van de hele onthulling: dezelfde foto, uitgeknepen
+ * tot een donker monochroom volume. Hij staat van de eerste scrollpixel tot de
+ * laatste op volle sterkte.
+ *
+ * Dat is de les van 17-11: stond deze laag uit aan het begin, dan was het eerste
+ * derde van de rit niets dan witte lijnen op zwart en leek de site een
+ * bouwtekening in plaats van een foto die uit het donker komt. "Van niets" hoort
+ * een foto in het donker te zijn, geen leeg vlak.
+ */
+.cinema-massa {
+  filter: brightness(0.34) grayscale(0.85) contrast(1.12);
+}
+
+/* Zonder JavaScript meteen zichtbaar, zodat er nooit een zwart vlak staat te
+   wachten op de eerste rAF-tik. */
+html.cinema-aan .cinema-laag[data-laag='massa'] {
+  opacity: 1;
+  will-change: transform;
+}
+
+/**
  * De lijncontour: een Laplacian-rand op de eigen foto, in de browser zelf
  * berekend uit hetzelfde beeldbestand (dus geen tweede download en geen
- * gegenereerd beeld). `screen` legt de lijnen over de donkere ondergrond.
+ * gegenereerd beeld). `screen` legt de lijnen over de foto eronder, zodat het
+ * gebouw zich als het ware in het beeld etst.
  */
 .cinema-kontour {
   filter: url(#uccib-kontour);
   mix-blend-mode: screen;
-}
-
-/* De massa: dezelfde foto, uitgeknepen tot een donker volume. */
-.cinema-massa {
-  filter: brightness(0.26) grayscale(1) contrast(1.35);
 }
 
 /* Filmkorrel, één keer getegeld uit een SVG-ruis. */
@@ -91,12 +108,14 @@ html.cinema-aan .cinema-laag {
   background-size: 140px 140px;
 }
 
-/* Cinemakader: laat de randen van het beeld wegvallen in het donker. */
+/* Cinemakader: laat de randen van het beeld zacht wegvallen in het donker.
+   Ruim genoeg open dat de foto aan de randen zichtbaar blijft; een dicht
+   zwart kader maakte van het geheel weer een vlak in plaats van een beeld. */
 .cinema-vignet {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(120% 92% at 50% 45%, transparent 34%, #060a0a 100%);
+  background: radial-gradient(135% 105% at 50% 42%, transparent 46%, rgba(6, 10, 10, 0.78) 100%);
 }
 
 /* ── Beeldsecties: onthulling bij binnenkomst en trage parallax ── */
