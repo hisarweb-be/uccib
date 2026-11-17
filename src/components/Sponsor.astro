@@ -1,0 +1,219 @@
+---
+/**
+ * De sponsor-funnel: /bagislar/ met de negen doneerknoppen en /bagis-onayi/ als
+ * bedankpagina. Eén component voor beide, in drie talen, zodat de teksten en de
+ * bedragen op één plek staan en de zes paginabestanden alleen nog de taal en de
+ * soort pagina doorgeven.
+ *
+ * Wat hier NIET staat: een formulier, een eigen betaalstroom of een bedrag dat
+ * de bezoeker zelf intikt. Mollie doet de betaling, de link bepaalt het bedrag.
+ */
+import Layout from '../layouts/Layout.astro';
+import { SITE } from '../data/site';
+import { getDictionary, type Locale } from '../i18n';
+import { pagePath } from '../i18n/config';
+import { BEDRAGEN, EIGEN_BEDRAG, bedragLabel, doneerUrl } from '../data/sponsor';
+
+interface Props {
+  locale: Locale;
+  pagina: 'bagislar' | 'bagis-onayi';
+}
+
+const { locale, pagina } = Astro.props;
+const t = getDictionary(locale);
+const page = t.pages[pagina];
+
+const TEKST: Record<
+  Locale,
+  {
+    kies: string;
+    eigen: string;
+    eigenNote: string;
+    uitleg: string;
+    betaal: string;
+    opnieuw: string;
+    terug: string;
+  }
+> = {
+  tr: {
+    kies: 'Bağış tutarınızı seçin',
+    eigen: 'Miktarı Giriniz',
+    eigenNote:
+      'Serbest tutar için düğme şimdilik 50 € üzerinden açılır; serbest tutar kısa süre içinde eklenir.',
+    uitleg:
+      'Bağışınız UCCIB’nin dini, sosyal ve kültürel hizmetlerine gider. Ödeme, Mollie’nin güvenli ödeme sayfasında yapılır.',
+    betaal: 'Ödeme sayfası aynı sekmede açılır.',
+    opnieuw: 'Yeniden bağış yap',
+    terug: 'Ana sayfaya dön',
+  },
+  nl: {
+    kies: 'Kies uw bedrag',
+    eigen: 'Eigen bedrag invullen',
+    eigenNote:
+      'Voor een eigen bedrag opent deze knop voorlopig op € 50. Een vrij bedrag volgt binnenkort.',
+    uitleg:
+      'Uw gift gaat naar de religieuze, sociale en culturele werking van UCCIB. De betaling verloopt via de beveiligde betaalpagina van Mollie.',
+    betaal: 'De betaalpagina opent in hetzelfde venster.',
+    opnieuw: 'Nog een donatie',
+    terug: 'Terug naar de hoofdpagina',
+  },
+  fr: {
+    kies: 'Choisissez votre montant',
+    eigen: 'Montant libre',
+    eigenNote:
+      'Pour un montant libre, ce bouton ouvre pour l’instant sur 50 €. Un montant libre suivra bientôt.',
+    uitleg:
+      'Votre don soutient l’action religieuse, sociale et culturelle de l’UCCIB. Le paiement se fait via la page de paiement sécurisée de Mollie.',
+    betaal: 'La page de paiement s’ouvre dans la même fenêtre.',
+    opnieuw: 'Faire un autre don',
+    terug: 'Retour à la page d’accueil',
+  },
+};
+
+const tekst = TEKST[locale];
+const homeHref = pagePath(locale, '');
+const doneerHref = pagePath(locale, 'bagislar');
+---
+
+<Layout locale={locale} slug={pagina} title={page.title} description={page.description}>
+  <div class="sponsor" data-pagina={pagina}>
+    <h1>{page.h1}</h1>
+    <p class="lead">{page.description}</p>
+
+    {
+      pagina === 'bagislar' ? (
+        <>
+          <h2 class="kies">{tekst.kies}</h2>
+          <ul class="tegels">
+            {BEDRAGEN.map(({ euro, id }) => (
+              <li>
+                <a class="tegel" href={doneerUrl(euro, id)} data-bedrag={euro}>
+                  <span class="bedrag">{bedragLabel(euro, locale)}</span>
+                  <span class="sr-only"> — {t.donateCta}</span>
+                </a>
+              </li>
+            ))}
+            <li>
+              <a
+                class="tegel tegel-eigen"
+                href={doneerUrl(EIGEN_BEDRAG.euro, EIGEN_BEDRAG.id)}
+                data-bedrag={EIGEN_BEDRAG.euro}
+                data-eigen="true"
+              >
+                <span class="bedrag">{tekst.eigen}</span>
+              </a>
+            </li>
+          </ul>
+          <p class="klein">{tekst.eigenNote}</p>
+          <p class="uitleg">{tekst.uitleg}</p>
+          <p class="klein">{tekst.betaal}</p>
+        </>
+      ) : (
+        <>
+          <p class="uitleg">
+            <a href={homeHref}>{tekst.terug}</a>
+            {' · '}
+            <a href={doneerHref}>{tekst.opnieuw}</a>
+          </p>
+          <dl class="contact">
+            <div>
+              <dt>{t.footer.phone}</dt>
+              <dd><a href={`tel:${SITE.phoneHref}`}>{SITE.phone}</a></dd>
+            </div>
+            <div>
+              <dt>{t.footer.email}</dt>
+              <dd><a href={`mailto:${SITE.email}`}>{SITE.email}</a></dd>
+            </div>
+          </dl>
+        </>
+      )
+    }
+  </div>
+</Layout>
+
+<style>
+  .sponsor {
+    max-width: 46rem;
+  }
+
+  .lead {
+    margin-top: 1rem;
+    color: var(--color-ink-muted);
+  }
+
+  .kies {
+    margin-top: 2.5rem;
+    font-size: var(--text-h3);
+  }
+
+  .tegels {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+    gap: 1rem;
+    margin-top: 1.25rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Het bedrag is de link, dus de tegel zelf is één groot doel: ruim boven de
+     44 bij 44 pixels die een aanwijzer nodig heeft. Tekst en rand halen samen
+     ruim 6:1 op de lichte vulling, dus geen kleur die alleen versiering is. */
+  .tegel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 5rem;
+    padding: 1rem;
+    border: 2px solid var(--color-brand);
+    border-radius: var(--radius-pill);
+    background: var(--color-brand-light);
+    color: var(--color-brand-dark);
+    text-align: center;
+    text-decoration: none;
+  }
+
+  .tegel:hover,
+  .tegel:focus-visible {
+    background: var(--color-brand-dark);
+    border-color: var(--color-brand-dark);
+    color: #fff;
+    text-decoration: none;
+  }
+
+  .bedrag {
+    font-family: var(--font-head);
+    font-size: var(--text-h3);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .tegel-eigen .bedrag {
+    font-family: var(--font-body);
+    font-size: var(--text-nav);
+    font-weight: 700;
+  }
+
+  .klein {
+    margin-top: 1rem;
+    color: var(--color-ink-muted);
+    font-size: var(--text-small);
+  }
+
+  .uitleg {
+    margin-top: 1.75rem;
+  }
+
+  .contact {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-line);
+    font-size: var(--text-small);
+  }
+
+  .contact dt {
+    font-weight: 600;
+    color: var(--color-ink-muted);
+  }
+</style>
