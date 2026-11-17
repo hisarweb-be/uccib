@@ -1,0 +1,153 @@
+/*
+ * De opmaak van paginatekst die uit Markdown komt.
+ *
+ * Sinds 17-11 bewerkt dhr. Omer de pagina's in Sveltia CMS, en die schrijft
+ * Markdown. De HTML daarvan komt via `<Content />` in `Pagina.astro` terecht, en
+ * Astro's scoped styles raken die kinderen niet: vandaar dit globale bestand in
+ * plaats van een `<style>`-blok in een component.
+ *
+ * Twee eigenaardigheden van de oude site worden hier nagebootst, zodat het
+ * omzetten van Sanity naar Markdown niets zichtbaar verandert:
+ *
+ * 1. Een alinea die uit precies één link bestaat, is een knop. Staat er een
+ *    reeks van zulke alinea's onder elkaar, dan vormen ze samen één rij:
+ *    daarvoor maken we de alinea zelf `inline-flex` en halen we de tussenruimte
+ *    weg tussen twee knoppen die direct op elkaar volgen. Zo blijven ze op
+ *    dezelfde regel staan en wrappen ze op een telefoon netjes door.
+ * 2. Een afbeelding staat in de Markdown als `![...](...)`, dus in een alinea
+ *    met één kind: die krijgt de afronding en de onderlinge ruimte van een
+ *    figuur.
+ */
+
+.tekst {
+  max-width: 68ch;
+  /*
+    Een lange URL in de cookieverklaring brak niet af en duwde de hele pagina
+    55 px breder dan het venster (gemeten op 17-11 op een telefoon van 320 px:
+    het document werd 375 px). Een adres is één woord zonder spaties, dus de
+    browser moet het mogen afkappen.
+  */
+  overflow-wrap: anywhere;
+}
+
+.tekst > * + * {
+  margin-top: 1.15em;
+}
+
+.tekst > p {
+  margin-bottom: 0;
+}
+
+.tekst h2 {
+  /* Lettertype, grootte en kleur komen uit de basislaag in `tokens.css`. */
+  margin-top: 2.4em;
+}
+
+.tekst > h2:first-child {
+  margin-top: 0;
+}
+
+.tekst h2::after {
+  content: '';
+  display: block;
+  width: 2.5rem;
+  height: 2px;
+  margin-top: 0.7rem;
+  border-radius: 2px;
+  background: var(--color-brand);
+}
+
+.tekst h3 {
+  margin-top: 2em;
+}
+
+.tekst a {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.tekst strong {
+  font-weight: 600;
+}
+
+.tekst blockquote {
+  margin: 2em 0;
+  padding: 1.25rem 1.5rem;
+  border-left: 3px solid var(--color-brand);
+  border-radius: 0 12px 12px 0;
+  background: var(--color-brand-light);
+}
+
+.tekst blockquote p {
+  margin: 0;
+}
+
+.tekst ul,
+.tekst ol {
+  padding-left: 1.4rem;
+}
+
+.tekst ul {
+  list-style: disc;
+}
+
+.tekst ol {
+  list-style: decimal;
+}
+
+.tekst li + li {
+  margin-top: 0.4rem;
+}
+
+/* ---------- Een alinea met één link is een knop ---------- */
+
+.tekst > p:has(> a:only-child) {
+  display: inline-flex;
+  margin: 0 0.65rem 0.65rem 0;
+  vertical-align: top;
+}
+
+/* Twee knoppen na elkaar staan op dezelfde regel: geen ruimte ertussen. */
+.tekst > p:has(> a:only-child) + p:has(> a:only-child) {
+  margin-top: 0;
+}
+
+.tekst > p:has(> a:only-child) > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.5rem 1.15rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-brand-dark);
+  font-size: var(--text-nav);
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.tekst > p:has(> a:only-child) > a:hover {
+  border-color: var(--color-brand);
+  background: var(--color-brand-light);
+}
+
+/* ---------- Een alinea met één afbeelding is een figuur ---------- */
+
+.tekst > p:has(> img:only-child) {
+  margin: 2.5em 0;
+}
+
+.tekst > p > img:only-child {
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tekst > p:has(> a:only-child) > a {
+    transition: none;
+  }
+}

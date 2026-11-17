@@ -9,7 +9,7 @@ import { extname, join, normalize, relative, resolve, sep } from 'node:path';
 import { chromium } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
 
-import { CONCEPT_SLUGS as SITE_CONCEPT_SLUGS } from '../../src/data/site.ts';
+import { conceptSlugs } from '../../src/lib/actief.ts';
 
 /**
  * De veertien slugs uit plan §8. Hier staan ze allemaal, zodat de keuring weet
@@ -46,12 +46,11 @@ export const ALL_SLUGS = [
  * checkConcepten() hieronder, want een lege pagina die de paginakeuring haalt,
  * is precies de verkeerde uitkomst.
  *
- * De bron is CONCEPT_SLUGS uit src/data/site.ts; deze regel leiden we daaruit af
+ * De bron is de front-matter van src/content/paginas/tr/*.md (`active: false`,
+ * zie src/lib/actief.ts); deze regel leiden we daaruit af
  * en niet andersom.
  */
-export const CONCEPT_SLUGS = ALL_SLUGS.filter((slug) =>
-  SITE_CONCEPT_SLUGS.includes(slug),
-);
+export const CONCEPT_SLUGS = ALL_SLUGS.filter((slug) => conceptSlugs().includes(slug));
 
 export const ACTIVE_SLUGS = ALL_SLUGS.filter((slug) => !CONCEPT_SLUGS.includes(slug));
 

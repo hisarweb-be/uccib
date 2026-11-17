@@ -1,22 +1,22 @@
 # Cloudflare Pages past dit bestand toe op elke uitrol.
 
-# Waarom /beheer/ hier staat en de rest van de site niet.
+# Waarom /admin/ hier staat en de rest van de site niet.
 #
-# Gemeten op 17 nov 2026: na een uitrol waarin /beheer bewust ontbrak, bleef de
-# alias https://uccib.pages.dev/beheer/ een oude kopie serveren met
-# `Cache-Control: public, s-maxage=604800` (een week) en `Age: 1221`, terwijl de
-# uitrol-URL zelf netjes 404 gaf. Wie het beheer uitzet, zag het dus nog een
-# week staan, en na een nieuwe Studio-bouw zag je een week lang de oude.
+# Gemeten op 17 nov 2026, met het oude beheer op /beheer: na een uitrol waarin
+# dat pad bewust ontbrak, bleef de alias https://uccib.pages.dev/beheer/ een
+# oude kopie serveren met `Cache-Control: public, s-maxage=604800` (een week)
+# en `Age: 1221`, terwijl de uitrol-URL zelf netjes 404 gaf. Wie het beheer
+# uitzet, zag het dus nog een week staan.
 #
 # Met een echt bestand op dat pad in de nieuwste uitrol verdween de oude kopie
 # meteen en kwam er `max-age=0, must-revalidate` voor terug. Dat is de stand die
-# we willen: het beheer verandert per bouw, dus het mag nooit uit de randcache
-# komen.
+# we willen: het bewerkscherm verandert per bouw, dus het mag nooit uit de
+# randcache komen. Sinds 17 nov is dat scherm Sveltia CMS op /admin/.
 #
 # De gewone pagina's houden hun eigen kop (`public, max-age=0, must-revalidate`),
 # die Cloudflare Pages zelf zet; daar raakt dit bestand niets aan.
-/beheer
+/admin
   Cache-Control: no-store
 
-/beheer/*
+/admin/*
   Cache-Control: no-store

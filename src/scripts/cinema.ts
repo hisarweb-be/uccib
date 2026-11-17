@@ -89,7 +89,6 @@ function leesPodium(el: HTMLElement): Podium {
 function podiumKijker(podium: Podium): Kijker {
   const { el, lagen } = podium;
   const kontour = lagen.get('kontour');
-  const massa = lagen.get('massa');
   const foto = lagen.get('foto');
   const korrel = lagen.get('korrel');
 
@@ -101,9 +100,12 @@ function podiumKijker(podium: Podium): Kijker {
     const span = r.height - vh;
     const p = span > 0 ? Math.min(1, Math.max(0, -r.top / span)) : r.top <= 0 ? 1 : 0;
 
-    zetOpacity(kontour, trap(p, 0.02, 0.34));
-    zetOpacity(massa, trap(p, 0.26, 0.58));
-    zetOpacity(foto, trap(p, 0.52, 0.9));
+    // De massa staat altijd (zie `cinema.css`): het begin van de rit is een
+    // donkere foto, geen leeg vlak. De contour is een korte flits over die foto
+    // heen en dooft daarna weg, zodat hij accent blijft en nooit het enige is
+    // dat je ziet. De foto komt er vroeg overheen en staat ruim voor het eind.
+    zetOpacity(kontour, 0.95 * trap(p, 0, 0.15) * (1 - trap(p, 0.15, 0.4)));
+    zetOpacity(foto, trap(p, 0.12, 0.75));
     // Korrel bouwt mee op en trekt aan het eind terug tot een filmische 12%.
     zetOpacity(korrel, 0.9 * trap(p, 0, 0.15) * (1 - 0.87 * trap(p, 0.3, 0.95)));
 

@@ -3,9 +3,17 @@
  * Elke inhoudspagina in het Turks. De lijst met slugs staat in
  * `src/i18n/f3.ts`; `/bagislar/` en `/bagis-onayi/` houden hun eigen route,
  * want die vult F5.
+ *
+ * Staat een pagina in de CMS uit (`active: false` in het Turkse Markdown-bestand,
+ * zie `src/lib/actief.ts`), dan rendert deze route `InAanbouw` in plaats van
+ * `Pagina`. Het adres blijft dus bestaan en geeft geen 404, maar de pagina draagt
+ * noindex, staat niet in de sitemap en wordt vanuit de site nergens gelinkt.
  */
 import Pagina from '../components/Pagina.astro';
+import InAanbouw from '../components/InAanbouw.astro';
 import { F3_PAGINAS } from '../i18n/f3';
+import { pagePath } from '../i18n/config';
+import { isActiveSlug } from '../lib/actief';
 import type { Slug } from '../data/site';
 
 export function getStaticPaths() {
@@ -15,4 +23,8 @@ export function getStaticPaths() {
 const slug = Astro.params.slug as Slug;
 ---
 
-<Pagina locale="tr" slug={slug} />
+{isActiveSlug(slug) ? (
+  <Pagina locale="tr" slug={slug} />
+) : (
+  <InAanbouw locale="tr" slug={slug} path={pagePath('tr', slug)} />
+)}

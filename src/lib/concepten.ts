@@ -1,13 +1,14 @@
 /**
  * Eén regel voor de hele site: een concept mag nergens gelinkt worden.
  *
- * `src/data/site.ts` is de enige schakelaar. Zolang een zustersessie een slug
- * nog vult, staat die in `CONCEPT_SLUGS` en keurt `scripts/verify-alle.mjs` een
- * link ernaar af. In plaats van zulke links uit de content te slopen, laat de
+ * De schakelaar is de front-matter van het Turkse Markdown-bestand
+ * (`active: false`), zie `src/lib/actief.ts`. Zolang een pagina uit staat, keurt
+ * `scripts/verify-alle.mjs` een link ernaar af. In plaats van zulke links uit de content te slopen, laat de
  * renderer het anker weg: de tekst blijft staan, en zodra de slug actief wordt
  * komt de link vanzelf terug zonder dat iemand de content aanpast.
  */
-import { SLUGS, isActiveSlug, type Slug } from '../data/site';
+import { SLUGS, type Slug } from '../data/site';
+import { isActiveSlug } from './actief';
 
 export function isConceptHref(href: string | undefined): boolean {
   if (!href || !href.startsWith('/')) return false;

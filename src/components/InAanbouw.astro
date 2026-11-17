@@ -14,11 +14,12 @@
 import Layout from '../layouts/Layout.astro';
 import { SITE } from '../data/site';
 import { getDictionary, type Locale } from '../i18n';
-import type { ConceptSlug } from '../data/site';
+import { f3 } from '../i18n/f3';
+import type { Slug } from '../data/site';
 
 interface Props {
   locale: Locale;
-  slug: ConceptSlug;
+  slug: Slug;
   /** Pad van deze route, bijvoorbeeld /nl/haberler/, voor de canonical. */
   path: string;
 }
@@ -51,6 +52,21 @@ const TEKST: Record<Locale, { title: string; description: string; h1: string; bo
 };
 
 const tekst = TEKST[locale];
+
+/**
+ * De vier pagina's die leeg zijn, hebben elk hun eigen, eerlijke mededeling in
+ * `src/i18n/f3.ts`: wat er nog niet is en waar de bezoeker het wel vindt. Die
+ * tekst is concreter dan de algemene hierboven, dus hij gaat voor. Zet dhr. Omer
+ * in de CMS een pagina aan, dan komt de echte pagina terug en valt deze route weg.
+ */
+const LEEG_SLUGS = ['subelerimiz', 'bolge-derneklerimiz', 'namaz-vakitleri', 'cuma-hutbesi'] as const;
+
+const eigen = (LEEG_SLUGS as readonly string[]).includes(slug)
+  ? f3(locale).leeg[slug as (typeof LEEG_SLUGS)[number]]
+  : null;
+
+const titel = eigen?.titel ?? tekst.h1;
+const body = eigen?.tekst ?? tekst.body;
 const homeHref = locale === 'tr' ? '/' : `/${locale}/`;
 
 ---
@@ -58,13 +74,13 @@ const homeHref = locale === 'tr' ? '/' : `/${locale}/`;
   locale={locale}
   slug={null}
   path={routePath}
-  title={`${tekst.title} — ${t.siteName}`}
+  title={`${titel} — ${t.siteName}`}
   description={tekst.description}
   noindex
 >
   <div class="concept" data-concept={slug}>
-    <h1>{tekst.h1}</h1>
-    <p class="concept-body">{tekst.body}</p>
+    <h1>{titel}</h1>
+    <p class="concept-body">{body}</p>
 
     <dl class="concept-contact">
       <div>

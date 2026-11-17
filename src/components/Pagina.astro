@@ -6,23 +6,25 @@
  * in opbouw. Eén plek die per slug kiest welke secties er komen, is te lezen in
  * één oogopslag en houdt de koppen, het beeld en de keuring consequent.
  *
- * De tekst komt uit Sanity (F2) via `getPagina`; wat het origineel leeg liet,
- * staat in `src/i18n/f3.ts` en noemt nooit een adres, telefoonnummer of
- * bestuurssamenstelling die niet in `src/data/site.ts` staat.
+ * De tekst komt uit `src/content/paginas/<taal>/<slug>.md`: Markdown die dhr. Omer
+ * in Sveltia CMS bewerkt, zonder code. Wat een pagina aan vaste secties heeft (de
+ * diensten, het adresblok, de tijdlijn) staat in `src/i18n/f3.ts` en noemt nooit
+ * een adres, telefoonnummer of bestuurssamenstelling die niet in `src/data/site.ts`
+ * staat.
  */
+import { getCollection, getEntry, render } from 'astro:content';
+
 import Layout from '../layouts/Layout.astro';
 import KopBand from './KopBand.astro';
-import LegeStaat from './LegeStaat.astro';
-import PortableTekst from './PortableTekst.astro';
 import Beeld from './Beeld.astro';
 import CinemaBeeld from './CinemaBeeld.astro';
 import GebouwCinema from './GebouwCinema.astro';
 import { getDictionary, type Locale } from '../i18n';
 import { pagePath, isSlug } from '../i18n/config';
 import { SITE, type Slug } from '../data/site';
+import { isActiveSlug } from '../lib/actief';
 import { isConceptHref } from '../lib/concepten';
 import { f3 } from '../i18n/f3';
-import { getPagina, getSponsorblokken } from '../lib/sanity';
 
 interface Props {
   locale: Locale;
@@ -33,9 +35,24 @@ const { locale, slug } = Astro.props;
 const t = getDictionary(locale);
 const teksten = f3(locale);
 const pagina = t.pages[slug];
-const inhoud = await getPagina(locale, slug);
-const body = inhoud?.body ?? [];
-const h1 = inhoud?.h1 ?? pagina.h1;
+
+/**
+ * Het Markdown-bestand van deze pagina in deze taal. De id is het pad onder
+ * `src/content/paginas`, maar de lader laat een `index` vallen: `fr` voor
+ * `fr/index.md`, `nl/hakkimizda` voor de Nederlandse over-pagina.
+ */
+const entryId = slug === '' ? locale : `${locale}/${slug}`;
+const entry = await getEntry('paginas', entryId);
+if (!entry) {
+  // Fail-closed: een ontbrekend bestand is een fout in de repo, geen reden om
+  // stilzwijgend een halve pagina te publiceren.
+  throw new Error(
+    `Geen inhoud voor ${entryId}: src/content/paginas/${locale}/${slug === '' ? 'index' : slug}.md ontbreekt.`,
+  );
+}
+const { Content } = await render(entry);
+const heeftBody = (entry.body ?? '').trim() !== '';
+const h1 = entry.data.h1 || pagina.h1;
 
 /**
  * Een tegel of knop wijst op een pad zonder taalprefix. Voor nl en fr zet
@@ -50,15 +67,6 @@ function doel(href: string): string {
   return isSlug(kaal) ? pagePath(locale, kaal) : pagePath(locale, 'iletisim');
 }
 
-const LEeg = {
-  subelerimiz: `tel:${SITE.phoneHref}`,
-  'bolge-derneklerimiz': `mailto:${SITE.email}`,
-  'namaz-vakitleri': pagePath(locale, 'subelerimiz'),
-  'cuma-hutbesi': pagePath(locale, 'iletisim'),
-} as const;
-
-const isLeeg = slug in LEeg;
-
 /**
  * Pagina's die hun tekst in eigen secties zetten in plaats van als lopende
  * tekst: de diensten op /hizmetlerimiz/, het adresblok op /iletisim/ en de
@@ -66,7 +74,7 @@ const isLeeg = slug in LEeg;
  * de vijf zinnen van die pagina zijn de vijf mijlpalen, dus de body eronder
  * zou dezelfde tekst een tweede keer tonen.
  */
-const EIGEN_SECTIES: ReadonlySet<Slug> = new Set(['hizmetlerimiz', 'iletisim', 'hakkimizda']);
+const EIGEN_SECTIES: ReadonlySet<Slug> = new Set(['hizmetlerimiz', 'iletisim']);
 
 /**
  * Eerlijke alt-teksten bij de eigen foto's uit de set van F1.
@@ -90,10 +98,11 @@ const DIENST_BEELD: Record<number, keyof typeof ALT> = {
   5: 'gebouw',
 };
 
-const sponsorblokken = slug === '' ? await getSponsorblokken() : [];
-const steun = [...sponsorblokken]
-  .filter((blok) => blok.actief !== false)
-  .sort((a, b) => (a.volgorde ?? 0) - (b.volgorde ?? 0));
+const sponsorblokken = slug === '' ? await getCollection('sponsorblokken') : [];
+const steun = sponsorblokken
+  .filter((blok) => blok.data.active !== false)
+  .sort((a, b) => a.data.order - b.data.order)
+  .map((blok) => ({ bedrag: blok.data.amount, label: blok.data.label, link: blok.data.link }));
 
 /** Gestructureerde gegevens: de organisatie zelf, op de homepage en bij contact. */
 const ngo =
@@ -130,8 +139,8 @@ const kaartUrl = `https://www.google.com/maps/search/?api=1&query=${SITE.geo.lat
 <Layout
   locale={locale}
   slug={slug}
-  title={pagina.title}
-  description={pagina.description}
+  title={entry.data.title || pagina.title}
+  description={entry.data.description || pagina.description}
   volleBreedte={slug === ''}
 >
   {
@@ -166,12 +175,17 @@ const kaartUrl = `https://www.google.com/maps/search/?api=1&query=${SITE.geo.lat
                 >
                   {teksten.heroCta}
                 </a>
-                <a
-                  href={pagePath(locale, 'namaz-vakitleri')}
-                  class="inline-flex min-h-[48px] items-center rounded-pill border border-line bg-surface px-6 text-nav font-semibold text-brand-dark no-underline transition-colors hover:border-brand hover:bg-brand-light"
-                >
-                  {teksten.heroCtaSecundair}
-                </a>
+                {/* Staat de doelpagina uit, dan is er geen tweede knop: een knop
+                    die "Namaz Vakitleri" belooft en op het contactformulier
+                    uitkomt is erger dan geen knop. */}
+                {isActiveSlug('namaz-vakitleri') ? (
+                  <a
+                    href={doel('/namaz-vakitleri')}
+                    class="inline-flex min-h-[48px] items-center rounded-pill border border-line bg-surface px-6 text-nav font-semibold text-brand-dark no-underline transition-colors hover:border-brand hover:bg-brand-light"
+                  >
+                    {teksten.heroCtaSecundair}
+                  </a>
+                ) : null}
               </div>
             </div>
             <Beeld
@@ -192,7 +206,7 @@ const kaartUrl = `https://www.google.com/maps/search/?api=1&query=${SITE.geo.lat
             <h2>{teksten.dienstenKop}</h2>
             <a
               href={pagePath(locale, 'hizmetlerimiz')}
-              class="text-nav font-semibold text-brand-dark"
+              class="inline-flex min-h-[44px] items-center text-nav font-semibold text-brand-dark"
             >
               {teksten.dienstenAlle}
               <svg
@@ -224,7 +238,11 @@ const kaartUrl = `https://www.google.com/maps/search/?api=1&query=${SITE.geo.lat
         </section>
 
         <div class="mx-auto w-full max-w-6xl px-4 pb-14 sm:px-6 lg:px-8">
-          <PortableTekst body={body} />
+          {heeftBody ? (
+            <div class="tekst">
+              <Content />
+            </div>
+          ) : null}
         </div>
 
         <section class="mx-auto w-full max-w-6xl px-4 pb-14 sm:px-6 lg:px-8">
@@ -246,20 +264,11 @@ const kaartUrl = `https://www.google.com/maps/search/?api=1&query=${SITE.geo.lat
       <>
         <KopBand
           h1={h1}
-          intro={slug === 'hizmetlerimiz' ? teksten.dienstenIntro : null}
+          intro={entry.data.intro || (slug === 'hizmetlerimiz' ? teksten.dienstenIntro : null)}
           beeldSlug={slug === 'hakkimizda' ? 'gebouw' : undefined}
           beeldAlt={ALT.gebouw}
         />
         <div class="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
-          {isLeeg ? (
-            <LegeStaat
-              titel={teksten.leeg[slug as keyof typeof teksten.leeg].titel}
-              tekst={teksten.leeg[slug as keyof typeof teksten.leeg].tekst}
-              actieLabel={teksten.leeg[slug as keyof typeof teksten.leeg].actie}
-              actieHref={LEeg[slug as keyof typeof LEeg]}
-            />
-          ) : null}
-
           {slug === 'hizmetlerimiz' ? (
             <ol class="m-0 grid list-none gap-6 p-0">
               {teksten.diensten.map((dienst, index) => {
@@ -390,8 +399,10 @@ const kaartUrl = `https://www.google.com/maps/search/?api=1&query=${SITE.geo.lat
               {teksten.juridischNoot}
             </p>
           ) : null}
-          {body.length > 0 && !isLeeg && !EIGEN_SECTIES.has(slug) ? (
-            <PortableTekst body={body} />
+          {heeftBody && !EIGEN_SECTIES.has(slug) ? (
+            <div class="tekst">
+              <Content />
+            </div>
           ) : null}
         </div>
       </>

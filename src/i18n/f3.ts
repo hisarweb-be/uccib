@@ -4,8 +4,8 @@
  * Waarom hier en niet in `src/i18n/tr.json` en de zusters: die woordenboeken
  * zijn het contract van F0/F1 (titel, beschrijving, h1 per pagina) en F5 werkt
  * er tegelijk in. Deze file is van F3 alleen, zodat twee sessies elkaar niet
- * in de weg zitten. Zodra de redactie deze teksten in Sanity wil beheren,
- * verhuizen ze naar een `teksten`-document en blijft de vorm gelijk.
+ * in de weg zitten. Zodra de redactie deze teksten zelf wil beheren, verhuizen
+ * ze naar een Markdown-collectie naast `paginas` en blijft de vorm gelijk.
  *
  * Alles wat hier staat is herleidbaar tot de oude site:
  * - de zeven diensten komen uit de opsomming in `pages.hizmetlerimiz` en uit de
@@ -34,7 +34,6 @@ export interface Mijlpaal {
 export interface LegeTekst {
   titel: string;
   tekst: string;
-  actie: string;
 }
 
 export interface F3Teksten {
@@ -170,25 +169,21 @@ const TR: F3Teksten = {
       titel: 'Şube bilgileri hazırlanıyor',
       tekst:
         'Belçika genelindeki şubelerimizin adres ve iletişim bilgilerini tek tek doğruluyoruz. Yanlış bir adres, kaybolmuş bir ziyaretçiden daha kötüdür. Bu arada sekretaryamız size en yakın şubeyi telefonla söyleyebilir.',
-      actie: 'Sekretaryayı arayın',
     },
     'bolge-derneklerimiz': {
       titel: 'Bölge dernekleri listesi hazırlanıyor',
       tekst:
         'Bölge derneklerimizin listesini bölge bazında, adları ve iletişim bilgileriyle birlikte yayımlayacağız. Liste hazır olana kadar bize yazarak en yakın dernek hakkında bilgi alabilirsiniz.',
-      actie: 'Bize yazın',
     },
     'namaz-vakitleri': {
       titel: 'Vakit çizelgesi hazırlanıyor',
       tekst:
         'Brüksel ve Belçika şehirleri için günlük vakitleri tek bir çizelgede yayımlayacağız: imsak, güneş, öğle, ikindi, akşam ve yatsı. O zamana kadar vakitleri şubelerimizden öğrenebilirsiniz.',
-      actie: 'Şubelerimiz',
     },
     'cuma-hutbesi': {
       titel: 'Hutbe arşivi hazırlanıyor',
       tekst:
         'Haftalık hutbelerimizi metin ve isteğe bağlı pdf ile arşivleyeceğiz, en yeni hutbe başta. Şu an için hutbeler camilerimizde okunmaktadır.',
-      actie: 'Bize ulaşın',
     },
   },
 };
@@ -299,25 +294,21 @@ const NL: F3Teksten = {
       titel: 'De vestigingen worden aangevuld',
       tekst:
         'Wij controleren de adressen en contactgegevens van al onze vestigingen in België een voor een. Een verkeerd adres is erger dan een bezoeker die even wacht. In de tussentijd noemt ons secretariaat u graag de dichtstbijzijnde vestiging.',
-      actie: 'Bel het secretariaat',
     },
     'bolge-derneklerimiz': {
       titel: 'De lijst van de regionale verenigingen volgt',
       tekst:
         'Wij publiceren de regionale verenigingen per regio, met naam en contactgegevens. Tot die lijst er is, helpen wij u graag verder aan de telefoon.',
-      actie: 'Schrijf ons',
     },
     'namaz-vakitleri': {
       titel: 'Het tijdschema wordt opgemaakt',
       tekst:
         'Wij brengen de dagelijkse tijden voor Brussel en de Belgische steden in één schema samen: imsak, zonsopgang, middag, namiddag, avond en nacht. Tot dan kunt u de tijden bij onze vestigingen vragen.',
-      actie: 'Onze vestigingen',
     },
     'cuma-hutbesi': {
       titel: 'Het preekarchief wordt opgebouwd',
       tekst:
         'Wij archiveren de wekelijkse preken met de tekst en optioneel een pdf, de nieuwste eerst. Voorlopig worden de preken in onze moskeeën gehouden.',
-      actie: 'Bereik ons',
     },
   },
 };
@@ -428,25 +419,21 @@ const FR: F3Teksten = {
       titel: 'Les centres sont en cours de complétion',
       tekst:
         'Nous vérifions une à une les adresses et les coordonnées de tous nos centres en Belgique. Une adresse erronée est pire qu’un visiteur qui attend un peu. Entre-temps, notre secrétariat vous indique volontiers le centre le plus proche.',
-      actie: 'Appeler le secrétariat',
     },
     'bolge-derneklerimiz': {
       titel: 'La liste des associations régionales suit',
       tekst:
         'Nous publierons les associations régionales par région, avec leur nom et leurs coordonnées. En attendant cette liste, nous vous aidons volontiers par téléphone.',
-      actie: 'Nous écrire',
     },
     'namaz-vakitleri': {
       titel: 'Le tableau des horaires est en préparation',
       tekst:
         'Nous réunirons les horaires quotidiens de Bruxelles et des villes belges dans un seul tableau : imsak, lever du soleil, midi, après-midi, soir et nuit. D’ici là, vous pouvez demander les horaires à nos centres.',
-      actie: 'Nos centres',
     },
     'cuma-hutbesi': {
       titel: 'Les archives des prêches se constituent',
       tekst:
         'Nous archivons les prêches hebdomadaires avec le texte et, si disponible, un pdf, le plus récent en premier. Pour l’instant, les prêches sont donnés dans nos mosquées.',
-      actie: 'Nous joindre',
     },
   },
 };

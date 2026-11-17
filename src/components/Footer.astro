@@ -3,7 +3,8 @@ import { SITE } from '../data/site';
 import Logo from './Logo.astro';
 import { getDictionary, type Locale } from '../i18n';
 import { pagePath } from '../i18n/config';
-import { isActiveSlug, type Slug } from '../data/site';
+import type { Slug } from '../data/site';
+import { isActiveSlug } from '../lib/actief';
 
 interface Props {
   locale: Locale;
@@ -14,7 +15,7 @@ const t = getDictionary(locale);
 
 /**
  * De quick links van het huidige footerblok, zonder de pagina's die nog geen
- * inhoud hebben (zie CONCEPT_SLUGS in src/data/site.ts). Ze komen vanzelf terug
+ * inhoud hebben (zie src/lib/actief.ts). Ze komen vanzelf terug
  * zodra hun slug daar verdwijnt.
  */
 const QUICK_LINKS = (

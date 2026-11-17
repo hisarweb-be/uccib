@@ -17,12 +17,12 @@ playwright-report/
 # Een kopie in deze map mag nooit mee in de repo of in de uitrol.
 /BORD.md
 /PLAN-UCCIB.md
+/voortgang/
+/planning/
 
-# De gebouwde Sanity Studio (22 MB, 787 bestanden) staat bewust NIET in de repo.
-# Cloudflare bouwt hem bij elke deploy zelf mee: `npm run build` draait eerst
-# `sanity/build` (zie package.json en docs/BESLUITEN.md #44). De map is een
-# bouwproduct, net als dist/.
-/public/beheer/
+# Instellingen van deze werkboom, niet van het project.
+/.claude/
 
-# Sanity-cache van de Studio (entiteiten, runtime), nooit in de repo.
-/sanity/.sanity/
+# Tijdelijke meethulpjes van de keurmeester (worden na de meting verwijderd).
+/scripts/tmp-*.mjs
+/scripts/.concept-check.mjs
