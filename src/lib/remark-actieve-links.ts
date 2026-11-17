@@ -29,13 +29,22 @@ import { isActiveSlug } from './actief';
 /** De talen met een eigen voorvoegsel; Turks staat op de root. */
 const MET_VOORVOEGSEL = new Set(['nl', 'fr']);
 
-/** De taal waarin dit bestand staat, afgeleid uit het pad van het bestand. */
-function taalVan(file: VFile): string {
+/**
+ * De taal waarin dit bestand staat, afgeleid uit het pad van het bestand.
+ *
+ * `null` betekent: dit is geen paginabestand, er valt hier niets te bewerken.
+ * De sponsorblokken zijn ook Markdown, maar zij hebben geen taal en geen
+ * interne paginalinks; de plugin hoort ze met rust te laten. Een bestand dat
+ * wél in de paginacollectie hoort maar waarvan de taal niet te lezen is, blijft
+ * een harde fout: dan zou een halve site gebouwd worden.
+ */
+function taalVan(file: VFile): string | null {
   const pad = String(file.path ?? '').replace(/\\/g, '/');
   const inCollectie = /\/paginas\/(tr|nl|fr)\//.exec(pad);
   if (inCollectie?.[1]) return inCollectie[1];
   const alsId = /^(?:paginas\/)?(tr|nl|fr)\//.exec(pad);
   if (alsId?.[1]) return alsId[1];
+  if (!/(^|\/)paginas\//.test(pad)) return null;
   // Fail-closed: zonder taal kan een link niet goed gezet worden, en een halve
   // site is erger dan een bouw die stopt.
   throw new Error(
@@ -121,6 +130,8 @@ function bewerk(kinderen: RootContent[], taal: string): void {
 
 export default function remarkActieveLinks() {
   return (boom: Root, file: VFile): void => {
-    bewerk(boom.children, taalVan(file));
+    const taal = taalVan(file);
+    if (taal === null) return;
+    bewerk(boom.children, taal);
   };
 }

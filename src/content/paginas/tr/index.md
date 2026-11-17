@@ -2,7 +2,7 @@
 title: UCCIB — İslam Kültür Merkezleri Birliği
 h1: İslam Kültür Merkezleri Birliği
 description: UCCIB, Belçika İslam Kültür Merkezleri Birliği Vakfı. 1979’dan beri Belçika’da dini, sosyal ve kültürel hizmetler.
-intro: Belçika’daki camilerin ve kültür merkezlerinin ortak sesi: ibadet, eğitim ve toplumsal dayanışma.
+intro: 'Belçika’daki camilerin ve kültür merkezlerinin ortak sesi: ibadet, eğitim ve toplumsal dayanışma.'
 order: 0
 active: true
 ---

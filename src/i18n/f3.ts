@@ -163,7 +163,7 @@ const TR: F3Teksten = {
   whatsappLabel: 'WhatsApp’tan yazın',
   whatsappAria: 'WhatsApp sohbetini aç',
   juridischNoot:
-    'Bu hukuki metin yalnızca Türkçe yayımlanmıştır. Sorularınız için bize yazabilirsiniz.',
+    'Bu hukuki metin 17 Kasım 2026 tarihinde güncellenmiştir. Sorularınız için info@uccib.com adresine yazabilirsiniz.',
   leeg: {
     subelerimiz: {
       titel: 'Şube bilgileri hazırlanıyor',
@@ -253,7 +253,7 @@ const NL: F3Teksten = {
         'De Unie van Islamitische Cultuurcentra werd in 1979 in Brussel opgericht als islamitische organisatie met de status van eredienst.',
     },
     {
-      jaar: 'Statuit',
+      jaar: 'Statuut',
       label: 'Onafhankelijk',
       tekst: 'Zij is onafhankelijk, boven de partijen en ten dienste van het publiek.',
     },
@@ -288,7 +288,7 @@ const NL: F3Teksten = {
   whatsappLabel: 'Stuur een WhatsApp',
   whatsappAria: 'Open de WhatsApp-gesprek',
   juridischNoot:
-    'Deze juridische tekst is alleen in het Turks gepubliceerd. Voor vragen kunt u ons schrijven.',
+    'Deze juridische tekst is bijgewerkt op 17 november 2026. Vragen? Schrijf naar info@uccib.com.',
   leeg: {
     subelerimiz: {
       titel: 'De vestigingen worden aangevuld',
@@ -413,7 +413,7 @@ const FR: F3Teksten = {
   whatsappLabel: 'Écrire sur WhatsApp',
   whatsappAria: 'Ouvrir la conversation WhatsApp',
   juridischNoot:
-    'Ce texte juridique n’est publié qu’en turc. Pour toute question, vous pouvez nous écrire.',
+    'Ce texte juridique a été mis à jour le 17 novembre 2026. Une question ? Écrivez à info@uccib.com.',
   leeg: {
     subelerimiz: {
       titel: 'Les centres sont en cours de complétion',

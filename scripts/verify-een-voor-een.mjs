@@ -240,18 +240,25 @@ async function main() {
       }
     }
 
-    // Eén titel, één bericht per taal: tien lege pagina's met dezelfde tekst is
-    // voor een bezoeker hetzelfde als één lege pagina.
+    // Elk concept zegt iets eigens. Tien pagina's met dezelfde tekst zijn voor
+    // een bezoeker één pagina, dus de titels moeten onderling verschillen. Dat
+    // elke titel ook echt bij zijn onderwerp hoort, bewaakt de losse keuring
+    // hierboven al: titel leeg, beschrijving leeg, noindex, hreflang en "toont
+    // de homepage" worden per pagina afgekeurd.
     //
-    // Sinds F3 is de conceptlijst leeg: alle veertien pagina's hebben inhoud. Er
-    // valt dan niets te vergelijken, en "nul concepten, nul titels" is geen fout
-    // maar de bedoelde eindstand. Zonder deze regel keurt de toets zijn eigen
-    // succes af. Zodra er weer een concept bij komt, geldt de vergelijking weer.
+    // Tot F3 stond hier het omgekeerde (alle concepten deelden één titel). Dat
+    // kwam uit de tijd dat de vier pagina's één placeholdersjabloon kopieerden;
+    // sinds elk concept zijn eigen onderwerp noemt, keurde die eis de betere
+    // toestand af.
+    //
+    // Is de conceptlijst leeg, dan valt er niets te vergelijken en is dat de
+    // bedoelde eindstand: zonder deze regel keurt de toets zijn eigen succes af.
     for (const locale of LOCALES) {
       const perTaal = CONCEPT_SLUGS.map((slug) => conceptTitels[`${locale}/${slug}`]).filter(Boolean);
       const uniek = new Set(perTaal);
       meld(
-        CONCEPT_SLUGS.length === 0 || (perTaal.length === CONCEPT_SLUGS.length && uniek.size === 1),
+        CONCEPT_SLUGS.length === 0 ||
+          (perTaal.length === CONCEPT_SLUGS.length && uniek.size === CONCEPT_SLUGS.length),
         `${locale.padEnd(2)} concepttekst`,
         CONCEPT_SLUGS.length === 0
           ? `geen concepten, alle pagina’s hebben inhoud`

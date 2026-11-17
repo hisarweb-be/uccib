@@ -2,7 +2,7 @@
 title: UCCIB — Unie van Islamitische Culturele Centra van België
 h1: Unie van Islamitische Culturele Centra van België
 description: UCCIB, de Unie van Islamitische Culturele Centra van België. Sinds 1979 religieuze, sociale en culturele dienstverlening in België.
-intro: De gezamenlijke stem van de moskeeën en cultuurcentra in België: gebed, vorming en maatschappelijke solidariteit.
+intro: 'De gezamenlijke stem van de moskeeën en cultuurcentra in België: gebed, vorming en maatschappelijke solidariteit.'
 order: 0
 ---
 
