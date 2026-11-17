@@ -39,5 +39,42 @@ export function heeftSanityProject() {
   return !bron.includes(`'${PLACEHOLDER}'`);
 }
 
+/**
+ * Vangnet voor de randcache van Cloudflare, en niet voor de site zelf.
+ *
+ * Gemeten op 17 nov 2026: na een uitrol waarin `/beheer` bewust ontbrak, bleef
+ * `https://uccib.pages.dev/beheer/` een oude Studio-kopie serveren met
+ * `Cache-Control: public, s-maxage=604800` en `Age: 1221`, terwijl de
+ * uitrol-URL zelf 404 gaf. Een bestand op dat pad in de nieuwste uitrol
+ * overschreef die kopie meteen. Zonder project krijgt `/beheer` daarom een
+ * kleine pagina die vertelt dat het beheer uitstaat en waarom, met
+ * `no-store` erop. Zo ziet niemand een week lang een scherm dat niet meer
+ * bestaat, en de site zelf blijft onaangeroerd.
+ */
+export const BEHEER_UIT = `<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Beheer staat uit | UCCIB</title>
+<style>
+  body { font-family: system-ui, sans-serif; line-height: 1.6; margin: 0; padding: 2rem 1.5rem; color: #1b1b1b; background: #faf8f5; }
+  main { max-width: 34rem; margin: 0 auto; }
+  h1 { font-size: 1.4rem; }
+  a { color: #7a5c2e; }
+</style>
+</head>
+<body>
+<main>
+<h1>Het beheer staat nog uit</h1>
+<p>De website zelf werkt volledig. Het bewerkgedeelte is nog niet aangezet omdat het
+Sanity-project nog niet is aangemaakt. Zodra dat er is, verschijnt het beheer hier.</p>
+<p><a href="/">Terug naar de website</a></p>
+</main>
+</body>
+</html>
+`;
+
 /** De regel die de bouw en de keuring allebei printen als er geen project is. */
 export const GEEN_PROJECT = `OVER  geen Sanity-projectId: /beheer wordt niet gebouwd en de site bouwt uit de offline kopie. Zet SANITY_STUDIO_PROJECT_ID in sanity/.env (zie ${UITLEG}) om het beheer aan te zetten.`;

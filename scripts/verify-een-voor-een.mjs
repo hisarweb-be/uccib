@@ -340,10 +340,13 @@ async function main() {
         meld(false, 'beheer (Studio opent)', levend ? `status ${studio?.status ?? 'geen antwoord'}` : 'route ontbreekt');
       }
     } else {
-      // De tegentoets: zonder project mag /beheer juist niet bestaan.
+      // De tegentoets: zonder project mag er geen Studio staan. Of het pad
+      // ontbreekt (plaatselijk) of er staat de eerlijke pagina dat het beheer
+      // uitstaat (uitgerold, zodat de randcache geen oude Studio vasthoudt).
       const studio = await haalHtml('', 'beheer');
-      const bestaat = typeof studio === 'string' && /<title>Sanity Studio<\/title>/.test(studio);
-      meld(!bestaat, 'beheer (geen project, dus bewust weg)', bestaat ? 'de Studio staat er toch' : 'geen Studio in de bouw, zoals bedoeld');
+      const echteStudio = typeof studio === 'string' && /<title>Sanity Studio<\/title>/.test(studio);
+      const eerlijkePagina = typeof studio === 'string' && /Beheer staat uit/i.test(studio);
+      meld(!echteStudio, 'beheer (geen project, dus geen Studio)', echteStudio ? 'de Studio staat er toch' : eerlijkePagina ? 'eerlijke melding dat het beheer uitstaat' : 'pad ontbreekt, zoals bedoeld');
     }
 
     // Elke bron die de pagina's noemen, één keer gemeten.
