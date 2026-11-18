@@ -25,6 +25,7 @@ import {
   LOCALES,
   SLUGS as ALL_SLUGS,
 } from './lib/keuring.mjs';
+import { keurRedirects, leesTabel, vindTabel } from './lib/verhuistabel.mjs';
 
 const distDir = resolve('dist');
 const errors = [];
@@ -48,6 +49,25 @@ if (!existsSync(viernullvier)) {
   }
 }
 
+// De doorverwijzingen (F3 D4): public/_redirects is de generatoruitvoer van de
+// verhuistabel, staat ongewijzigd in dist, en elke rij doorverwijzen of vangregel
+// komt met 301 op zijn nieuwe adres; geen doelpad ontbreekt in dist.
+const tabel = leesTabel(vindTabel());
+errors.push(...tabel.fouten.map((f) => `verhuistabel: ${f}`));
+const redirectsBron = resolve('public', '_redirects');
+const redirectsDist = resolve(distDir, '_redirects');
+let verhuis = null;
+if (!existsSync(redirectsBron)) {
+  errors.push('_redirects: public/_redirects ontbreekt, draai `node scripts/lib/verhuis.mjs`');
+} else {
+  const tekst = await readFile(redirectsBron, 'utf8');
+  if (!existsSync(redirectsDist) || (await readFile(redirectsDist, 'utf8')) !== tekst) {
+    errors.push('_redirects: dist/_redirects ontbreekt of wijkt af van public/_redirects (bouw opnieuw)');
+  }
+  verhuis = keurRedirects(tekst, tabel.rijen, { distDir });
+  errors.push(...verhuis.fouten.map((f) => `_redirects: ${f}`));
+}
+
 if (errors.length > 0) {
   for (const line of errors) console.error(line);
   console.error(`\n${errors.length} fout(en) op ${actief.checked} pagina's en ${concept.checked} concepten.`);
@@ -66,3 +86,6 @@ console.log(
     : `OK ${concept.checked} conceptpagina's verborgen (${CONCEPT_SLUGS.length} slugs x ${LOCALES.length} talen): route bestaat, noindex, nergens gelinkt, niet in de sitemap.`,
 );
 console.log('OK 404: dist/404.html bestaat en draagt noindex.');
+console.log(
+  `OK _redirects: ${verhuis.vast} vaste en ${verhuis.dynamisch} dynamische regels dekken ${verhuis.gedekt} rijen van de verhuistabel, gelijk aan de generator.`,
+);
