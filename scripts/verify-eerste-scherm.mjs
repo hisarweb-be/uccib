@@ -219,6 +219,23 @@ async function naarPodium(page, deel) {
   );
 }
 
+/**
+ * Het vlak van het podium onder de kop. Sinds F2b PR2 staat de kop vast bovenaan
+ * (DESIGNSYSTEEM 7.3, papier): over de donkere cinema is dat een lichte band van
+ * 56 tot 72 px die het gemiddelde optilt (gemeten 18-11: de oude stand van 17-11
+ * kwam met kop op 32,4 en haalde dan de lat van 20). De cinema-standen meten
+ * daarom het venster onder de kop; het eerste scherm blijft het hele venster.
+ * De lat zelf verandert niet.
+ */
+async function podiumBeeld(page) {
+  const kop = await page.evaluate(() => {
+    const h = document.querySelector('header');
+    return h ? Math.max(0, Math.round(h.getBoundingClientRect().bottom)) : 0;
+  });
+  const v = page.viewportSize();
+  return page.screenshot({ clip: { x: 0, y: kop, width: v.width, height: v.height - kop } });
+}
+
 async function schiet(page, naam) {
   await page.screenshot({ path: UIT + '/' + naam + '.png' });
 }
@@ -281,7 +298,7 @@ async function tegentoets(browser, baseUrl) {
     await page.goto(baseUrl + '/', { waitUntil: 'load' });
     await page.addStyleTag({ content: OUDE_STAND });
     await naarPodium(page, 0);
-    const m = meet(await page.screenshot(), LAT.opening);
+    const m = meet(await podiumBeeld(page), LAT.opening);
     await schiet(page, 'tegentoets-oude-stand');
     oordeel(
       !m.goed,
@@ -343,7 +360,7 @@ try {
         );
 
         await naarPodium(page, 0);
-        const opening = meet(await page.screenshot(), LAT.opening);
+        const opening = meet(await podiumBeeld(page), LAT.opening);
         await schiet(page, scherm + '-' + kort + '-cinema-opening');
         oordeel(
           opening.goed,
@@ -352,7 +369,7 @@ try {
         );
 
         await naarPodium(page, 1);
-        const eind = meet(await page.screenshot(), LAT.eind);
+        const eind = meet(await podiumBeeld(page), LAT.eind);
         await schiet(page, scherm + '-' + kort + '-cinema-einde');
         oordeel(
           eind.goed,

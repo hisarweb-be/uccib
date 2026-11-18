@@ -65,16 +65,33 @@ export interface F3Teksten {
   whatsappLabel: string;
   whatsappAria: string;
   juridischNoot: string;
-  leeg: Record<
-    | 'subelerimiz'
-    | 'bolge-derneklerimiz'
-    | 'namaz-vakitleri'
-    | 'cuma-hutbesi'
-    | 'haberler'
-    | 'baharkermesi-menu',
-    LegeTekst
-  >;
+  /**
+   * De eerlijke binnenkort-tekst per pagina die uit kan staan: elk menupunt en
+   * elke dienst. Geen tijd, aantal of plaats: die feiten zijn niet bevestigd.
+   */
+  leeg: Record<LeegSlug, LegeTekst>;
+  /** Toegankelijke naam van de menuknop in de kop (DESIGNSYSTEEM 7.3). */
+  rozetMenuOpen: string;
+  rozetMenuSluit: string;
+  /** Vermelding bij een AI-film (FILMDRAAIBOEK 5.1); gelijk aan `vermelding` in het manifest. */
+  mediaAi: string;
+  mediaBewerkt: string;
+  /** De vier slagen van de piek, in volgorde (BRIEF); zelfde zin als dienstenIntro. */
+  piekSlagen: readonly [string, string, string, string];
 }
+
+/** Pagina's met een eigen binnenkort-tekst. InAanbouw leest ze hieruit. */
+export const LEEG_SLUGS = [
+  'hakkimizda',
+  'haberler',
+  'bolge-derneklerimiz',
+  'subelerimiz',
+  'namaz-vakitleri',
+  'cuma-hutbesi',
+  'bagislar',
+  'baharkermesi-menu',
+] as const;
+export type LeegSlug = (typeof LEEG_SLUGS)[number];
 
 const TR: F3Teksten = {
   heroKlein: '1979’dan beri Brüksel’de',
@@ -82,7 +99,7 @@ const TR: F3Teksten = {
   heroCtaSecundair: 'Namaz vakitleri',
   dienstenKop: 'Hizmetlerimiz',
   dienstenIntro:
-    'Yedi başlıkta hizmet veriyoruz. Elinizdeki her hizmetin arkasında bir şube, bir gönüllü ve bir kapı var.',
+    'Elinizdeki her hizmetin arkasında bir şube, bir gönüllü ve bir kapı var.',
   dienstenAlle: 'Tüm hizmetler',
   dienstenMeer: 'Daha fazla',
   diensten: [
@@ -176,7 +193,7 @@ const TR: F3Teksten = {
     subelerimiz: {
       titel: 'Şube bilgileri hazırlanıyor',
       tekst:
-        'Belçika genelindeki şubelerimizin adres ve iletişim bilgilerini tek tek doğruluyoruz. Yanlış bir adres, kaybolmuş bir ziyaretçiden daha kötüdür. Bu arada sekretaryamız size en yakın şubeyi telefonla söyleyebilir.',
+        'Şubelerimizin adres ve iletişim bilgilerini tek tek doğruluyoruz. Yanlış bir adres, kaybolmuş bir ziyaretçiden daha kötüdür. Bu arada sekretaryamız size en yakın şubeyi telefonla söyleyebilir.',
     },
     'bolge-derneklerimiz': {
       titel: 'Bölge dernekleri listesi hazırlanıyor',
@@ -186,12 +203,12 @@ const TR: F3Teksten = {
     'namaz-vakitleri': {
       titel: 'Vakit çizelgesi hazırlanıyor',
       tekst:
-        'Brüksel ve Belçika şehirleri için günlük vakitleri tek bir çizelgede yayımlayacağız: imsak, güneş, öğle, ikindi, akşam ve yatsı. O zamana kadar vakitleri şubelerimizden öğrenebilirsiniz.',
+        'Günlük vakitleri tek bir çizelgede yayımlayacağız: imsak, güneş, öğle, ikindi, akşam ve yatsı. O zamana kadar vakitleri şubelerimizden öğrenebilirsiniz.',
     },
     'cuma-hutbesi': {
       titel: 'Hutbe arşivi hazırlanıyor',
       tekst:
-        'Haftalık hutbelerimizi metin ve isteğe bağlı pdf ile arşivleyeceğiz, en yeni hutbe başta. Şu an için hutbeler camilerimizde okunmaktadır.',
+        'Hutbelerimizi metin ve isteğe bağlı pdf ile arşivleyeceğiz, en yeni hutbe başta. Şu an için hutbeler camilerimizde okunmaktadır.',
     },
     haberler: {
       titel: 'Haberler bölümü hazırlanıyor',
@@ -201,9 +218,24 @@ const TR: F3Teksten = {
     'baharkermesi-menu': {
       titel: 'Bahar çarşısı menüsü arşivde',
       tekst:
-        '2026 bahar çarşısı geride kaldı. O günün menüsünü arşiv olarak saklıyoruz. Derneğimiz yeni tarihi belirlediğinde güncel menü burada yayımlanacak.',
+        'Son bahar çarşısı geride kaldı. O günün menüsünü arşiv olarak saklıyoruz. Derneğimiz yeni tarihi belirlediğinde güncel menü burada yayımlanacak.',
+    },
+    hakkimizda: {
+      titel: 'Hakkımızda sayfası hazırlanıyor',
+      tekst:
+        'Birliğimizi anlatan sayfayı yeniden yazıyoruz. O zamana kadar sorularınızı telefonla veya e-postayla sekretaryamıza iletebilirsiniz.',
+    },
+    bagislar: {
+      titel: 'Bağış sayfası hazırlanıyor',
+      tekst:
+        'Güvenli bağış bağlantılarını yeniden düzenliyoruz. Bu arada bağış yapmak isterseniz sekretaryamız size yardımcı olur.',
     },
   },
+  rozetMenuOpen: 'Menü',
+  rozetMenuSluit: 'Menüyü kapat',
+  mediaAi: 'Film: yapay zekâ ile üretildi',
+  mediaBewerkt: 'Fotoğraf rötuşlandı',
+  piekSlagen: ['Elinizdeki her hizmetin arkasında', 'bir şube,', 'bir gönüllü', 've bir kapı var.'],
 };
 
 const NL: F3Teksten = {
@@ -212,7 +244,7 @@ const NL: F3Teksten = {
   heroCtaSecundair: 'Gebedstijden',
   dienstenKop: 'Onze diensten',
   dienstenIntro:
-    'Wij werken rond zeven thema’s. Achter elke dienst staat een vestiging, een vrijwilliger en een deur die openstaat.',
+    'Achter elke dienst staat een vestiging, een vrijwilliger en een deur die openstaat.',
   dienstenAlle: 'Alle diensten',
   dienstenMeer: 'Meer info',
   diensten: [
@@ -311,7 +343,7 @@ const NL: F3Teksten = {
     subelerimiz: {
       titel: 'De vestigingen worden aangevuld',
       tekst:
-        'Wij controleren de adressen en contactgegevens van al onze vestigingen in België een voor een. Een verkeerd adres is erger dan een bezoeker die even wacht. In de tussentijd noemt ons secretariaat u graag de dichtstbijzijnde vestiging.',
+        'Wij controleren de adressen en contactgegevens van onze vestigingen een voor een. Een verkeerd adres is erger dan een bezoeker die even wacht. In de tussentijd noemt ons secretariaat u graag de dichtstbijzijnde vestiging.',
     },
     'bolge-derneklerimiz': {
       titel: 'De lijst van de regionale verenigingen volgt',
@@ -321,12 +353,12 @@ const NL: F3Teksten = {
     'namaz-vakitleri': {
       titel: 'Het tijdschema wordt opgemaakt',
       tekst:
-        'Wij brengen de dagelijkse tijden voor Brussel en de Belgische steden in één schema samen: imsak, zonsopgang, middag, namiddag, avond en nacht. Tot dan kunt u de tijden bij onze vestigingen vragen.',
+        'Wij brengen de dagelijkse tijden in één schema samen: imsak, zonsopgang, middag, namiddag, avond en nacht. Tot dan kunt u de tijden bij onze vestigingen vragen.',
     },
     'cuma-hutbesi': {
       titel: 'Het preekarchief wordt opgebouwd',
       tekst:
-        'Wij archiveren de wekelijkse preken met de tekst en optioneel een pdf, de nieuwste eerst. Voorlopig worden de preken in onze moskeeën gehouden.',
+        'Wij archiveren de preken met de tekst en optioneel een pdf, de nieuwste eerst. Voorlopig worden de preken in onze moskeeën gehouden.',
     },
     haberler: {
       titel: 'De nieuwsrubriek wordt opgebouwd',
@@ -336,9 +368,24 @@ const NL: F3Teksten = {
     'baharkermesi-menu': {
       titel: 'Het menu van de lentejaarmarkt is archief',
       tekst:
-        'De lentejaarmarkt van 2026 is voorbij. Het menu van die dag bewaren wij als archief. Zodra de vereniging de nieuwe datum vastlegt, staat het nieuwe menu hier.',
+        'De vorige lentejaarmarkt is voorbij. Het menu van die dag bewaren wij als archief. Zodra de vereniging de nieuwe datum vastlegt, staat het nieuwe menu hier.',
+    },
+    hakkimizda: {
+      titel: 'De pagina over ons wordt herschreven',
+      tekst:
+        'Wij schrijven de pagina over onze unie opnieuw. Tot dan beantwoordt ons secretariaat uw vragen graag per telefoon of e-mail.',
+    },
+    bagislar: {
+      titel: 'De pagina voor giften wordt klaargemaakt',
+      tekst:
+        'Wij zetten de veilige betaallinks opnieuw klaar. Wilt u in de tussentijd een gift doen, dan helpt ons secretariaat u graag.',
     },
   },
+  rozetMenuOpen: 'Menu',
+  rozetMenuSluit: 'Menu sluiten',
+  mediaAi: 'Film: AI-gegenereerd',
+  mediaBewerkt: 'Foto bijgewerkt',
+  piekSlagen: ['Achter elke dienst staat', 'een vestiging,', 'een vrijwilliger', 'en een deur die openstaat.'],
 };
 
 const FR: F3Teksten = {
@@ -347,7 +394,7 @@ const FR: F3Teksten = {
   heroCtaSecundair: 'Heures de prière',
   dienstenKop: 'Nos services',
   dienstenIntro:
-    'Nous travaillons autour de sept thèmes. Derrière chaque service, il y a un centre, un bénévole et une porte ouverte.',
+    'Derrière chaque service, il y a un centre, un bénévole et une porte ouverte.',
   dienstenAlle: 'Tous les services',
   dienstenMeer: 'En savoir plus',
   diensten: [
@@ -446,7 +493,7 @@ const FR: F3Teksten = {
     subelerimiz: {
       titel: 'Les centres sont en cours de complétion',
       tekst:
-        'Nous vérifions une à une les adresses et les coordonnées de tous nos centres en Belgique. Une adresse erronée est pire qu’un visiteur qui attend un peu. Entre-temps, notre secrétariat vous indique volontiers le centre le plus proche.',
+        'Nous vérifions une à une les adresses et les coordonnées de nos centres. Une adresse erronée est pire qu’un visiteur qui attend un peu. Entre-temps, notre secrétariat vous indique volontiers le centre le plus proche.',
     },
     'bolge-derneklerimiz': {
       titel: 'La liste des associations régionales suit',
@@ -456,12 +503,12 @@ const FR: F3Teksten = {
     'namaz-vakitleri': {
       titel: 'Le tableau des horaires est en préparation',
       tekst:
-        'Nous réunirons les horaires quotidiens de Bruxelles et des villes belges dans un seul tableau : imsak, lever du soleil, midi, après-midi, soir et nuit. D’ici là, vous pouvez demander les horaires à nos centres.',
+        'Nous réunirons les horaires quotidiens dans un seul tableau : imsak, lever du soleil, midi, après-midi, soir et nuit. D’ici là, vous pouvez demander les horaires à nos centres.',
     },
     'cuma-hutbesi': {
       titel: 'Les archives des prêches se constituent',
       tekst:
-        'Nous archivons les prêches hebdomadaires avec le texte et, si disponible, un pdf, le plus récent en premier. Pour l’instant, les prêches sont donnés dans nos mosquées.',
+        'Nous archivons les prêches avec le texte et, si disponible, un pdf, le plus récent en premier. Pour l’instant, les prêches sont donnés dans nos mosquées.',
     },
     haberler: {
       titel: 'La rubrique actualités est en préparation',
@@ -471,9 +518,24 @@ const FR: F3Teksten = {
     'baharkermesi-menu': {
       titel: 'Le menu du marché de printemps est archivé',
       tekst:
-        'Le marché de printemps 2026 est terminé. Nous conservons le menu de cette journée comme archive. Dès que l’association fixe la nouvelle date, le nouveau menu paraîtra ici.',
+        'Le dernier marché de printemps est terminé. Nous conservons le menu de cette journée comme archive. Dès que l’association fixe la nouvelle date, le nouveau menu paraîtra ici.',
+    },
+    hakkimizda: {
+      titel: 'La page de présentation est en cours de rédaction',
+      tekst:
+        'Nous réécrivons la page qui présente notre union. D’ici là, notre secrétariat répond volontiers à vos questions par téléphone ou par e-mail.',
+    },
+    bagislar: {
+      titel: 'La page des dons est en préparation',
+      tekst:
+        'Nous remettons en place les liens de paiement sécurisés. Si vous souhaitez faire un don entre-temps, notre secrétariat vous aide volontiers.',
     },
   },
+  rozetMenuOpen: 'Menu',
+  rozetMenuSluit: 'Fermer le menu',
+  mediaAi: 'Film : généré par IA',
+  mediaBewerkt: 'Photo retouchée',
+  piekSlagen: ['Derrière chaque service, il y a', 'un centre,', 'un bénévole', 'et une porte ouverte.'],
 };
 
 export const F3: Record<Locale, F3Teksten> = { tr: TR, nl: NL, fr: FR };

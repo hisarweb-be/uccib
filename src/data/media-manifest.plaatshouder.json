@@ -1,0 +1,415 @@
+{
+  "versie": 2,
+  "shots": [
+    {
+      "shot": "h1",
+      "sectie": "hero-unie",
+      "rol": "scrub",
+      "vorm": "frames",
+      "bron": "MESCIT-1.jpg",
+      "bewerkt": false,
+      "retouche": [],
+      "aiFilm": false,
+      "model": null,
+      "startUitsnede": {
+        "x": 0,
+        "y": 100,
+        "breedte": 1600,
+        "hoogte": 900
+      },
+      "uitsnede": {
+        "d": "16:9",
+        "m": {
+          "x": 0.275,
+          "breedte": 0.45
+        }
+      },
+      "anker": {
+        "d": "50% 46%",
+        "m": "50% 46%"
+      },
+      "ankers": {
+        "d": [
+          {
+            "x": 8,
+            "y": 70
+          }
+        ],
+        "m": [
+          {
+            "x": 6,
+            "y": 78
+          }
+        ]
+      },
+      "bestanden": {
+        "d": {
+          "film": null,
+          "reeks": null,
+          "poster": {
+            "pad": "/beeld/mescit/1440.webp",
+            "breedte": 1440,
+            "hoogte": 1080,
+            "gewicht": 154906,
+            "avif": "/beeld/mescit/1440.avif"
+          },
+          "frame0": null,
+          "eind": null
+        },
+        "m": {
+          "film": null,
+          "reeks": null,
+          "poster": {
+            "pad": "/beeld/mescit/960.webp",
+            "breedte": 960,
+            "hoogte": 720,
+            "gewicht": 71794,
+            "avif": "/beeld/mescit/960.avif"
+          },
+          "frame0": null,
+          "eind": null
+        }
+      },
+      "fase": {
+        "van": 0.09,
+        "tot": 0.92,
+        "variabele": "--hero-p"
+      },
+      "vermelding": null,
+      "alt": {
+        "tr": "Mescit: solda beyaz bir sütun ve kürsü, ortada mihrap, duvar lambalarının sıcak ışığı.",
+        "nl": "Gebedsruimte: links een witte zuil en het spreekgestoelte, in het midden de mihrab, warm licht van de wandlampen.",
+        "fr": "Salle de prière : à gauche une colonne blanche et le pupitre, au centre le mihrab, lumière chaude des appliques."
+      },
+      "status": "terugval"
+    },
+    {
+      "shot": "p1",
+      "sectie": "piek-ruimtes",
+      "rol": "scrub",
+      "vorm": "video",
+      "bron": "MESCIT-1.jpg",
+      "bewerkt": false,
+      "retouche": [],
+      "aiFilm": false,
+      "model": null,
+      "startUitsnede": {
+        "x": 696,
+        "y": 330,
+        "breedte": 904,
+        "hoogte": 508
+      },
+      "uitsnede": {
+        "d": "16:9",
+        "m": {
+          "x": 0.495,
+          "breedte": 0.45
+        }
+      },
+      "anker": {
+        "d": "72% 49%",
+        "m": "72% 49%"
+      },
+      "ankers": {
+        "d": [
+          {
+            "x": 8,
+            "y": 70
+          }
+        ],
+        "m": [
+          {
+            "x": 6,
+            "y": 78
+          }
+        ]
+      },
+      "bestanden": {
+        "d": {
+          "film": null,
+          "reeks": null,
+          "poster": {
+            "pad": "/beeld/mescit/1440.webp",
+            "breedte": 1440,
+            "hoogte": 1080,
+            "gewicht": 154906,
+            "avif": "/beeld/mescit/1440.avif"
+          },
+          "frame0": null,
+          "eind": null
+        },
+        "m": {
+          "film": null,
+          "reeks": null,
+          "poster": {
+            "pad": "/beeld/mescit/960.webp",
+            "breedte": 960,
+            "hoogte": 720,
+            "gewicht": 71794,
+            "avif": "/beeld/mescit/960.avif"
+          },
+          "frame0": null,
+          "eind": null
+        }
+      },
+      "fase": {
+        "van": 0.2,
+        "tot": 0.42,
+        "variabele": "--piek-p"
+      },
+      "vermelding": null,
+      "alt": {
+        "tr": "Ahşap çıtalı bir duvarın önünde mihrap ve minber, sıcak duvar ışığı.",
+        "nl": "De mihrab en de minbar tegen een wand van houten latten, in warm wandlicht.",
+        "fr": "Le mihrab et le minbar devant un mur à lattes de bois, dans une lumière chaude."
+      },
+      "status": "terugval"
+    },
+    {
+      "shot": "p2",
+      "sectie": "piek-ruimtes",
+      "rol": "scrub",
+      "vorm": "video",
+      "bron": "IMG_2130.jpg",
+      "bewerkt": false,
+      "retouche": [],
+      "aiFilm": false,
+      "model": null,
+      "startUitsnede": {
+        "x": 0,
+        "y": 150,
+        "breedte": 1600,
+        "hoogte": 900
+      },
+      "uitsnede": {
+        "d": "16:9",
+        "m": {
+          "x": 0.275,
+          "breedte": 0.45
+        }
+      },
+      "anker": {
+        "d": "50% 50%",
+        "m": "50% 50%"
+      },
+      "ankers": {
+        "d": [
+          {
+            "x": 8,
+            "y": 70
+          }
+        ],
+        "m": [
+          {
+            "x": 6,
+            "y": 78
+          }
+        ]
+      },
+      "bestanden": {
+        "d": {
+          "film": null,
+          "reeks": null,
+          "poster": {
+            "pad": "/beeld/gebouw/1440.webp",
+            "breedte": 1440,
+            "hoogte": 1080,
+            "gewicht": 53816,
+            "avif": "/beeld/gebouw/1440.avif"
+          },
+          "frame0": null,
+          "eind": null
+        },
+        "m": {
+          "film": null,
+          "reeks": null,
+          "poster": {
+            "pad": "/beeld/gebouw/960.webp",
+            "breedte": 960,
+            "hoogte": 720,
+            "gewicht": 30956,
+            "avif": "/beeld/gebouw/960.avif"
+          },
+          "frame0": null,
+          "eind": null
+        }
+      },
+      "fase": {
+        "van": 0.46,
+        "tot": 0.58,
+        "variabele": "--piek-p"
+      },
+      "vermelding": null,
+      "alt": {
+        "tr": "Büyük pencereli bir salon; U biçiminde masalar ve bordo sandalyeler.",
+        "nl": "Een lokaal met een groot raam, tafels in U-vorm en bordeauxrode stoelen.",
+        "fr": "Une salle avec une grande fenêtre, des tables en U et des chaises bordeaux."
+      },
+      "status": "terugval"
+    },
+    {
+      "shot": "p3",
+      "sectie": "piek-ruimtes",
+      "rol": "scrub",
+      "vorm": "video",
+      "bron": "IMG_2180.jpg",
+      "bewerkt": false,
+      "retouche": [],
+      "aiFilm": false,
+      "model": null,
+      "startUitsnede": {
+        "x": 0,
+        "y": 150,
+        "breedte": 1600,
+        "hoogte": 900
+      },
+      "uitsnede": {
+        "d": "16:9",
+        "m": {
+          "x": 0.275,
+          "breedte": 0.45
+        }
+      },
+      "anker": {
+        "d": "50% 50%",
+        "m": "50% 50%"
+      },
+      "ankers": {
+        "d": [
+          {
+            "x": 8,
+            "y": 70
+          }
+        ],
+        "m": [
+          {
+            "x": 6,
+            "y": 78
+          }
+        ]
+      },
+      "bestanden": {
+        "d": {
+          "film": null,
+          "reeks": null,
+          "poster": {
+            "pad": "/beeld/interieur/1440.webp",
+            "breedte": 1440,
+            "hoogte": 1080,
+            "gewicht": 145760,
+            "avif": "/beeld/interieur/1440.avif"
+          },
+          "frame0": null,
+          "eind": null
+        },
+        "m": {
+          "film": null,
+          "reeks": null,
+          "poster": {
+            "pad": "/beeld/interieur/960.webp",
+            "breedte": 960,
+            "hoogte": 720,
+            "gewicht": 70898,
+            "avif": "/beeld/interieur/960.avif"
+          },
+          "frame0": null,
+          "eind": null
+        }
+      },
+      "fase": {
+        "van": 0.62,
+        "tot": 0.78,
+        "variabele": "--piek-p"
+      },
+      "vermelding": null,
+      "alt": {
+        "tr": "Masalar ve sandalyelerle dolu bir salon; ortada bir halı yolu, arkada merdiven ve çift kanatlı ahşap bir kapı.",
+        "nl": "Een zaal met tafels en stoelen; in het midden een loper, achteraan een trap en een dubbele houten deur.",
+        "fr": "Une salle avec des tables et des chaises ; au centre un tapis de passage, au fond un escalier et une double porte en bois."
+      },
+      "status": "terugval"
+    },
+    {
+      "shot": "p4",
+      "sectie": "piek-ruimtes",
+      "rol": "scrub",
+      "vorm": "video",
+      "bron": "IMG_2180.jpg",
+      "bewerkt": false,
+      "retouche": [],
+      "aiFilm": false,
+      "model": null,
+      "startUitsnede": {
+        "x": 0,
+        "y": 150,
+        "breedte": 1600,
+        "hoogte": 900
+      },
+      "uitsnede": {
+        "d": "16:9",
+        "m": {
+          "x": 0.275,
+          "breedte": 0.45
+        }
+      },
+      "anker": {
+        "d": "50% 50%",
+        "m": "50% 50%"
+      },
+      "ankers": {
+        "d": [
+          {
+            "x": 8,
+            "y": 70
+          }
+        ],
+        "m": [
+          {
+            "x": 6,
+            "y": 78
+          }
+        ]
+      },
+      "bestanden": {
+        "d": {
+          "film": null,
+          "reeks": null,
+          "poster": {
+            "pad": "/beeld/interieur/1440.webp",
+            "breedte": 1440,
+            "hoogte": 1080,
+            "gewicht": 145760,
+            "avif": "/beeld/interieur/1440.avif"
+          },
+          "frame0": null,
+          "eind": null
+        },
+        "m": {
+          "film": null,
+          "reeks": null,
+          "poster": {
+            "pad": "/beeld/interieur/960.webp",
+            "breedte": 960,
+            "hoogte": 720,
+            "gewicht": 70898,
+            "avif": "/beeld/interieur/960.avif"
+          },
+          "frame0": null,
+          "eind": null
+        }
+      },
+      "fase": {
+        "van": 0.78,
+        "tot": 0.86,
+        "variabele": "--piek-p"
+      },
+      "vermelding": null,
+      "alt": {
+        "tr": "Kapalı, çift kanatlı ahşap bir kapı.",
+        "nl": "Een gesloten dubbele houten deur.",
+        "fr": "Une double porte en bois, fermée."
+      },
+      "status": "terugval"
+    }
+  ]
+}

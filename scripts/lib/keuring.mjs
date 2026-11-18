@@ -419,7 +419,12 @@ export async function checkConcepten({ distDir, slugs = CONCEPT_SLUGS, locales =
     const html = await readFile(file, 'utf8');
     const bodyStart = html.search(/<body\b/i);
     const body = bodyStart === -1 ? html : html.slice(bodyStart);
-    for (const match of body.matchAll(/href\s*=\s*"([^"]*)"/gi)) {
+    // Herontwerp (18 nov 2026, CONTRACT 7.2): het menu toont altijd alle punten, ook
+    // een pagina die uit staat. Zo'n menulink is eerlijk gemerkt met
+    // aria-describedby="binnenkort-<slug>" en mag; elke andere link naar een concept
+    // blijft een fout.
+    for (const match of body.matchAll(/<[^>]*\bhref\s*=\s*"([^"]*)"[^>]*>/gi)) {
+      if (/aria-describedby="binnenkort-/.test(match[0])) continue;
       const href = match[1];
       const pad = href.replace(/^https?:\/\/uccib\.com/i, '').split(/[?#]/)[0];
       for (const slug of slugs) {

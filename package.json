@@ -21,7 +21,9 @@
     "verify:scherm": "node scripts/verify-eerste-scherm.mjs",
     "verify:live": "node scripts/verify-een-voor-een.mjs --basis=https://uccib.com",
     "verify:sponsor": "node scripts/verify-sponsor.mjs",
-    "verify:tekens": "node scripts/verify-tekens.mjs"
+    "verify:tekens": "node scripts/verify-tekens.mjs",
+    "verify:betaallinks": "node scripts/verify-betaallinks.mjs",
+    "verify:menu": "node scripts/verify-menu.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "3.7.4",

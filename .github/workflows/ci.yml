@@ -22,6 +22,9 @@ jobs:
     steps:
       - name: Ophalen
         uses: actions/checkout@v4
+        with:
+          # verify:betaallinks vergelijkt met origin/main en heeft die ref nodig.
+          fetch-depth: 0
 
       - name: Node 22
         uses: actions/setup-node@v4
@@ -52,6 +55,12 @@ jobs:
 
       - name: Server en paden
         run: npm run verify:server
+
+      - name: Betaallinks gelijk aan main
+        run: npm run verify:betaallinks
+
+      - name: Menu met acht punten
+        run: npm run verify:menu
 
       - name: Schermafbeeldingen bewaren
         run: echo "UCCIB_BEELD=$RUNNER_TEMP/uccib-beeld" >> "$GITHUB_ENV"

@@ -275,7 +275,10 @@ async function main() {
         );
     for (const [file, html] of teKijken) {
       const romp = html.slice(Math.max(0, html.search(/<body\b/i)));
-      for (const [, href] of romp.matchAll(/href\s*=\s*"([^"]*)"/gi)) {
+      // Herontwerp (18 nov 2026): een menulink met aria-describedby="binnenkort-<slug>"
+      // mag naar een pagina die uit staat wijzen (zie checkConcepten in lib/keuring.mjs).
+      for (const [tag, href] of romp.matchAll(/<[^>]*\bhref\s*=\s*"([^"]*)"[^>]*>/gi)) {
+        if (/aria-describedby="binnenkort-/.test(tag)) continue;
         const pad = href.replace(/^https?:\/\/uccib\.com/i, '').split(/[?#]/)[0];
         linkTelling += 1;
         for (const slug of CONCEPT_SLUGS) {
