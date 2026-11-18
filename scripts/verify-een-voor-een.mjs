@@ -279,9 +279,12 @@ async function main() {
       // mag naar een pagina die uit staat wijzen (zie checkConcepten in lib/keuring.mjs).
       for (const [tag, href] of romp.matchAll(/<[^>]*\bhref\s*=\s*"([^"]*)"[^>]*>/gi)) {
         if (/aria-describedby="binnenkort-/.test(tag)) continue;
+        // F2b PR4: een dienstregel met data-binnenkort="<slug>" mag alleen naar die ene slug.
+        const binnenkort = tag.match(/\bdata-binnenkort="([^"]*)"/)?.[1];
         const pad = href.replace(/^https?:\/\/uccib\.com/i, '').split(/[?#]/)[0];
         linkTelling += 1;
         for (const slug of CONCEPT_SLUGS) {
+          if (slug === binnenkort) continue;
           for (const locale of LOCALES) {
             const route = pagePath(locale, slug);
             if (pad === route || pad === route.slice(0, -1)) linkFouten.push(`${file}: ${href}`);

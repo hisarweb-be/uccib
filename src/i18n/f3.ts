@@ -20,8 +20,10 @@ import type { Slug } from '../data/site';
 export interface Dienst {
   titel: string;
   tekst: string;
-  /** Doel van de tegel. Een concept wordt in de component naar `/iletisim/` geleid. */
+  /** Doel van de regel. Een concept-pagina krijgt in DienstenIndex `data-binnenkort` en haar leeg-titel. */
   href: string;
+  /** Plek op de startpagina: `deur` is de kop van OpenDeur, `bezoek` de regel eronder. */
+  rol?: 'deur' | 'bezoek';
 }
 
 export interface Mijlpaal {
@@ -61,6 +63,8 @@ export interface F3Teksten {
   labelEmail: string;
   labelUren: string;
   labelRoute: string;
+  /** Label van het ondernemingsnummer in het adresblad (alleen als kerngegevens.kbo gevuld is). */
+  labelKbo: string;
   routeTekst: string;
   whatsappLabel: string;
   whatsappAria: string;
@@ -132,11 +136,13 @@ const TR: F3Teksten = {
       titel: 'Cami Tanıtım Programları',
       tekst: 'Okullar, kurumlar ve ilgilenen herkes için cami ziyaretleri düzenliyoruz. Ziyaretler için en yakın şubemizle iletişime geçebilirsiniz.',
       href: '/subelerimiz',
+      rol: 'bezoek',
     },
     {
       titel: 'Açık Cami Günü',
       tekst: 'Her yıl düzenlenen Açık Cami Günü’nde kapılarımızı tüm komşularımıza açıyor, tanışma ve diyalog ortamı oluşturuyoruz.',
       href: '/haberler',
+      rol: 'deur',
     },
   ],
   steunKop: 'Desteğiniz',
@@ -185,6 +191,7 @@ const TR: F3Teksten = {
   labelUren: 'Açık olduğumuz saatler',
   labelRoute: 'Yol tarifi',
   routeTekst: 'Haritada aç',
+  labelKbo: 'KBO',
   whatsappLabel: 'WhatsApp’tan yazın',
   whatsappAria: 'WhatsApp sohbetini aç',
   juridischNoot:
@@ -281,12 +288,14 @@ const NL: F3Teksten = {
       tekst:
         'Voor scholen, instellingen en iedereen die interesse heeft organiseren wij bezoeken aan de moskee. Neem daarvoor contact op met de dichtstbijzijnde vestiging.',
       href: '/subelerimiz',
+      rol: 'bezoek',
     },
     {
       titel: 'Open Moskeedag',
       tekst:
         'Tijdens de jaarlijkse Open Moskeedag zetten wij onze deuren open voor alle buren en creëren wij een ontmoeting en een gesprek.',
       href: '/haberler',
+      rol: 'deur',
     },
   ],
   steunKop: 'Uw steun',
@@ -335,6 +344,7 @@ const NL: F3Teksten = {
   labelUren: 'Wanneer wij open zijn',
   labelRoute: 'Route',
   routeTekst: 'Open in kaart',
+  labelKbo: 'KBO',
   whatsappLabel: 'Stuur een WhatsApp',
   whatsappAria: 'Open de WhatsApp-gesprek',
   juridischNoot:
@@ -431,12 +441,14 @@ const FR: F3Teksten = {
       tekst:
         'Nous organisons des visites de la mosquée pour les écoles, les institutions et toute personne intéressée. Pour une visite, contactez le centre le plus proche.',
       href: '/subelerimiz',
+      rol: 'bezoek',
     },
     {
       titel: 'Journée portes ouvertes',
       tekst:
         'Lors de la Journée portes ouvertes annuelle, nous ouvrons nos portes à tous nos voisins et créons un lieu de rencontre et de dialogue.',
       href: '/haberler',
+      rol: 'deur',
     },
   ],
   steunKop: 'Votre soutien',
@@ -485,6 +497,7 @@ const FR: F3Teksten = {
   labelUren: 'Nos heures d’ouverture',
   labelRoute: 'Itinéraire',
   routeTekst: 'Ouvrir dans la carte',
+  labelKbo: 'BCE',
   whatsappLabel: 'Écrire sur WhatsApp',
   whatsappAria: 'Ouvrir la conversation WhatsApp',
   juridischNoot:

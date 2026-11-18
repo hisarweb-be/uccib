@@ -157,18 +157,14 @@ export const anker = (naam: ShotNaam, bp: Breekpunt): string => shot(naam).anker
 
 export const alt = (naam: ShotNaam, locale: Locale): string => shot(naam).alt[locale];
 
-/** De AI-vermelding van één shot: alleen als er een film ligt én die film AI is. */
-export const vermelding = (naam: ShotNaam, locale: Locale): string | null =>
-  vormVan(naam) === 'film' && shot(naam).aiFilm ? (shot(naam).vermelding?.[locale] ?? null) : null;
-
-/** De vermelding voor de voet: is er op de pagina één AI-film, dan één regel. */
-export function vermeldingPagina(locale: Locale): string | null {
-  for (const s of perShot.values()) {
-    const v = vermelding(s.shot, locale);
-    if (v) return v;
-  }
-  return null;
-}
+/**
+ * De AI-vermelding van één shot in de vorm die de bezoeker te zien krijgt.
+ * `getoond` is wat er echt in beeld staat: zonder JavaScript of met reduced motion
+ * is dat de poster, ook als er een film ligt. Alleen bij `film` (een film of reeks
+ * die er ligt én getoond wordt) en een AI-film is er een regel.
+ */
+export const vermelding = (naam: ShotNaam, getoond: Vorm, locale: Locale): string | null =>
+  getoond === 'film' && vormVan(naam) === 'film' && shot(naam).aiFilm ? (shot(naam).vermelding?.[locale] ?? null) : null;
 
 /**
  * Hoeveel eigen pixels de breedte van een shot heeft (BIJSTURING ronde 2g punt 2).

@@ -128,6 +128,33 @@ function meetOverloop() {
   return { breed, scroll: document.documentElement.scrollWidth, uit };
 }
 
+/**
+ * Woorden die midden in breken (F2b PR4): op 390 px brak "Hakkımızda" in een
+ * smal vak over twee regels, omdat `overflow-wrap: anywhere` elk woord mocht
+ * knippen. Per tekstnode wordt elk woord van vier of meer tekens (gesplitst op
+ * spatie, koppelteken en schuine streep, waar afbreken wel mag) als bereik gemeten;
+ * staan de stukken van één woord op meer dan één regelhoogte, dan is het gebroken.
+ */
+function meetGebrokenWoorden() {
+  const uit = [];
+  const loper = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const bereik = document.createRange();
+  for (let node = loper.nextNode(); node; node = loper.nextNode()) {
+    const ouder = node.parentElement;
+    if (!ouder || ouder.closest('script, style, noscript, template, dialog:not([open])')) continue;
+    const tekst = node.textContent;
+    for (const woord of tekst.matchAll(/[^\s\-\/\u2010-\u2014]{4,}/gu)) {
+      bereik.setStart(node, woord.index);
+      bereik.setEnd(node, woord.index + woord[0].length);
+      const rects = [...bereik.getClientRects()].filter((r) => r.width > 0 && r.height > 0);
+      if (rects.length < 2) continue;
+      const toppen = new Set(rects.map((r) => Math.round(r.top)));
+      if (toppen.size > 1) uit.push(woord[0]);
+    }
+  }
+  return uit;
+}
+
 /* ── Tegelefoon ── */
 
 function maakContext(browser, viewport, opties = {}) {
@@ -215,6 +242,8 @@ async function tegentoets(browser) {
      <a href="/" style="display:inline-block;width:20px;height:20px;background:#333">klein</a>
      <a href="/" style="display:inline-block;width:44px;height:44px;background:#333">goed</a>
      <div style="width:600px;height:10px;background:#ccc"></div>
+     <p style="width:60px;overflow-wrap:anywhere;font-size:20px">Hakkımızda</p>
+     <p style="width:300px;overflow-wrap:break-word;font-size:20px">Bize ulaşın vandaag</p>
      </body></html>`,
     'utf8',
   );
@@ -231,6 +260,10 @@ async function tegentoets(browser) {
 
     const over = await page.evaluate(meetOverloop);
     oordeel(over.scroll > over.breed, 'tegentoets overloop: 600 px in een venster van ' + over.breed + ' px wordt gezien');
+
+    const gebroken = await page.evaluate(meetGebrokenWoorden);
+    oordeel(gebroken.includes('Hakkımızda'), 'tegentoets woordbreuk: een woord dat in een vak van 60 px over twee regels valt, wordt gezien');
+    oordeel(!gebroken.includes('ulaşın') && !gebroken.includes('vandaag'), 'tegentoets woordbreuk: heel gebleven woorden worden niet genoemd');
   } finally {
     await context.close();
     await server.close();
@@ -250,6 +283,7 @@ async function keurPaginas(browser, baseUrl) {
   const tikFout = [];
   const overFout = [];
   const menuFout = [];
+  const woordFout = [];
   let tikUitgezonderd = 0;
   let gemeten = 0;
 
@@ -283,6 +317,10 @@ async function keurPaginas(browser, baseUrl) {
             ')',
         );
       }
+
+      // 2b. geen woord dat midden in breekt
+      const gebroken = await page.evaluate(meetGebrokenWoorden);
+      if (gebroken.length > 0) woordFout.push(label + ': ' + [...new Set(gebroken)].slice(0, 6).join(', '));
 
       // 3. menu: elk item is zichtbaar, niet bedekt en binnen het venster (na openen)
       await openMenu(page);
@@ -325,6 +363,7 @@ async function keurPaginas(browser, baseUrl) {
     tikFout,
   );
   oordeel(overFout.length === 0, "overloop op 390 px: geen enkele pagina breder dan het venster", overFout);
+  oordeel(woordFout.length === 0, 'woorden op 390 px: geen woord breekt midden in over twee regels', woordFout);
 
   // Hetzelfde op 320 px, de smalste telefoon die nog rondgaat.
   const smal = await maakContext(browser, KLEIN);
@@ -453,6 +492,79 @@ async function tikSponsor(browser, baseUrl) {
   );
 }
 
+/* ── 4b. Steunkeuze op de voorpagina: bedrag kiezen, dan doneren ── */
+
+/**
+ * De oude bedragtegels op de voorpagina zijn vervangen door de steunkeuze
+ * (STORYBOARD D21, DESIGNSYSTEEM 7.5): een rij keuzerondjes en één knop. Met een
+ * vinger in elke taal: tik een ander bedrag dan het voorgekozen, het getoonde
+ * bedrag volgt, en de knop opent precies de betaallink van dat bedrag bij Mollie.
+ */
+async function tikSteun(browser, baseUrl) {
+  const foutenLijst = [];
+  for (const locale of LOCALES) {
+    const context = await maakContext(browser, TELEFOON);
+    const gevraagd = [];
+    await context.route('https://payment-links.mollie.com/**', async (route) => {
+      gevraagd.push(route.request().url());
+      await route.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: '<!DOCTYPE html><title>Mollie</title>' });
+    });
+    const page = await context.newPage();
+    const cdp = await context.newCDPSession(page);
+    try {
+      await page.goto(baseUrl + pagePath(locale, ''), { waitUntil: 'load' });
+      const rondjes = page.locator('#steun input[type="radio"]');
+      const aantal = await rondjes.count();
+      if (aantal < 2) {
+        foutenLijst.push(locale + ': ' + aantal + ' bedragen in de steunkeuze, verwacht minstens 2');
+        continue;
+      }
+      const voor = await rondjes.evaluateAll((els) => els.findIndex((e) => e.checked));
+      const doel = voor === 0 ? 1 : 0;
+      const label = page.locator('#steun label').nth(doel);
+      await label.scrollIntoViewIfNeeded();
+      const lb = await label.boundingBox();
+      if (!lb || lb.width < MIN_TIK || lb.height < MIN_TIK) {
+        foutenLijst.push(locale + ': bedragvak ' + (lb ? Math.round(lb.width) + 'x' + Math.round(lb.height) : 'onzichtbaar'));
+        continue;
+      }
+      await tikMetVinger(cdp, lb.x + lb.width / 2, lb.y + lb.height / 2);
+      await page.waitForTimeout(100);
+      const stand = await page.evaluate((i) => {
+        const r = document.querySelectorAll('#steun input[type="radio"]')[i];
+        return {
+          gekozen: r.checked,
+          link: r.value,
+          bedrag: r.dataset.bedrag,
+          getoond: document.querySelector('#steun .steun-bedrag')?.textContent ?? '',
+          knop: document.querySelector('#steun [data-steun-knop]')?.getAttribute('href') ?? '',
+        };
+      }, doel);
+      if (!stand.gekozen) foutenLijst.push(locale + ': tik op het bedragvak kiest het bedrag niet');
+      if (stand.getoond.trim() !== stand.bedrag) foutenLijst.push(locale + ': getoond "' + stand.getoond + '" volgt het gekozen bedrag ' + stand.bedrag + ' niet');
+      if (stand.knop !== stand.link) foutenLijst.push(locale + ': de knop wijst naar ' + stand.knop + ' in plaats van de link van het gekozen bedrag');
+      const knop = page.locator('#steun [data-steun-knop]');
+      await knop.scrollIntoViewIfNeeded();
+      const kb = await knop.boundingBox();
+      if (!kb) {
+        foutenLijst.push(locale + ': geen doneerknop in de steunkeuze');
+        continue;
+      }
+      await tikMetVinger(cdp, kb.x + kb.width / 2, kb.y + kb.height / 2);
+      for (let i = 0; i < 80 && gevraagd.length === 0; i += 1) await page.waitForTimeout(100);
+      const ok = gevraagd.length === 1 && gevraagd[0] === stand.link;
+      if (!ok) foutenLijst.push(locale + ': Mollie-aanvraag ' + (gevraagd.join(' | ') || 'geen') + ', verwacht ' + stand.link);
+    } finally {
+      await context.close();
+    }
+  }
+  oordeel(
+    foutenLijst.length === 0,
+    'steunkeuze: in drie talen een bedrag met een vinger gekozen en met de knop precies die betaallink bij Mollie geopend',
+    foutenLijst,
+  );
+}
+
 /* ── 5. De twee scènes onder een vinger ── */
 
 /**
@@ -482,7 +594,7 @@ const sceneStand = (page) =>
     };
   });
 
-async function keurCinema(browser, baseUrl) {
+async function keurScenes(browser, baseUrl) {
   const context = await maakContext(browser, TELEFOON);
   const page = await context.newPage();
   const cdp = await context.newCDPSession(page);
@@ -678,7 +790,8 @@ try {
   console.log('');
   await tikMenu(browser, server.baseUrl);
   await tikSponsor(browser, server.baseUrl);
-  await keurCinema(browser, server.baseUrl);
+  await tikSteun(browser, server.baseUrl);
+  await keurScenes(browser, server.baseUrl);
   await keurStil(browser, server.baseUrl);
 } finally {
   await browser.close();
