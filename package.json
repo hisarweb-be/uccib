@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "UCCIB vzw — statische site in drie talen (Astro 5, Tailwind 4)",
+  "description": "UCCIB, statische site in drie talen (Astro 5, Tailwind 4)",
   "engines": {
     "node": ">=22.0.0"
   },
