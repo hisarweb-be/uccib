@@ -12,7 +12,7 @@ uccib.com ne place aucun cookie. Nous ne stockons rien dans votre navigateur et 
 
 ## (1) Responsable
 
-Union des Centres Culturels Islamiques Belgium (UCCIB), Rue Charles Demeer 3, 1020 Bruxelles, Belgique. Numéro d'entreprise BE 0843.891.981. E-mail info@uccib.com, téléphone +32 493 344 665.
+Union des Centres Culturels Islamiques de Belgique (UCCIB), fondation d'utilité publique. Siège Rue Charles Demeer 1-3, 1020 Bruxelles ; adresse de visite Rue Charles Demeer 3, 1020 Bruxelles, Belgique. Numéro d'entreprise BE 0843.891.981. E-mail info@uccib.com, téléphone +32 493 344 665.
 
 ## (2) Ce que nous avons mesuré sur le site
 

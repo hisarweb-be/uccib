@@ -9,9 +9,10 @@ active: true
 
 ## (1) Sorumlu yayıncı
 
-Bu web sitesi uccib.com, Union des Centres Culturels Islamiques Belgium (UCCIB) derneği tarafından yayımlanmaktadır.
+Bu web sitesi uccib.com, kamu yararına vakıf (stichting van openbaar nut) Union des Centres Culturels Islamiques de Belgique (kısaca UCCIB) tarafından yayımlanmaktadır.
 
-- Adres: Rue Charles Demeer 3, 1020 Brüksel, Belçika
+- Kayıtlı merkez (KBO): Charles Demeerstraat 1-3, 1020 Brüksel, Belçika
+- Ziyaret adresi: Rue Charles Demeer 3, 1020 Brüksel, Belçika
 - Kayıt numarası (KBO/BTW): BE 0843.891.981
 - E-posta: info@uccib.com
 - Telefon: +32 493 344 665
@@ -20,7 +21,7 @@ Bu web sitesi uccib.com, Union des Centres Culturels Islamiques Belgium (UCCIB) 
 
 Bu sitedeki bilgileri dikkatle ve güncel tutmaya çalışıyoruz. Yine de eksik, güncelliğini yitirmiş veya yanlış bir bilgiyle karşılaşabilirsiniz. Bu bilgilere dayanarak verdiğiniz kararlardan doğan zararlar için sorumluluk kabul etmiyoruz.
 
-Sitede yer alan hiçbir şey bir teklif, bir sözleşme veya hukuki danışmanlık sayılmaz. Bağış, üyelik veya ziyaret konusunda bağlayıcı bilgi için dernekle doğrudan iletişime geçin.
+Sitede yer alan hiçbir şey bir teklif, bir sözleşme veya hukuki danışmanlık sayılmaz. Bağış, üyelik veya ziyaret konusunda bağlayıcı bilgi için vakıfla doğrudan iletişime geçin.
 
 ## (3) Fikri mülkiyet
 

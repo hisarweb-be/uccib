@@ -58,6 +58,7 @@ export interface F3Teksten {
   mijlpalen: Mijlpaal[];
   contactKop: string;
   contactIntro: string;
+  /** Label van het bezoekadres (site.ts); het zeteladres uit de KBO heeft labelZetel. */
   labelAdres: string;
   labelTelefoon: string;
   labelEmail: string;
@@ -65,6 +66,14 @@ export interface F3Teksten {
   labelRoute: string;
   /** Label van het ondernemingsnummer in het adresblad (alleen als kerngegevens.kbo gevuld is). */
   labelKbo: string;
+  /** Label van de officiële naam en rechtsvorm uit de KBO. */
+  labelRechtspersoon: string;
+  /** Label van het zeteladres uit de KBO (src/lib/rechtspersoon.ts). */
+  labelZetel: string;
+  /** Alleen Turks: vertaling van de rechtsvorm, achter de officiële term tussen haakjes. */
+  rechtsvormUitleg?: string;
+  /** Het land achter het bezoekadres. */
+  land: string;
   routeTekst: string;
   whatsappLabel: string;
   whatsappAria: string;
@@ -190,17 +199,21 @@ const TR: F3Teksten = {
   contactKop: 'Bize ulaşın',
   contactIntro:
     'Sorularınız, ziyaret talepleriniz ve bağış bilgileri için sekretaryamızı arayabilir veya yazabilirsiniz.',
-  labelAdres: 'Adres',
+  labelAdres: 'Ziyaret adresi',
   labelTelefoon: 'Telefon',
   labelEmail: 'E-posta',
   labelUren: 'Açık olduğumuz saatler',
   labelRoute: 'Yol tarifi',
   routeTekst: 'Haritada aç',
   labelKbo: 'KBO',
+  labelRechtspersoon: 'Tüzel kişi',
+  labelZetel: 'Kayıtlı merkez',
+  rechtsvormUitleg: 'kamu yararına vakıf',
+  land: 'Belçika',
   whatsappLabel: 'WhatsApp’tan yazın',
   whatsappAria: 'WhatsApp sohbetini aç',
   juridischNoot:
-    'Bu hukuki metin 17 Kasım 2026 tarihinde güncellenmiştir. Sorularınız için info@uccib.com adresine yazabilirsiniz.',
+    'Bu hukuki metin 19 Kasım 2026 tarihinde güncellenmiştir. Sorularınız için info@uccib.com adresine yazabilirsiniz.',
   leeg: {
     subelerimiz: {
       titel: 'Şube bilgileri hazırlanıyor',
@@ -350,17 +363,20 @@ const NL: F3Teksten = {
   contactKop: 'Bereik ons',
   contactIntro:
     'Voor vragen, een bezoekaanvraag of informatie over schenken kunt u ons secretariaat bellen of schrijven.',
-  labelAdres: 'Adres',
+  labelAdres: 'Bezoekadres',
   labelTelefoon: 'Telefoon',
   labelEmail: 'E-mail',
   labelUren: 'Wanneer wij open zijn',
   labelRoute: 'Route',
   routeTekst: 'Open in kaart',
   labelKbo: 'KBO',
+  labelRechtspersoon: 'Rechtspersoon',
+  labelZetel: 'Maatschappelijke zetel',
+  land: 'België',
   whatsappLabel: 'Stuur een WhatsApp',
   whatsappAria: 'Open de WhatsApp-gesprek',
   juridischNoot:
-    'Deze juridische tekst is bijgewerkt op 17 november 2026. Vragen? Schrijf naar info@uccib.com.',
+    'Deze juridische tekst is bijgewerkt op 19 november 2026. Vragen? Schrijf naar info@uccib.com.',
   leeg: {
     subelerimiz: {
       titel: 'De vestigingen worden aangevuld',
@@ -510,17 +526,20 @@ const FR: F3Teksten = {
   contactKop: 'Nous joindre',
   contactIntro:
     'Pour vos questions, une demande de visite ou des informations sur les dons, vous pouvez appeler ou écrire à notre secrétariat.',
-  labelAdres: 'Adresse',
+  labelAdres: 'Adresse de visite',
   labelTelefoon: 'Téléphone',
   labelEmail: 'E-mail',
   labelUren: 'Nos heures d’ouverture',
   labelRoute: 'Itinéraire',
   routeTekst: 'Ouvrir dans la carte',
   labelKbo: 'BCE',
+  labelRechtspersoon: 'Personne morale',
+  labelZetel: 'Siège',
+  land: 'Belgique',
   whatsappLabel: 'Écrire sur WhatsApp',
   whatsappAria: 'Ouvrir la conversation WhatsApp',
   juridischNoot:
-    'Ce texte juridique a été mis à jour le 17 novembre 2026. Une question ? Écrivez à info@uccib.com.',
+    'Ce texte juridique a été mis à jour le 19 novembre 2026. Une question ? Écrivez à info@uccib.com.',
   leeg: {
     subelerimiz: {
       titel: 'Les centres sont en cours de complétion',

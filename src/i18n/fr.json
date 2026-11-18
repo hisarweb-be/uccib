@@ -2,7 +2,6 @@
   "lang": "fr",
   "siteName": "UCCIB",
   "siteTagline": "Union des Centres Culturels Islamiques Belgium",
-  "siteTaglineAlt": "Belçika İslam Kültür Merkezleri Birliği Vakfı",
   "skipToContent": "Aller au contenu",
   "navLabel": "Menu principal",
   "footerNavLabel": "Liens de pied de page",
@@ -10,11 +9,9 @@
   "logoAlt": "UCCIB — Union des Centres Culturels Islamiques Belgium",
   "donateCta": "Faire un don",
   "footer": {
-    "address": "Adresse",
     "contact": "Contact",
     "phone": "Téléphone",
-    "email": "E-mail",
-    "rights": "© 2026 | UCCIB — Union des Centres Culturels Islamiques Belgium"
+    "email": "E-mail"
   },
   "nav": {
     "home": "Accueil",
