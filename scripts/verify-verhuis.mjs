@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * Meet elke rij van herontwerp/VERHUISTABEL.csv op de voorvertoning en schrijft
- * herontwerp/bewijs-f3/verhuis-<datum>.csv.
+ * Meet elke rij van de verhuistabel (scripts/data/verhuistabel.csv) op de voorvertoning en schrijft
+ * verhuis-<datum>.csv naar --uit=, anders naar ../herontwerp/bewijs-f3 als die map er is, anders naar de tijdmap.
  *
  * Gebruik: node scripts/verify-verhuis.mjs [basisadres] [--tabel=pad] [--uit=map] [--alleen-tabel]
  * Standaard basisadres: https://herontwerp-wow.uccib.pages.dev (alleen GET, zonder redirects te volgen).
@@ -13,8 +13,9 @@
  *   "verhuis-proef" ingevuld. Daarna volgt het script de doorverwijzing en eist eindstatus 200.
  * Slagen = geen rij fout of 404. Uitgang 1 bij een fout.
  */
-import { mkdirSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import { csvVeld, leesTabel, vindTabel } from './lib/verhuistabel.mjs';
 
 const args = process.argv.slice(2);
@@ -81,7 +82,8 @@ await Promise.all(Array.from({ length: 6 }, werker));
 const lijst = gemeten.filter(Boolean);
 
 const nu = new Date();
-const uitMap = optie('uit') ?? join(dirname(tabelPad), 'bewijs-f3');
+const herontwerp = resolve('..', 'herontwerp');
+const uitMap = optie('uit') ?? (existsSync(herontwerp) ? join(herontwerp, 'bewijs-f3') : join(tmpdir(), 'uccib-verhuis'));
 mkdirSync(uitMap, { recursive: true });
 const kop = ['oud_adres', 'actie', 'nieuw_adres', 'gemeten_pad', 'verwacht', 'status', 'location', 'eindstatus', 'uitslag', 'gemeten_op'];
 const regels = lijst.map(({ rij, gemeten: g, verwacht, status, locatie, eind, uitslag }) =>

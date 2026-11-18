@@ -1,12 +1,14 @@
 /**
- * Leest en controleert herontwerp/VERHUISTABEL.csv (oud adres van uccib.com naar nieuw pad).
+ * Leest en controleert de verhuistabel (scripts/data/verhuistabel.csv, kopie van
+ * herontwerp/VERHUISTABEL.csv): oud adres van uccib.com naar nieuw pad.
  * Kolommen: oud_adres, status_nu, soort, taal, nieuw_adres, actie, uitleg.
  * actie is gelijk (zelfde pad, of alleen schuine streep anders, of geen pad: hostregel),
  * doorverwijzen (301 naar nieuw_adres) of vangregel (jokerregel, 301 naar nieuw_adres).
  * nieuw_adres is een pad dat met / begint, of leeg; nooit een spatie of uitleg.
  */
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 export const KOLOMMEN = ['oud_adres', 'status_nu', 'soort', 'taal', 'nieuw_adres', 'actie', 'uitleg'];
 export const ACTIES = ['gelijk', 'doorverwijzen', 'vangregel'];
@@ -50,17 +52,142 @@ export function csvVeld(waarde) {
   return `"${String(waarde ?? '').replace(/"/g, '""')}"`;
 }
 
-/** Zoekt de tabel: expliciet pad, anders herontwerp/ in of naast de werkmap. */
+/**
+ * De tabel die de repo, de generator en CI lezen. De werkversie van D3 staat in
+ * herontwerp/VERHUISTABEL.csv (buiten git); `node scripts/lib/verhuis.mjs --tabel=<pad>`
+ * neemt die over in deze kopie en schrijft public/_redirects opnieuw.
+ */
+export const REPO_TABEL = fileURLToPath(new URL('../data/verhuistabel.csv', import.meta.url));
+
+/** Zoekt de tabel: expliciet pad, anders de kopie in de repo. */
 export function vindTabel(pad) {
-  const kandidaten = pad
-    ? [pad]
-    : [
-        join(process.cwd(), 'herontwerp', 'VERHUISTABEL.csv'),
-        join(process.cwd(), '..', 'herontwerp', 'VERHUISTABEL.csv'),
-      ];
-  const gevonden = kandidaten.find((p) => existsSync(p));
-  if (!gevonden) throw new Error(`VERHUISTABEL.csv niet gevonden (gezocht: ${kandidaten.join(', ')})`);
+  const gevonden = pad ?? REPO_TABEL;
+  if (!existsSync(gevonden)) throw new Error(`verhuistabel niet gevonden: ${gevonden}`);
   return gevonden;
+}
+
+/** Pad (met query) van een oud adres op uccib.com, of null voor een hostregel of ander domein. */
+export function oudPad(rij) {
+  const u = new URL(rij.oud_adres);
+  return u.hostname === 'uccib.com' ? u.pathname + u.search : null;
+}
+
+/**
+ * Regels voor public/_redirects (Cloudflare Pages): { van, naar, rij }.
+ * doorverwijzen = één vaste regel per rij; vangregel met * = één jokerregel;
+ * een vangregel zonder * krijgt alleen een eigen regel als geen jokerregel hem dekt.
+ * Vaste regels eerst, jokerregels daarna (Cloudflare neemt de eerste die past).
+ * Gooit bij een rij die _redirects niet kan uitdrukken (query of * buiten het eind).
+ */
+export function redirectRegels(rijen) {
+  const vast = [];
+  const joker = [];
+  const fouten = [];
+  for (const rij of rijen) {
+    if (rij.actie === 'gelijk') continue;
+    const van = oudPad(rij);
+    if (van === null) {
+      fouten.push(`regel ${rij.regel}: ${rij.actie} buiten uccib.com kan niet in _redirects`);
+      continue;
+    }
+    if (van.includes('?')) fouten.push(`regel ${rij.regel}: ${van} heeft een query, _redirects kan die niet lezen`);
+    if (van.includes('*') && (rij.actie !== 'vangregel' || van.indexOf('*') !== van.length - 1)) {
+      fouten.push(`regel ${rij.regel}: * mag alleen aan het eind van een vangregel staan`);
+    }
+    (van.endsWith('*') ? joker : vast).push({ van, naar: rij.nieuw_adres, rij });
+  }
+  if (fouten.length) throw new Error(fouten.join('\n'));
+  const regels = [...vast.filter((r) => r.rij.actie === 'doorverwijzen' || !zoekRegel(joker, r.van)), ...joker];
+  const dubbel = regels.map((r) => r.van).filter((v, i, a) => a.indexOf(v) !== i);
+  if (dubbel.length) throw new Error(`dubbele bron in _redirects: ${[...new Set(dubbel)].join(', ')}`);
+  return regels;
+}
+
+/** Eerste regel die op het pad past (vast: gelijk pad; joker: prefix voor de *), zoals Cloudflare Pages. */
+export function zoekRegel(regels, pad) {
+  return regels.find((r) => (r.van.endsWith('*') ? pad.startsWith(r.van.slice(0, -1)) : pad === r.van));
+}
+
+export const REDIRECTS_KOP = [
+  '# Doorverwijzingen van de oude adressen van uccib.com (Cloudflare Pages).',
+  '# Gegenereerd door `node scripts/lib/verhuis.mjs` uit scripts/data/verhuistabel.csv.',
+  '# Niet met de hand wijzigen: pas de tabel aan en draai de generator; `npm run verify` vergelijkt.',
+];
+
+export function redirectsTekst(regels) {
+  return `${[...REDIRECTS_KOP, ...regels.map((r) => `${r.van} ${r.naar} 301`)].join('\n')}\n`;
+}
+
+/** Leest de regels terug uit de tekst van een _redirects-bestand. */
+export function leesRedirects(tekst) {
+  return tekst
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith('#'))
+    .map((l) => {
+      const [van, naar, status] = l.split(/\s+/);
+      return { van, naar, status: Number(status ?? 302) };
+    });
+}
+
+/** Cloudflare Pages: hooguit 2000 vaste en 100 dynamische regels (samen 2100). */
+export const LIMIET = { vast: 2000, dynamisch: 100 };
+
+/**
+ * Keurt een _redirects-tekst tegen de tabel: gelijk aan de generatoruitvoer, elke rij
+ * doorverwijzen/vangregel komt via de eerste passende regel met 301 op nieuw_adres,
+ * geen gelijk-rij wordt omgeleid, geen bron is een bestand in dist, limieten gehaald.
+ * Geeft { fouten, vast, dynamisch, gedekt }.
+ */
+export function keurRedirects(tekst, rijen, { distDir } = {}) {
+  const fouten = [];
+  let verwacht = '';
+  try {
+    verwacht = redirectsTekst(redirectRegels(rijen));
+  } catch (e) {
+    return { fouten: [String(e.message)], vast: 0, dynamisch: 0, gedekt: 0 };
+  }
+  if (tekst.replace(/\r\n/g, '\n') !== verwacht) {
+    fouten.push('public/_redirects wijkt af van de tabel: draai `node scripts/lib/verhuis.mjs`');
+  }
+  const regels = leesRedirects(tekst);
+  let gedekt = 0;
+  for (const rij of rijen) {
+    const pad = oudPad(rij);
+    if (pad === null) continue;
+    const proef = pad.replace('*', 'verhuis-proef');
+    const regel = zoekRegel(regels, proef.split('?')[0]);
+    if (rij.actie === 'gelijk') {
+      if (regel) fouten.push(`regel ${rij.regel}: ${pad} is gelijk maar wordt omgeleid naar ${regel.naar}`);
+      continue;
+    }
+    if (!regel) fouten.push(`regel ${rij.regel}: ${pad} (${rij.actie}) heeft geen regel in _redirects`);
+    else if (regel.naar !== rij.nieuw_adres || regel.status !== 301) {
+      fouten.push(`regel ${rij.regel}: ${pad} gaat naar ${regel.naar} ${regel.status}, verwacht ${rij.nieuw_adres} 301`);
+    } else gedekt += 1;
+  }
+  if (distDir) {
+    for (const r of regels) {
+      if (r.van.includes('*')) continue;
+      const kaal = r.van.replace(/^\/+|\/+$/g, '');
+      const bestand = [join(distDir, kaal), join(distDir, kaal, 'index.html'), join(distDir, `${kaal}.html`)];
+      if (kaal && bestand.some((b) => existsSync(b) && statSync(b).isFile())) {
+        fouten.push(`${r.van} is een bestaande pagina of bestand in dist en mag niet omgeleid worden`);
+      }
+    }
+    for (const r of regels) {
+      const doel = r.naar.replace(/^\/+/, '');
+      const kandidaten = doel === '' ? [join(distDir, 'index.html')] : [join(distDir, doel), join(distDir, doel, 'index.html')];
+      if (!kandidaten.some((b) => existsSync(b) && statSync(b).isFile())) {
+        fouten.push(`${r.van} wijst naar ${r.naar}, maar dat bestaat niet in dist`);
+      }
+    }
+  }
+  const dynamisch = regels.filter((r) => r.van.includes('*') || r.van.includes(':')).length;
+  const vast = regels.length - dynamisch;
+  if (vast > LIMIET.vast) fouten.push(`${vast} vaste regels, Cloudflare staat er ${LIMIET.vast} toe`);
+  if (dynamisch > LIMIET.dynamisch) fouten.push(`${dynamisch} dynamische regels, Cloudflare staat er ${LIMIET.dynamisch} toe`);
+  return { fouten, vast, dynamisch, gedekt };
 }
 
 /** Geeft { rijen, fouten }; rijen zijn objecten met de zeven kolommen plus regel. */
