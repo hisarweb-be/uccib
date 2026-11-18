@@ -419,7 +419,20 @@ export function start() {
   if (heroSectie) hero(heroSectie);
   if (piekSectie) piek(piekSectie);
 
-  /* Maten kloppen pas als de letters er zijn en als een film zijn plek heeft. */
-  document.addEventListener('uccib:film-klaar', () => ScrollTrigger.refresh());
-  document.fonts?.ready.then(() => ScrollTrigger.refresh());
+  /* Maten kloppen pas als de letters er zijn en als een film zijn plek heeft.
+     Een refresh zet de scrollpositie terug en breekt zo een lopende (smooth)
+     scroll af: daarom pas verversen als er 200 ms niet gescrold is. */
+  let wacht = 0;
+  let nodig = false;
+  const ververs = () => {
+    nodig = true;
+    clearTimeout(wacht);
+    wacht = window.setTimeout(() => {
+      nodig = false;
+      ScrollTrigger.refresh();
+    }, 200);
+  };
+  window.addEventListener('scroll', () => nodig && ververs(), { passive: true });
+  document.addEventListener('uccib:film-klaar', ververs);
+  document.fonts?.ready.then(ververs);
 }
