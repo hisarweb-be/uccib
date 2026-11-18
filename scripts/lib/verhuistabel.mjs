@@ -1,6 +1,6 @@
 /**
- * Leest en controleert de verhuistabel (scripts/data/verhuistabel.csv, kopie van
- * herontwerp/VERHUISTABEL.csv): oud adres van uccib.com naar nieuw pad.
+ * Leest en controleert de verhuistabel (scripts/data/verhuistabel.csv, de enige bron):
+ * oud adres van uccib.com naar nieuw pad.
  * Kolommen: oud_adres, status_nu, soort, taal, nieuw_adres, actie, uitleg.
  * actie is gelijk (zelfde pad, of alleen schuine streep anders, of geen pad: hostregel),
  * doorverwijzen (301 naar nieuw_adres) of vangregel (jokerregel, 301 naar nieuw_adres).
@@ -53,17 +53,15 @@ export function csvVeld(waarde) {
 }
 
 /**
- * De tabel die de repo, de generator en CI lezen. De werkversie van D3 staat in
- * herontwerp/VERHUISTABEL.csv (buiten git); `node scripts/lib/verhuis.mjs --tabel=<pad>`
- * neemt die over in deze kopie en schrijft public/_redirects opnieuw.
+ * De enige verhuistabel: de generator, verify en verify:verhuis lezen alleen dit
+ * bestand. Er is geen overname van een tabel buiten de repo.
  */
 export const REPO_TABEL = fileURLToPath(new URL('../data/verhuistabel.csv', import.meta.url));
 
-/** Zoekt de tabel: expliciet pad, anders de kopie in de repo. */
-export function vindTabel(pad) {
-  const gevonden = pad ?? REPO_TABEL;
-  if (!existsSync(gevonden)) throw new Error(`verhuistabel niet gevonden: ${gevonden}`);
-  return gevonden;
+/** Geeft het pad van de tabel in de repo; fout als het bestand ontbreekt. */
+export function vindTabel() {
+  if (!existsSync(REPO_TABEL)) throw new Error(`verhuistabel niet gevonden: ${REPO_TABEL}`);
+  return REPO_TABEL;
 }
 
 /** Pad (met query) van een oud adres op uccib.com, of null voor een hostregel of ander domein. */

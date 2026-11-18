@@ -3,7 +3,7 @@
  * Meet elke rij van de verhuistabel (scripts/data/verhuistabel.csv) op de voorvertoning en schrijft
  * verhuis-<datum>.csv naar --uit=, anders naar ../herontwerp/bewijs-f3 als die map er is, anders naar de tijdmap.
  *
- * Gebruik: node scripts/verify-verhuis.mjs [basisadres] [--tabel=pad] [--uit=map] [--alleen-tabel]
+ * Gebruik: node scripts/verify-verhuis.mjs [basisadres] [--uit=map] [--alleen-tabel]
  * Standaard basisadres: https://herontwerp-wow.uccib.pages.dev (alleen GET, zonder redirects te volgen).
  *
  * Verwachting per rij:
@@ -21,7 +21,7 @@ import { csvVeld, leesTabel, vindTabel } from './lib/verhuistabel.mjs';
 const args = process.argv.slice(2);
 const optie = (naam) => args.find((a) => a.startsWith(`--${naam}=`))?.slice(naam.length + 3);
 const basis = (args.find((a) => /^https?:\/\//.test(a)) ?? 'https://herontwerp-wow.uccib.pages.dev').replace(/\/+$/, '');
-const tabelPad = vindTabel(optie('tabel'));
+const tabelPad = vindTabel();
 const { rijen, fouten } = leesTabel(tabelPad);
 
 if (fouten.length) {
