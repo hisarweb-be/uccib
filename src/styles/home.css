@@ -350,7 +350,8 @@
     }
     .hero-podium {
       --t1: clamp(0, (var(--hero-p) - 0.09) / 0.11, 1);
-      --t2: clamp(0, (var(--hero-p) - 0.92) / 0.06, 1);
+      /* Het slot: de rozet parkeert 0,90-0,95, pas daarna komt de belofte (vanaf 0,955). */
+      --t2: clamp(0, (var(--hero-p) - 0.9) / 0.05, 1);
       --hero-k: clamp(0, (var(--hero-p) - 0.81) / 0.09, 1);
       --weg: clamp(0, 1 - (var(--hero-p) - 0.09) / 0.05, 1);
       --fig-s: calc(1 + (var(--fs, 1) - 1) * var(--t1) + (var(--gs, 1) - var(--fs, 1)) * var(--t2));
@@ -393,7 +394,11 @@
     .hero-foto img,
     .hero-foto canvas.is-klaar {
       clip-path: var(--venster-pad);
-      opacity: clamp(0, 1 - (var(--hero-p) - 0.92) / 0.04, 1);
+      opacity: clamp(0, 1 - (var(--hero-p) - 0.9) / 0.03, 1);
+    }
+    /* De vermelding hoort bij de film: weg zodra het venster naar het slot verhuist. */
+    .hero-vermelding {
+      opacity: calc(1 - clamp(0, (var(--hero-p) - 0.89) / 0.01, 1));
     }
     .hero-stip {
       transform: scale(calc(1 / var(--fig-s)));
@@ -480,7 +485,7 @@
       font-weight: var(--text-klok--font-weight);
       color: var(--inkt-zacht);
       white-space: nowrap;
-      opacity: calc(clamp(0, (var(--hero-p) - 0.09) / 0.04, 1) * (1 - var(--t2)));
+      opacity: calc(clamp(0, (var(--hero-p) - 0.09) / 0.04, 1) * clamp(0, (0.9 - var(--hero-p)) / 0.02, 1));
     }
     .hero-klok li + li::before {
       content: '·';
@@ -536,7 +541,7 @@
       left: 0;
       right: 0;
       padding: calc(var(--slot-rozet) + 1.5rem) var(--blad) 0;
-      opacity: clamp(0, (var(--hero-p) - 0.93) / 0.05, 1);
+      opacity: clamp(0, (var(--hero-p) - 0.955) / 0.035, 1);
       pointer-events: none;
     }
     .hero-unie[data-stand='slot'] .hero-slot {

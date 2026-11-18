@@ -186,7 +186,7 @@ function hero(sectie: HTMLElement) {
   function zet(p: number) {
     sectie.style.setProperty('--hero-p', p.toFixed(4));
 
-    const nu = p >= 0.92 ? 'slot' : p > 0.14 ? 'fasen' : 'eerste';
+    const nu = p >= 0.95 ? 'slot' : p > 0.14 ? 'fasen' : 'eerste';
     if (nu !== stand) {
       stand = nu;
       sectie.dataset.stand = nu;
@@ -195,7 +195,7 @@ function hero(sectie: HTMLElement) {
     }
 
     let index = -1;
-    if (p < 0.92) for (let i = 0; i < grenzen.length; i += 1) if (p >= (grenzen[i] ?? 2)) index = i;
+    if (p < 0.9) for (let i = 0; i < grenzen.length; i += 1) if (p >= (grenzen[i] ?? 2)) index = i;
     if (index !== actief) {
       actief = index;
       klok.forEach((li, i) => {
