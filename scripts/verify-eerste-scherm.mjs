@@ -212,23 +212,30 @@ const ZONDER_FOTO = '.piek-laag,.piek-film{opacity:0!important}';
  * een kortere pagina geeft geen wachttijd die afloopt.
  */
 async function naarPodium(page, deel, kies = '[data-controle-podium]') {
+  // Het doel staat als functie in de pagina, zodat de wacht het elk beeld opnieuw
+  // kan uitrekenen uit het element (zelfde formule als de eerste scroll).
   const doel = await page.evaluate(
     ([d, k]) => {
-      const el = document.querySelector(k);
-      if (!el) return null;
-      let top = el.getBoundingClientRect().top + window.scrollY;
-      let span = Math.max(0, el.getBoundingClientRect().height - window.innerHeight);
-      // Een scène van de startpagina: het podium plakt onder de kop en de weg is
-      // `data-lengte` schermhoogten lang (de hero drie), gemeten aan `.sh-maat`.
-      const maat = el.querySelector('.sh-maat');
-      const podium = el.querySelector('.hero-podium, .piek-podium');
-      if (maat && podium) {
-        top -= parseFloat(getComputedStyle(podium).top) || 0;
-        span = maat.offsetHeight * (Number(el.dataset.lengte) || 3);
-      }
-      const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-      const y = Math.min(Math.max(0, top + span * d), max);
+      window.__schermpoortDoel = () => {
+        const el = document.querySelector(k);
+        if (!el) return null;
+        let top = el.getBoundingClientRect().top + window.scrollY;
+        let span = Math.max(0, el.getBoundingClientRect().height - window.innerHeight);
+        // Een scène van de startpagina: het podium plakt onder de kop en de weg is
+        // `data-lengte` schermhoogten lang (de hero drie), gemeten aan `.sh-maat`.
+        const maat = el.querySelector('.sh-maat');
+        const podium = el.querySelector('.hero-podium, .piek-podium');
+        if (maat && podium) {
+          top -= parseFloat(getComputedStyle(podium).top) || 0;
+          span = maat.offsetHeight * (Number(el.dataset.lengte) || 3);
+        }
+        const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+        return Math.min(Math.max(0, top + span * d), max);
+      };
+      const y = window.__schermpoortDoel();
+      if (y === null) return null;
       delete window.__schermpoortY;
+      window.__schermpoortStil = 0;
       window.scrollTo(0, y);
       return y;
     },
@@ -236,14 +243,29 @@ async function naarPodium(page, deel, kies = '[data-controle-podium]') {
   );
   if (doel === null) return;
 
+  // Na de scroll kan de documenthoogte of de klem nog verschuiven (ScrollTrigger-
+  // refresh na fonts.ready of een film, de bewegingslaag na load, een stijlblad,
+  // scroll anchoring); de pagina staat dan stil op een andere, geldige plek. Het
+  // doel wordt daarom elk beeld vers berekend, en staat de pagina drie beelden stil
+  // naast dat verse doel, dan scrolt dezelfde wacht er opnieuw heen. De voorwaarde
+  // om door te gaan blijft "stil én op het doel" (0,5 px en 1,5 px, 4000 ms).
   await page.waitForFunction(
-    (y) => {
+    () => {
       const nu = window.scrollY;
       const vorige = window.__schermpoortY;
       window.__schermpoortY = nu;
-      return vorige !== undefined && Math.abs(nu - vorige) < 0.5 && Math.abs(nu - y) < 1.5;
+      const y = window.__schermpoortDoel();
+      if (y === null) return false;
+      const stil = vorige !== undefined && Math.abs(nu - vorige) < 0.5;
+      if (stil && Math.abs(nu - y) < 1.5) return true;
+      window.__schermpoortStil = stil ? window.__schermpoortStil + 1 : 0;
+      if (window.__schermpoortStil >= 2) {
+        window.__schermpoortStil = 0;
+        window.scrollTo(0, y);
+      }
+      return false;
     },
-    doel,
+    null,
     { timeout: 4000, polling: 'raf' },
   );
 }
