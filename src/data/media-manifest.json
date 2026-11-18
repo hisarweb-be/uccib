@@ -177,9 +177,9 @@
           "reeks": null,
           "poster": {
             "pad": "/media/wow/p1-d-poster.webp",
-            "breedte": 1280,
-            "hoogte": 720,
-            "gewicht": 62246,
+            "breedte": 904,
+            "hoogte": 508,
+            "gewicht": 47822,
             "avif": "/media/wow/p1-d-poster.avif"
           },
           "frame0": null,
@@ -253,9 +253,9 @@
           "reeks": null,
           "poster": {
             "pad": "/media/wow/p2-d-poster.webp",
-            "breedte": 1280,
-            "hoogte": 720,
-            "gewicht": 43846,
+            "breedte": 1600,
+            "hoogte": 900,
+            "gewicht": 63606,
             "avif": "/media/wow/p2-d-poster.avif"
           },
           "frame0": null,
@@ -330,9 +330,9 @@
           "reeks": null,
           "poster": {
             "pad": "/media/wow/p3-d-poster.webp",
-            "breedte": 1280,
-            "hoogte": 720,
-            "gewicht": 106746,
+            "breedte": 1600,
+            "hoogte": 900,
+            "gewicht": 112482,
             "avif": "/media/wow/p3-d-poster.avif"
           },
           "frame0": null,
