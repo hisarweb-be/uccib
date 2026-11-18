@@ -453,7 +453,7 @@
       fill: var(--color-mint);
     }
 
-    /* De fasetekst: één cel, buren overlappen, dus nooit een moment zonder tekst. */
+    /* De fasetekst: één cel; buren wisselen kort na de grens, nooit tegelijk zichtbaar. */
     .hero-fasen {
       position: absolute;
       inset: 0;
@@ -498,9 +498,11 @@
     }
     .hero-fase {
       grid-area: 1 / 1;
+      /* Na elkaar, nooit door elkaar: tot de grens staat de vorige vol, die is weg op
+         grens + 0,006 en pas dan komt de volgende (vol op grens + 0,018). */
       opacity: clamp(
         0,
-        min((var(--hero-p) - var(--van)) / 0.03 + 0.5, (var(--tot) - var(--hero-p)) / 0.03 + 0.5),
+        min((var(--hero-p) - var(--van) - 0.006) / 0.012, (var(--tot) + 0.006 - var(--hero-p)) / 0.006),
         1
       );
     }
