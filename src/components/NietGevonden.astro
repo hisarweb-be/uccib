@@ -1,0 +1,281 @@
+---
+/**
+ * De 404 (DESIGNSYSTEEM 7.13), in drie talen.
+ *
+ * Papier, de rozet in stand `open-kern`, daarnaast de kop, één zin, een
+ * primaire knop naar de startpagina en een secundaire naar contact, en daaronder
+ * de hoofdbestemmingen als gewone links. Geen reuzencijfer, geen grap, geen
+ * illustratie: het woord "404" staat nergens in beeld.
+ *
+ * Drie bestanden roepen dit op: src/pages/404.astro, nl/404.astro en fr/404.astro.
+ * Cloudflare Pages toont bij een onbekend pad de 404.html die het dichtst bij dat
+ * pad staat, dus /nl/iets geeft dist/nl/404.html en /iets dist/404.html. De
+ * statuscode komt van Pages, niet van Astro.
+ *
+ * Kop en zin staan hier en niet in de taallaag: f3.ts en de taal-json zijn van
+ * F2b. De Turkse kop is de bestaande ("Sayfa bulunamadı"); verify-een-voor-een
+ * zoekt hem. Zodra f3.ts een blok voor de 404 krijgt, leest dit bestand daaruit.
+ *
+ * Bestemmingen: alleen pagina's die aan staan (`isActiveSlug`). Een link naar een
+ * uitgezette pagina zou checkConcepten in scripts/lib/keuring.mjs breken.
+ */
+import Layout from '../layouts/Layout.astro';
+import Rozet from './Rozet.astro';
+import { getDictionary, type Locale } from '../i18n';
+import { pagePath } from '../i18n/config';
+import { f3 } from '../i18n/f3';
+import { isActiveSlug } from '../lib/actief';
+import type { Slug } from '../data/site';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale);
+const teksten = f3(locale);
+
+const TEKST: Record<Locale, { kop: string; lead: string; lijstLabel: string; beschrijving: string }> = {
+  tr: {
+    kop: 'Sayfa bulunamadı',
+    lead: 'Aradığınız sayfa taşınmış veya kaldırılmış olabilir.',
+    lijstLabel: 'Sitedeki sayfalar',
+    beschrijving: 'Aradığınız sayfa bulunamadı. Ana sayfadan veya aşağıdaki sayfalardan devam edebilirsiniz.',
+  },
+  nl: {
+    kop: 'Pagina niet gevonden',
+    lead: 'De pagina die u zoekt, is misschien verplaatst of verwijderd.',
+    lijstLabel: 'Pagina’s op deze site',
+    beschrijving: 'De pagina die u zoekt, bestaat hier niet. Ga verder via de startpagina of een van de pagina’s hieronder.',
+  },
+  fr: {
+    kop: 'Page introuvable',
+    lead: 'La page que vous cherchez a peut-être été déplacée ou supprimée.',
+    lijstLabel: 'Pages du site',
+    beschrijving: 'La page que vous cherchez n’existe pas ici. Continuez par l’accueil ou l’une des pages ci-dessous.',
+  },
+};
+const tekst = TEKST[locale];
+
+/** Volgorde van het menu (RozetMenu) plus de dienstenpagina; start en contact staan al in de knoppen. */
+const BESTEMMINGEN = [
+  'hakkimizda',
+  'hizmetlerimiz',
+  'haberler',
+  'bolge-derneklerimiz',
+  'subelerimiz',
+  'namaz-vakitleri',
+  'cuma-hutbesi',
+  'bagislar',
+] as const satisfies readonly Slug[];
+
+const bestemmingen = BESTEMMINGEN.filter((slug) => isActiveSlug(slug)).map((slug) => ({
+  href: pagePath(locale, slug),
+  label: t.nav[slug],
+}));
+---
+
+<Layout
+  locale={locale}
+  slug={null}
+  path={locale === 'tr' ? '/404/' : `/${locale}/404/`}
+  title={`${tekst.kop} | ${t.siteName}`}
+  description={tekst.beschrijving}
+  noindex
+  volleBreedte
+>
+  <section class="niet-gevonden" aria-labelledby="niet-gevonden-kop">
+    <div class="kolom">
+      <Rozet stand="open-kern" maat={360} class="ng-rozet" />
+      <div class="tekst">
+        <h1 id="niet-gevonden-kop">{tekst.kop}</h1>
+        <p class="lead">{tekst.lead}</p>
+        <p class="knoppen">
+          <a class="knop knop-eerst" href={pagePath(locale, '')}>{t.nav.home}</a>
+          <a class="knop knop-tweede" href={pagePath(locale, 'iletisim')}>{teksten.contactKop}</a>
+        </p>
+      </div>
+    </div>
+
+    {
+      bestemmingen.length > 0 && (
+        <nav class="kolom bestemmingen" aria-label={tekst.lijstLabel}>
+          <ul>
+            {bestemmingen.map((b) => (
+              <li>
+                <a href={b.href}>{b.label}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )
+    }
+  </section>
+</Layout>
+
+<style>
+  .niet-gevonden {
+    background: var(--color-papier);
+    color: var(--color-inkt);
+    padding-block: 4rem 6rem;
+  }
+
+  .kolom {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 72rem;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+
+  .kolom:first-child {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2.5rem;
+  }
+
+  /* 200 px op een telefoon, 360 px op een breed scherm (7.13). */
+  .niet-gevonden :global(.ng-rozet) {
+    width: clamp(200px, 26vw, 360px);
+    height: auto;
+  }
+
+  h1 {
+    font-family: var(--font-kop);
+    font-size: var(--text-h1);
+    line-height: var(--text-h1--line-height);
+    letter-spacing: var(--text-h1--letter-spacing);
+    font-weight: var(--text-h1--font-weight);
+    overflow-wrap: anywhere;
+  }
+
+  .lead {
+    margin-top: 1.25rem;
+    max-width: 34rem;
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+  }
+
+  .knoppen {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+
+  /* Knoppen volgens DESIGNSYSTEEM 7.1, zelfde maat als op de startpagina. */
+  .knop {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-height: 3.25rem;
+    padding: 0 1.5rem;
+    border: 1.5px solid var(--color-petrol-diep);
+    border-radius: var(--radius-vak);
+    font-family: var(--font-tekst);
+    font-size: var(--text-knop);
+    line-height: var(--text-knop--line-height);
+    letter-spacing: var(--text-knop--letter-spacing);
+    font-weight: var(--text-knop--font-weight);
+    text-decoration: none;
+    transition:
+      background-color 160ms var(--ease-uit),
+      border-color 160ms var(--ease-uit),
+      color 160ms var(--ease-uit);
+  }
+
+  .knop-eerst {
+    background: var(--color-petrol-diep);
+    color: var(--color-wit);
+  }
+
+  .knop-eerst:hover {
+    background: var(--color-inkt);
+    border-color: var(--color-inkt);
+  }
+
+  .knop-tweede {
+    background: transparent;
+    color: var(--color-petrol-diep);
+  }
+
+  .knop-tweede:hover {
+    border-color: var(--color-inkt);
+    color: var(--color-inkt);
+  }
+
+  .knop:active {
+    transform: translateY(1px);
+  }
+
+  .knop:focus-visible,
+  .bestemmingen a:focus-visible {
+    outline: 3px solid var(--color-petrol);
+    outline-offset: 3px;
+  }
+
+  .bestemmingen {
+    margin-top: 3.5rem;
+  }
+
+  .bestemmingen ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+    column-gap: 2rem;
+    border-top: 1px solid var(--lijn);
+  }
+
+  .bestemmingen li {
+    border-bottom: 1px solid var(--lijn);
+  }
+
+  .bestemmingen a {
+    display: block;
+    padding-block: 0.75rem;
+    min-height: 44px;
+    box-sizing: border-box;
+    color: var(--color-inkt);
+    font-size: var(--text-voet);
+    line-height: var(--text-voet--line-height);
+    text-decoration: none;
+  }
+
+  .bestemmingen a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  @media (min-width: 640px) {
+    .kolom {
+      padding-inline: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .niet-gevonden {
+      padding-block: 6rem 8rem;
+    }
+
+    .kolom {
+      padding-inline: 2rem;
+    }
+
+    .kolom:first-child {
+      flex-direction: row;
+      align-items: center;
+      gap: 4rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .knop {
+      transition: none;
+    }
+
+    .knop:active {
+      transform: none;
+    }
+  }
+</style>
