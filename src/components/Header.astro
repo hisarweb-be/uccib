@@ -1,10 +1,20 @@
 ---
-import { SITE } from '../data/site';
-import Logo from './Logo.astro';
+/**
+ * De navigatiekop (DESIGNSYSTEEM 7.3): links de rozet als menuknop, dan het
+ * woordmerk, rechts de taalkeuze en op desktop de giftlink. Papier, vast bovenaan,
+ * een haarlijn zodra de pagina 8 px gescrold is. Geen topbalk meer: telefoon en
+ * mail staan in het menublad, het adresblad en de voet.
+ *
+ * Het menu zelf is `RozetMenu`: altijd de zeven punten plus Bağış. De structuur
+ * `header nav ul a` en `a.donate` blijft daarin bestaan (verify-mobiel).
+ * Zonder JavaScript is er geen knop; dan staat het menu als lijst onder de balk.
+ */
 import { LOCALES, LOCALE_LABELS, LOCALE_TAGS, getDictionary, type Locale } from '../i18n';
 import { pagePath } from '../i18n/config';
+import { f3 } from '../i18n/f3';
 import type { Slug } from '../data/site';
-import { isActiveSlug } from '../lib/actief';
+import RozetVoortgang from './RozetVoortgang.astro';
+import RozetMenu from './RozetMenu.astro';
 
 interface Props {
   locale: Locale;
@@ -14,196 +24,213 @@ interface Props {
 
 const { locale, slug } = Astro.props;
 const t = getDictionary(locale);
-
-/**
- * De hoofditems in dezelfde volgorde als het huidige menu. Een concept dat nog
- * geen inhoud heeft staat er niet in: een menulink naar een lege pagina is
- * precies wat we niet willen. Zodra F3 de inhoud levert, komt het item vanzelf
- * terug zodra de pagina in de CMS op actief staat.
- */
-const MAIN_NAV = [
-  'home',
-  'hakkimizda',
-  'haberler',
-  'bolge-derneklerimiz',
-  'subelerimiz',
-  'namaz-vakitleri',
-  'cuma-hutbesi',
-] as const;
-
-const mainNav = MAIN_NAV.map((key) => ({
-  key,
-  slug: (key === 'home' ? '' : key) as Slug,
-  label: t.nav[key],
-}))
-  .filter((item) => isActiveSlug(item.slug))
-  .map((item) => ({ ...item, href: pagePath(locale, item.slug) }));
+const teksten = f3(locale);
 
 /** De taalkiezer wijst op deze pagina; zonder slug (404) valt hij terug op de eigen taal. */
 const languageHref = (other: Locale) =>
   slug === null ? (other === 'tr' ? '/' : `/${other}/`) : pagePath(other, slug);
 ---
 
-<header>
-  <div class="topbar on-dark">
-    <div class="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-1 px-4 py-2 sm:px-6 lg:px-8">
-      <div class="flex flex-wrap items-center gap-x-5 gap-y-1">
-        <a class="topbar-link" href={`tel:${SITE.phoneHref}`}>
-          <span class="sr-only">{t.footer.phone}: </span>{SITE.phone}
-        </a>
-        <a class="topbar-link" href={`mailto:${SITE.email}`}>
-          <span class="sr-only">{t.footer.email}: </span>{SITE.email}
-        </a>
-      </div>
-      <nav aria-label={t.langLabel} class="flex items-center gap-x-4">
+<header class="kop">
+  <div class="balk">
+    <button
+      type="button"
+      class="menuknop"
+      data-menu-open
+      aria-expanded="false"
+      aria-controls="rozetmenu"
+    >
+      <RozetVoortgang maat={32} />
+      <span class="menuknop-tekst">{teksten.rozetMenuOpen}</span>
+    </button>
+
+    <a class="woordmerk" href={pagePath(locale, '')}>uccib</a>
+
+    <div class="rechts">
+      <nav class="talen" aria-label={t.langLabel}>
         {
           LOCALES.map((other) => (
             <a
-              class:list={['topbar-link', { 'is-current': other === locale }]}
+              class="taal"
               href={languageHref(other)}
               hreflang={LOCALE_TAGS[other].html}
               lang={LOCALE_TAGS[other].html}
               aria-current={other === locale ? 'true' : undefined}
             >
-              {LOCALE_LABELS[other].native}
+              {LOCALE_LABELS[other].short}
+              <span class="sr-only"> {LOCALE_LABELS[other].native}</span>
             </a>
           ))
         }
       </nav>
+      <a class="giftlink" href={pagePath(locale, 'bagislar')}>{t.donateCta}</a>
     </div>
   </div>
 
-  <div class="site-header">
-    <div class="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-8 lg:px-8">
-      <a class="logo-link" href={pagePath(locale, '')}>
-        <Logo locale={locale} breedte={200} />
-      </a>
-
-      <nav aria-label={t.navLabel}>
-        <ul class="flex flex-wrap items-center gap-x-1 gap-y-1 lg:justify-end">
-          {
-            mainNav.map((item) => (
-              <li>
-                <a
-                  class:list={[
-                    'nav-link',
-                    { 'is-current': item.key === 'home' ? slug === '' : slug === item.key },
-                  ]}
-                  href={item.href}
-                >
-                  {item.label}
-                </a>
-              </li>
-            ))
-          }
-        </ul>
-      </nav>
-
-      {
-        /* De doneerknop verschijnt pas als /bagislar/ echte inhoud heeft (F5).
-           Een opvallende knop naar een pagina die nog gebouwd wordt, kost meer
-           vertrouwen dan hij oplevert. */
-        isActiveSlug('bagislar') && (
-          <a class="donate" href={pagePath(locale, 'bagislar')}>{t.donateCta}</a>
-        )
-      }
-    </div>
-  </div>
+  <RozetMenu locale={locale} slug={slug} />
 </header>
 
 <style>
-  .topbar {
-    background: var(--color-brand-dark);
-    color: #fff;
-    font-size: var(--text-small);
+  .kop {
+    background: var(--color-papier);
+    border-bottom: 1px solid var(--lijn);
   }
 
-  .topbar-link {
-    color: #fff;
-    text-decoration: none;
+  /* Vast bovenaan alleen met JavaScript: zonder JavaScript hangt het menu onder de balk. */
+  :global(html.js-aan) .kop {
+    position: sticky;
+    top: 0;
+    z-index: 30;
   }
 
   /*
-    Op een telefoon is de bovenbalk het eerste wat een duim tegenkomt. Daar is
-    elke link 44 px hoog, de maat waar een vinger op mikt; met een muis blijft de
-    balk compact. Gemeten op 17-11: de links waren 24 px hoog en dus net te klein
-    (WCAG 2.5.8 vraagt 24, onze eigen lat staat op 44).
+    De haarlijn verschijnt na 8 px scroll. Een scroll-driven animatie op de
+    randkleur, geen JavaScript; kan de browser dat niet of vraagt de bezoeker
+    minder beweging, dan staat de lijn er gewoon altijd.
   */
-  @media (pointer: coarse), (max-width: 767px) {
-    .topbar-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 44px;
-      /* Atkinson is smaller dan Open Sans: "Türkçe" werd 43 px breed (18 nov). */
-      min-width: 44px;
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .kop {
+        animation: kop-lijn linear both;
+        animation-timeline: scroll(root);
+        animation-range: 0 8px;
+      }
     }
   }
 
-  .topbar-link:hover,
-  .topbar-link:focus-visible {
-    text-decoration: underline;
+  @keyframes kop-lijn {
+    from {
+      border-bottom-color: transparent;
+    }
+    to {
+      border-bottom-color: var(--lijn);
+    }
   }
 
-  .topbar-link.is-current {
-    font-weight: 700;
-    text-decoration: underline;
+  .balk {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: var(--container-blad);
+    min-height: var(--kop-hoogte);
+    margin-inline: auto;
+    padding-inline: var(--spacing-marge);
   }
 
-  .site-header {
-    background: var(--color-surface);
-    border-bottom: 4px solid var(--color-brand);
+  .menuknop {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 44px;
+    min-height: 44px;
+    margin-inline-start: -6px;
+    padding: 0 6px;
+    border: 0;
+    border-radius: var(--radius-vak);
+    background: transparent;
+    color: var(--color-inkt);
+    font: inherit;
+    font-size: var(--text-klok);
+    font-weight: 600;
+    cursor: pointer;
   }
 
-  .logo-link {
+  :global(html.js-aan) .menuknop {
     display: inline-flex;
   }
 
-  /*
-    De maat van het logo staat op het beeld zelf (`breedte` op `<Logo>`), niet
-    hier. Gemeten op 17-11: deze regel raakte het logo nooit. Een scoped stijl
-    geldt alleen voor elementen uit dit bestand, en de `<img>` staat in
-    `Logo.astro`; het logo stond daardoor op zijn bronmaat van 560 px en vulde
-    de halve kop. Op een telefoon hield alleen de `max-width: 100%` van Tailwind
-    hem nog binnen, waardoor hij daar bijna het hele scherm breed werd.
-  */
-
-  .nav-link {
-    display: inline-block;
-    padding: 10px 11px;
-    font-size: var(--text-nav);
-    font-weight: 600;
-    color: var(--color-ink);
-    text-decoration: none;
+  /* 32 px op een telefoon, 40 px vanaf 1024 (DESIGNSYSTEEM 5.4). */
+  @media (min-width: 64rem) {
+    .menuknop :global(.rozet) {
+      width: 40px;
+      height: 40px;
+    }
   }
 
-  .nav-link:hover,
-  .nav-link:focus-visible {
-    color: var(--color-brand-dark);
+  .menuknop:hover .menuknop-tekst,
+  .menuknop:focus-visible .menuknop-tekst {
+    color: var(--color-petrol-diep);
     text-decoration: underline;
   }
 
-  .nav-link.is-current {
-    color: var(--color-brand-dark);
-    text-decoration: underline;
-    text-underline-offset: 0.35em;
-  }
-
-  .donate {
-    display: inline-block;
-    align-self: flex-start;
-    padding: 12px 28px;
-    border-radius: var(--radius-pill);
-    background: var(--color-brand-dark);
-    color: #fff;
+  .woordmerk {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--color-petrol-diep);
+    font-family: var(--font-kop);
+    font-size: var(--text-naam);
     font-weight: 600;
+    line-height: 1;
     text-decoration: none;
-    white-space: nowrap;
   }
 
-  .donate:hover,
-  .donate:focus-visible {
-    background: var(--color-ink);
+  .rechts {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-inline-start: auto;
+  }
+
+  .talen {
+    display: flex;
+  }
+
+  .taal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    color: var(--color-inkt);
+    font-size: var(--text-klok);
+    font-weight: 500;
     text-decoration: none;
+  }
+
+  .taal:hover,
+  .taal:focus-visible {
+    color: var(--color-petrol-diep);
+    text-decoration: underline;
+  }
+
+  .taal[aria-current='true'] {
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.25em;
+  }
+
+  /* Op een telefoon staat de giftknop in het menublad en onder de naam, niet in de kop. */
+  .giftlink {
+    display: none;
+  }
+
+  @media (min-width: 64rem) {
+    .giftlink {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 0 1.25rem;
+      border: 2px solid var(--color-petrol-diep);
+      border-radius: var(--radius-vak);
+      color: var(--color-petrol-diep);
+      font-size: var(--text-knop);
+      font-weight: 600;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .giftlink:hover,
+    .giftlink:focus-visible {
+      background: var(--color-petrol-diep);
+      color: var(--color-wit);
+    }
+  }
+
+  /* Zolang het blad open is, valt de WhatsApp-knop weg: hij zou het blad bedekken. */
+  :global(html.menu-open .wa-wrap) {
+    display: none;
   }
 </style>
