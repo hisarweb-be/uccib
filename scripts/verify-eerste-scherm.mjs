@@ -157,12 +157,12 @@ const TEGENTOETS_VLAK = `<!DOCTYPE html><html lang="nl"><head><meta charset="utf
 const CONTROLE_BEWEGING = `<!DOCTYPE html><html lang="nl"><head><meta charset="utf-8">
 <style>
   html,body{margin:0;background:#0b0f0f}
-  [data-cinema]{height:200vh}
+  [data-controle-podium]{height:200vh}
   .staart{height:200vh}
   #linnen{position:fixed;inset:0;z-index:9;background:#f2f5f5}
   #linnen.stil{background:repeating-linear-gradient(115deg,#0d1212 0 18px,#b9c6c6 18px 34px)}
 </style></head><body>
-<div data-cinema></div><div class="staart"></div><div id="linnen"></div>
+<div data-controle-podium></div><div class="staart"></div><div id="linnen"></div>
 <script>
   const ECHT = window.scrollTo.bind(window);
   const DUUR = 1200;
@@ -180,7 +180,7 @@ const CONTROLE_BEWEGING = `<!DOCTYPE html><html lang="nl"><head><meta charset="u
     requestAnimationFrame(stap);
   };
   const linnen = document.getElementById('linnen');
-  const podium = document.querySelector('[data-cinema]');
+  const podium = document.querySelector('[data-controle-podium]');
   const doel = () => podium.getBoundingClientRect().height - window.innerHeight;
   const kijk = () => {
     linnen.classList.toggle('stil', !window.__schermpoortBeweegt && window.scrollY >= doel() - 1);
@@ -211,7 +211,7 @@ const ZONDER_FOTO = '.piek-laag,.piek-film{opacity:0!important}';
  * De doelhoogte wordt in de pagina zelf begrensd op wat er te scrollen valt, dus
  * een kortere pagina geeft geen wachttijd die afloopt.
  */
-async function naarPodium(page, deel, kies = '[data-cinema]') {
+async function naarPodium(page, deel, kies = '[data-controle-podium]') {
   const doel = await page.evaluate(
     ([d, k]) => {
       const el = document.querySelector(k);
@@ -316,7 +316,7 @@ async function tegentoets(browser, baseUrl) {
         await naarPodium(page, 1);
       } else {
         await page.evaluate(() => {
-          const el = document.querySelector('[data-cinema]');
+          const el = document.querySelector('[data-controle-podium]');
           const span = Math.max(0, el.getBoundingClientRect().height - window.innerHeight);
           window.scrollTo(0, span);
         });
