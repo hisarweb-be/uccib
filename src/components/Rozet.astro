@@ -1,0 +1,146 @@
+---
+/**
+ * De rozet als inline SVG (CONTRACT 2.8, DESIGNSYSTEEM 5). Eén figuur, zeven
+ * standen; geen extern beeld en geen netwerkverzoek.
+ *
+ * Maat: `viewBox="0 0 100 100"` uit het contract, midden op 50,50. De constructie
+ * van DESIGNSYSTEEM 5.2 (512 eenheden, R = 240) is hier geschaald naar R = 47:
+ * vierkant A met hoekpunten op 45, 135, 225 en 315 graden, vierkant B 45 graden
+ * gedraaid, inkepingen op 0,7654 R, kern een achtpuntige ster van 0,40 R en 0,30 R
+ * (geschat, DESIGNSYSTEEM 5.2). Lijnen in `currentColor`, met `pathLength="1"`
+ * zodat `stroke-dashoffset` van 1 naar 0 een lijn tekent, en
+ * `vector-effect: non-scaling-stroke` zodat de dikte in schermpixels vast blijft.
+ *
+ * Vlakken alleen in stand `vol`: buitenpunten petrol, middenring rozet-midden,
+ * kern mint, lijnen wit, en de hele figuur 22,5 graden gedraaid (logostand).
+ */
+export type RozetStand = 'punt' | 'cirkel' | 'vierkant' | 'acht-punten' | 'vlecht' | 'vol' | 'open-kern';
+
+interface Props {
+  stand: RozetStand;
+  /** Diameter in px. Minimum in de pagina is 24 (DESIGNSYSTEEM 5.4). */
+  maat?: number;
+  /** Lijndikte in schermpixels; standaard volgens de tabel in DESIGNSYSTEEM 5.4. */
+  lijn?: number;
+  /** Binnenlijnen pas vanaf 56 px (5.4); kleiner laat ze weg. */
+  binnenlijnen?: boolean;
+  /** Teken ook de stip in het midden (RozetVoortgang begint als punt). */
+  metPunt?: boolean;
+  class?: string;
+}
+
+const { stand, maat = 32, binnenlijnen = maat >= 56, metPunt = false, class: klasse } = Astro.props;
+const lijn = Astro.props.lijn ?? (maat < 56 ? 1.5 : maat < 200 ? 2 : maat < 480 ? 3 : 4);
+
+const R = 47;
+const pt = (graden: number, r: number) => {
+  const a = (graden * Math.PI) / 180;
+  return `${(50 + r * Math.cos(a)).toFixed(2)} ${(50 - r * Math.sin(a)).toFixed(2)}`;
+};
+const veelhoek = (punten: string[]) => `M${punten.join('L')}Z`;
+const hoeken = (start: number, stap: number, n: number) => Array.from({ length: n }, (_, i) => start + i * stap);
+
+const vierkantA = veelhoek(hoeken(45, 90, 4).map((g) => pt(g, R)));
+const vierkantB = veelhoek(hoeken(0, 90, 4).map((g) => pt(g, R)));
+/** De acht inkepingen, op de snijpunten van de zijden van A en B. */
+const inkepingen = hoeken(22.5, 45, 8).map((g) => pt(g, R * 0.7654));
+const binnen = veelhoek(inkepingen);
+const ster = (buiten: number, inkeping: number) =>
+  veelhoek(hoeken(0, 22.5, 16).map((g, i) => pt(g, i % 2 === 0 ? buiten : inkeping)));
+const kern = ster(R * 0.4, R * 0.3);
+const buitenster = ster(R, R * 0.7654);
+
+const toon = {
+  punt: stand === 'punt' || metPunt,
+  cirkel: stand === 'cirkel' || stand === 'vierkant',
+  a: stand !== 'punt' && stand !== 'cirkel',
+  b: ['acht-punten', 'vlecht', 'vol', 'open-kern'].includes(stand),
+  binnen: binnenlijnen && ['vlecht', 'vol', 'open-kern'].includes(stand),
+  kern: ['vlecht', 'vol', 'open-kern'].includes(stand),
+};
+---
+
+<svg
+  class:list={['rozet', `rozet--${stand}`, klasse]}
+  viewBox="0 0 100 100"
+  width={maat}
+  height={maat}
+  aria-hidden="true"
+  focusable="false"
+  style={`--rozet-lijn:${lijn}px`}
+>
+  <g class:list={[{ 'rozet-logostand': stand === 'vol' }]}>
+    {
+      stand === 'vol' && (
+        <g class="rozet-vlakken">
+          <path class="rozet-buiten" d={buitenster} />
+          <path class="rozet-ring" d={binnen} />
+          <path class="rozet-kern-vlak" d={kern} />
+        </g>
+      )
+    }
+    {stand === 'open-kern' && <path class="rozet-opening" d={kern} />}
+    {toon.punt && <circle class="rozet-punt" cx="50" cy="50" r="6" />}
+    {
+      toon.cirkel && (
+        <circle class:list={['rozet-lijn', { 'rozet-vaag': stand === 'vierkant' }]} cx="50" cy="50" r={R} pathLength="1" />
+      )
+    }
+    {toon.a && <path class="rozet-lijn rozet-a" d={vierkantA} pathLength="1" />}
+    {toon.b && <path class="rozet-lijn rozet-b" d={vierkantB} pathLength="1" />}
+    {toon.binnen && <path class="rozet-lijn rozet-binnen" d={binnen} pathLength="1" />}
+    {toon.kern && <path class="rozet-lijn rozet-kern" d={kern} pathLength="1" />}
+  </g>
+</svg>
+
+<style>
+  .rozet {
+    display: block;
+    flex: none;
+    overflow: visible;
+    color: var(--color-petrol-diep);
+  }
+
+  .rozet-lijn {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: var(--rozet-lijn);
+    stroke-linejoin: miter;
+    stroke-linecap: butt;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .rozet-vaag {
+    opacity: 0.3;
+  }
+
+  .rozet-punt {
+    fill: var(--color-petrol);
+  }
+
+  /* Stand vol: lijnen wit tussen gevulde vlakken (wit op papier bestaat niet). */
+  .rozet--vol .rozet-lijn {
+    stroke: var(--color-wit);
+  }
+
+  .rozet-buiten {
+    fill: var(--color-petrol);
+  }
+
+  .rozet-ring {
+    fill: var(--rozet-midden);
+  }
+
+  .rozet-kern-vlak {
+    fill: var(--color-mint);
+  }
+
+  .rozet-opening {
+    fill: var(--color-papier);
+  }
+
+  .rozet-logostand {
+    transform: rotate(22.5deg);
+    transform-origin: 50px 50px;
+  }
+</style>

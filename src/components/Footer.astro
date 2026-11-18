@@ -40,7 +40,7 @@ const LEGAL_LINKS = (
 ).filter((link) => isActiveSlug(link.slug));
 ---
 
-<footer class="site-footer on-dark">
+<footer class="site-footer">
   <div class="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
     <div class="grid gap-10 md:grid-cols-3">
       <div>
@@ -114,6 +114,7 @@ const LEGAL_LINKS = (
   .site-footer {
     background: var(--color-footer);
     color: var(--color-footer-text);
+    border-top: 1px solid var(--color-footer-line);
   }
 
   .footer-logo {
@@ -130,7 +131,7 @@ const LEGAL_LINKS = (
     font-family: var(--font-body);
     font-size: var(--text-h4);
     font-weight: 700;
-    color: #fff;
+    color: var(--color-footer-text);
   }
 
   .footer-link {
@@ -140,7 +141,7 @@ const LEGAL_LINKS = (
 
   .footer-link:hover,
   .footer-link:focus-visible {
-    color: #fff;
+    color: var(--color-brand-dark);
     text-decoration: underline;
   }
 

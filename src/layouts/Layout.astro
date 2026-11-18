@@ -1,6 +1,4 @@
 ---
-import '@fontsource-variable/open-sans/wght.css';
-import '@fontsource-variable/noto-serif/wght.css';
 import '../styles/tokens.css';
 import '../styles/tekst.css';
 import '../styles/cinema.css';
@@ -77,6 +75,13 @@ const xDefault = alternates[0]?.href;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {/*
+      Twee vlaggen vóór de eerste verf (CONTRACT 5.2): `js-aan` zodra er JavaScript
+      is (het menu wordt dan een knop met een modaal blad, zonder flits van de open
+      lijst), `beweging-aan` alleen als de bezoeker geen minder beweging vraagt.
+    */}
+    <script is:inline>(function(d){d.classList.add('js-aan');if(window.matchMedia&&matchMedia('(prefers-reduced-motion: no-preference)').matches)d.classList.add('beweging-aan')})(document.documentElement)</script>
+    <link rel="preload" href="/fonts/platypi-var.woff2" as="font" type="font/woff2" crossorigin />
     <title>{title}</title>
     <meta name="description" content={description} />
     {canonical && <link rel="canonical" href={canonical} />}

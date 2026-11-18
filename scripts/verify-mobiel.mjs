@@ -199,6 +199,19 @@ const opacity = (page, laag) =>
     laag,
   );
 
+/**
+ * Het menu staat sinds F2b PR2 in een modale dialog achter de rozetknop
+ * (DESIGNSYSTEEM 7.3): eerst openen, dan pas meten of tikken. De knop zelf is een
+ * gewoon tikdoel en wordt in stap 1 al op 44 px gekeurd. Zonder JavaScript is
+ * er geen knop en staat de lijst al open; dan doet deze stap niets.
+ */
+async function openMenu(page) {
+  const knop = page.locator('[data-menu-open]').first();
+  if ((await knop.count()) === 0 || !(await knop.isVisible())) return;
+  await knop.click();
+  await page.waitForSelector('dialog#rozetmenu[open]', { timeout: 5000 });
+}
+
 /* ── 0. Tegentoetsen: de poort moet zelf kunnen afkeuren ── */
 
 async function tegentoets(browser) {
@@ -280,7 +293,8 @@ async function keurPaginas(browser, baseUrl) {
         );
       }
 
-      // 3. menu: elk item is zichtbaar, niet bedekt en binnen het venster
+      // 3. menu: elk item is zichtbaar, niet bedekt en binnen het venster (na openen)
+      await openMenu(page);
       const menu = await page.evaluate(() => {
         const nav = document.querySelector('header nav ul');
         if (!nav) return { aantal: 0, fout: ['geen hoofdmenu gevonden'] };
@@ -357,11 +371,13 @@ async function tikMenu(browser, baseUrl) {
   const foutenLijst = [];
   try {
     await page.goto(baseUrl + '/hakkimizda/', { waitUntil: 'load' });
+    await openMenu(page);
     const items = await page.$$eval('header nav ul a', (as) =>
       as.map((a) => ({ tekst: a.textContent.trim(), href: a.getAttribute('href') })),
     );
     for (const item of items) {
       await page.goto(baseUrl + '/hakkimizda/', { waitUntil: 'load' });
+      await openMenu(page);
       // De vinger tikt in het midden van het item; geen `click()` die zelf het
       // midden uitrekent en daarmee een bedekking zou omzeilen.
       const box = await page.locator('header nav ul a', { hasText: item.tekst }).first().boundingBox();
@@ -404,6 +420,7 @@ async function tikSponsor(browser, baseUrl) {
   const foutenLijst = [];
   try {
     await page.goto(baseUrl + '/', { waitUntil: 'load' });
+    await openMenu(page);
     const doneer = page.locator('a.donate').first();
     const box = await doneer.boundingBox();
     if (!box) {
