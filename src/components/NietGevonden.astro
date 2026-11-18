@@ -12,9 +12,8 @@
  * pad staat, dus /nl/iets geeft dist/nl/404.html en /iets dist/404.html. De
  * statuscode komt van Pages, niet van Astro.
  *
- * Kop en zin staan hier en niet in de taallaag: f3.ts en de taal-json zijn van
- * F2b. De Turkse kop is de bestaande ("Sayfa bulunamadı"); verify-een-voor-een
- * zoekt hem. Zodra f3.ts een blok voor de 404 krijgt, leest dit bestand daaruit.
+ * Kop, zin, lijstlabel en beschrijving komen uit f3.ts (`nietGevonden`). De
+ * Turkse kop is de bestaande ("Sayfa bulunamadı"); verify-een-voor-een zoekt hem.
  *
  * Bestemmingen: alleen pagina's die aan staan (`isActiveSlug`). Een link naar een
  * uitgezette pagina zou checkConcepten in scripts/lib/keuring.mjs breken.
@@ -35,27 +34,7 @@ const { locale } = Astro.props;
 const t = getDictionary(locale);
 const teksten = f3(locale);
 
-const TEKST: Record<Locale, { kop: string; lead: string; lijstLabel: string; beschrijving: string }> = {
-  tr: {
-    kop: 'Sayfa bulunamadı',
-    lead: 'Aradığınız sayfa taşınmış veya kaldırılmış olabilir.',
-    lijstLabel: 'Sitedeki sayfalar',
-    beschrijving: 'Aradığınız sayfa bulunamadı. Ana sayfadan veya aşağıdaki sayfalardan devam edebilirsiniz.',
-  },
-  nl: {
-    kop: 'Pagina niet gevonden',
-    lead: 'De pagina die u zoekt, is misschien verplaatst of verwijderd.',
-    lijstLabel: 'Pagina’s op deze site',
-    beschrijving: 'De pagina die u zoekt, bestaat hier niet. Ga verder via de startpagina of een van de pagina’s hieronder.',
-  },
-  fr: {
-    kop: 'Page introuvable',
-    lead: 'La page que vous cherchez a peut-être été déplacée ou supprimée.',
-    lijstLabel: 'Pages du site',
-    beschrijving: 'La page que vous cherchez n’existe pas ici. Continuez par l’accueil ou l’une des pages ci-dessous.',
-  },
-};
-const tekst = TEKST[locale];
+const tekst = teksten.nietGevonden;
 
 /** Volgorde van het menu (RozetMenu) plus de dienstenpagina; start en contact staan al in de knoppen. */
 const BESTEMMINGEN = [

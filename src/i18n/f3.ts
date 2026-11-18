@@ -74,6 +74,11 @@ export interface F3Teksten {
    * elke dienst. Geen tijd, aantal of plaats: die feiten zijn niet bevestigd.
    */
   leeg: Record<LeegSlug, LegeTekst>;
+  /**
+   * De 404 (DESIGNSYSTEEM 7.13): kop, één zin, label van de bestemmingenlijst en
+   * de meta-beschrijving. De Turkse kop zoekt verify-een-voor-een.
+   */
+  nietGevonden: { kop: string; lead: string; lijstLabel: string; beschrijving: string };
   /** Toegankelijke naam van de menuknop in de kop (DESIGNSYSTEEM 7.3). */
   rozetMenuOpen: string;
   rozetMenuSluit: string;
@@ -238,6 +243,13 @@ const TR: F3Teksten = {
         'Güvenli bağış bağlantılarını yeniden düzenliyoruz. Bu arada bağış yapmak isterseniz sekretaryamız size yardımcı olur.',
     },
   },
+  nietGevonden: {
+    kop: 'Sayfa bulunamadı',
+    lead: 'Aradığınız sayfa taşınmış veya kaldırılmış olabilir.',
+    lijstLabel: 'Sitedeki sayfalar',
+    beschrijving:
+      'Aradığınız sayfa bulunamadı. Ana sayfadan veya aşağıdaki sayfalardan devam edebilirsiniz.',
+  },
   rozetMenuOpen: 'Menü',
   rozetMenuSluit: 'Menüyü kapat',
   mediaAi: 'Film: yapay zekâ ile üretildi',
@@ -391,6 +403,13 @@ const NL: F3Teksten = {
         'Wij zetten de veilige betaallinks opnieuw klaar. Wilt u in de tussentijd een gift doen, dan helpt ons secretariaat u graag.',
     },
   },
+  nietGevonden: {
+    kop: 'Pagina niet gevonden',
+    lead: 'De pagina die u zoekt, is misschien verplaatst of verwijderd.',
+    lijstLabel: 'Pagina’s op deze site',
+    beschrijving:
+      'De pagina die u zoekt, bestaat hier niet. Ga verder via de startpagina of een van de pagina’s hieronder.',
+  },
   rozetMenuOpen: 'Menu',
   rozetMenuSluit: 'Menu sluiten',
   mediaAi: 'Film: AI-gegenereerd',
@@ -543,6 +562,13 @@ const FR: F3Teksten = {
       tekst:
         'Nous remettons en place les liens de paiement sécurisés. Si vous souhaitez faire un don entre-temps, notre secrétariat vous aide volontiers.',
     },
+  },
+  nietGevonden: {
+    kop: 'Page introuvable',
+    lead: 'La page que vous cherchez a peut-être été déplacée ou supprimée.',
+    lijstLabel: 'Pages du site',
+    beschrijving:
+      'La page que vous cherchez n’existe pas ici. Continuez par l’accueil ou l’une des pages ci-dessous.',
   },
   rozetMenuOpen: 'Menu',
   rozetMenuSluit: 'Fermer le menu',
