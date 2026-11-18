@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && node scripts/lib/taal-404.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "verify": "node scripts/verify-alle.mjs",
