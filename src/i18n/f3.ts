@@ -439,7 +439,7 @@ const NL: F3Teksten = {
   },
   bedankt: {
     beeldAlt:
-      'Turkse dankkaart van UCCIB: een dankwoord aan iedereen die met giften en hulp de werking en de Koranleerlingen steunt, afgesloten met „Teşekkür Ederiz” (wij danken u) en „Allah razı olsun” (moge God tevreden over u zijn). Onderaan het logo van UCCIB.',
+      'Turkse dankkaart van UCCIB: een dankwoord aan iedereen die met giften en hulp de werking en de Koranleerlingen steunt, afgesloten met “Teşekkür Ederiz” (wij danken u) en “Allah razı olsun” (moge God tevreden over u zijn). Onderaan het logo van UCCIB.',
     terug: 'Terug naar de hoofdpagina',
     opnieuw: 'Nog een donatie',
   },
