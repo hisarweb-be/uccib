@@ -335,26 +335,6 @@ const ngo =
             </ol>
           ) : null}
 
-          {slug === 'hakkimizda' ? (
-            <section class="mt-12">
-              <h2>{teksten.mijlpalenKop}</h2>
-              <ol class="mt-8 ml-0 grid list-none gap-0 p-0">
-                {teksten.mijlpalen.map((mijlpaal) => (
-                  <li class="relative border-l-2 border-line pb-8 pl-6 last:pb-0 sm:pl-8">
-                    <span
-                      aria-hidden="true"
-                      class="absolute top-1 -left-[9px] h-4 w-4 rounded-full border-2 border-surface bg-brand"
-                    />
-                    <p class="text-small font-semibold tracking-[0.14em] text-brand-dark uppercase">
-                      {mijlpaal.jaar} · {mijlpaal.label}
-                    </p>
-                    <p class="mt-2 max-w-[64ch]">{mijlpaal.tekst}</p>
-                  </li>
-                ))}
-              </ol>
-            </section>
-          ) : null}
-
           {slug === 'disclameer' || slug === 'cerez-politikasi-cookie-policy' ? (
             <p class="mb-8 max-w-[66ch] border-y border-[color:var(--lijn)] py-4 text-voet text-inkt">
               {teksten.juridischNoot}
