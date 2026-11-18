@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, herontwerp-wow]
   pull_request:
-    branches: [main]
+    branches: [main, herontwerp-wow]
   workflow_dispatch:
 
 permissions:

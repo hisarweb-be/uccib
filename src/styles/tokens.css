@@ -1,50 +1,250 @@
 @import 'tailwindcss';
 
 /**
- * Huisstijl-tokens, overgenomen uit de huidige site.
- * Herkomst per token staat in TOKENS.md. Niets hier is verzonnen.
+ * Huisstijl-tokens van het herontwerp (herontwerp/DESIGNSYSTEEM.md, hoofdstuk 9).
  *
- * Contrastregel die uit de meting volgt: --c (#1f9e96) haalt 3.29:1 op wit en
- * mag dus nooit tekst of een link zijn. Tekst, links en knoppen gebruiken --cd.
+ * Zes kleurtokens; alles wat daarnaast nodig is, is een color-mix in :root (1.2).
+ * Contrastregel (1.3): petrol (#1D9F95) haalt 2,99:1 op papier en is nooit tekst,
+ * rand van een bediening of focusring. Tekst, links en de focusring zijn petrol-diep.
+ *
+ * De oude namen (TOKENS.md) blijven bestaan als alias (9.2), zodat bağış,
+ * hakkımızda, juridisch, 404 en /admin/ niet breken tot F3 ze overzet.
  */
+
+/* Letters: zelf gehost, één subset per familie (2.4). De unicode-range hieronder
+   is de bron van waarheid voor scripts/verify-tekens.mjs. */
+@font-face {
+  font-family: 'Platypi';
+  src: url('/fonts/platypi-var.woff2') format('woff2');
+  font-weight: 300 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-007E, U+00A0, U+00A9, U+00AB, U+00B7, U+00BB, U+00C0, U+00C2, U+00C7-00CB, U+00CE-00CF, U+00D4, U+00D6, U+00D9, U+00DB-00DC, U+00E0, U+00E2, U+00E7-00EB, U+00EE-00EF, U+00F4, U+00F6, U+00F9, U+00FB-00FC, U+00FF, U+011E-011F, U+0130-0131, U+0152-0153, U+015E-015F, U+2013-2014, U+2018-2019, U+201C-201D, U+2026, U+202F, U+20AC, U+2192;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible Next';
+  src: url('/fonts/atkinson-next-var.woff2') format('woff2');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-007E, U+00A0, U+00A9, U+00AB, U+00B7, U+00BB, U+00C0, U+00C2, U+00C7-00CB, U+00CE-00CF, U+00D4, U+00D6, U+00D9, U+00DB-00DC, U+00E0, U+00E2, U+00E7-00EB, U+00EE-00EF, U+00F4, U+00F6, U+00F9, U+00FB-00FC, U+00FF, U+011E-011F, U+0130-0131, U+0152-0153, U+015E-015F, U+2013-2014, U+2018-2019, U+201C-201D, U+2026, U+202F, U+20AC, U+2192;
+}
+
+/* Metrische terugval (2.5). Gemeten 18 nov 2026 met fonttools op de echte bestanden:
+   size-adjust = gemiddelde advance over een TR/NL/FR-proefzin (wght 400) gedeeld door die
+   van de lokale letter; overrides = hhea ascent, descent en lineGap / size-adjust. */
+@font-face {
+  font-family: 'Platypi Terugval';
+  src: local('Georgia');
+  size-adjust: 109.87%; /* gemeten: Platypi is breder dan Georgia */
+  ascent-override: 102.39%; /* gemeten */
+  descent-override: 22.85%; /* gemeten */
+  line-gap-override: 0%; /* gemeten */
+}
+
+@font-face {
+  font-family: 'Atkinson Terugval';
+  src: local('Arial');
+  size-adjust: 99.74%; /* gemeten */
+  ascent-override: 98.66%; /* gemeten */
+  descent-override: 31.68%; /* gemeten */
+  line-gap-override: 0%; /* gemeten */
+}
+
 @theme {
-  /* Kleur: rollen */
-  --color-brand: #1f9e96; /* --c : vlakken, randen, iconen, focusring */
-  --color-brand-dark: #0f6b66; /* --cd : tekst, links, knoppen, topbar */
-  --color-brand-light: #e8f5f4; /* --cl : zachte vlakken */
-  --color-ink: #33393b; /* --t : bodytekst */
-  --color-ink-muted: #5f6769; /* --tm : secundaire tekst */
-  --color-surface: #ffffff; /* --w */
-  --color-surface-alt: #f5f7f7; /* --g : afwisselende secties */
-  --color-line: #e3e8e8; /* --line : randen */
-  --color-footer: #2d3436; /* footerachtergrond */
-  --color-footer-text: #cfd6d6; /* footertekst */
-  --color-footer-line: #444b4d; /* scheidingslijn in de footer */
+  /* Kleur: de zes tokens (1.1) */
+  --color-papier: #f2f6f5;
+  --color-inkt: #2b3335;
+  --color-petrol-diep: #0f6b66;
+  --color-petrol: #1d9f95; /* alleen vlak, nooit tekst */
+  --color-mint: #8acbc5; /* alleen vlak, nooit tekst */
+  --color-wit: #ffffff;
 
-  /* Typografie */
-  --font-body: "Open Sans Variable", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
-  --font-head: "Noto Serif Variable", Georgia, "Times New Roman", serif;
+  /* Kleur: oude namen als alias (9.2) */
+  --color-brand: var(--color-petrol);
+  --color-brand-dark: var(--color-petrol-diep);
+  --color-brand-light: color-mix(in srgb, var(--color-mint) 20%, var(--color-wit));
+  --color-ink: var(--color-inkt);
+  --color-ink-muted: var(--inkt-zacht);
+  --color-surface: var(--color-wit); /* oude pagina's blijven wit tot F3 */
+  --color-surface-alt: var(--color-papier);
+  --color-line: var(--lijn);
+  /* De donkere voet verdwijnt overal (1.4): papier, inkt, haarlijn. */
+  --color-footer: var(--color-papier);
+  --color-footer-text: var(--color-inkt);
+  --color-footer-line: var(--lijn);
 
+  /* Letters (2.5) */
+  --font-kop: 'Platypi', 'Platypi Terugval', Georgia, 'Times New Roman', serif;
+  --font-tekst: 'Atkinson Hyperlegible Next', 'Atkinson Terugval', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+  --font-head: var(--font-kop);
+  --font-body: var(--font-tekst);
+
+  /* Tekstmaten per rol (3.1), met regelhoogte, spatiëring en gewicht */
+  --text-unie: calc(clamp(7.25rem, 3.2571rem + 16.381vw, 18rem) * var(--unie-schaal));
+  --text-unie--line-height: 0.9;
+  --text-unie--letter-spacing: -0.02em;
+  --text-unie--font-weight: 600;
+  --text-naam: clamp(1.25rem, 1.0643rem + 0.7619vw, 1.75rem);
+  --text-naam--line-height: 1.25;
+  --text-naam--letter-spacing: 0;
+  --text-naam--font-weight: 500;
+  --text-h1: clamp(2.5rem, 1.3857rem + 4.5714vw, 5.5rem);
+  --text-h1--line-height: 1.05;
+  --text-h1--letter-spacing: -0.015em;
+  --text-h1--font-weight: 600;
+  --text-h2: clamp(2.25rem, 1.6rem + 2.6667vw, 4rem);
+  --text-h2--line-height: 1.1;
+  --text-h2--letter-spacing: -0.01em;
+  --text-h2--font-weight: 600;
+  --text-citaat: clamp(1.875rem, 1.2714rem + 2.4762vw, 3.5rem);
+  --text-citaat--line-height: 1.2;
+  --text-citaat--letter-spacing: -0.005em;
+  --text-citaat--font-weight: 400;
+  --text-dienst: clamp(1.75rem, 1.2857rem + 1.9048vw, 3rem);
+  --text-dienst--line-height: 1.15;
+  --text-dienst--letter-spacing: -0.005em;
+  --text-dienst--font-weight: 500;
+  --text-bedrag: clamp(6rem, 3.5857rem + 9.9048vw, 12.5rem);
+  --text-bedrag--line-height: 0.9;
+  --text-bedrag--letter-spacing: -0.02em;
+  --text-bedrag--font-weight: 600;
+  --text-bedrag-klein: clamp(1.375rem, 1.2357rem + 0.5714vw, 1.75rem);
+  --text-bedrag-klein--line-height: 1;
+  --text-bedrag-klein--letter-spacing: 0;
+  --text-bedrag-klein--font-weight: 600;
+  --text-telefoon: clamp(1.5rem, 1.3143rem + 0.7619vw, 2rem);
+  --text-telefoon--line-height: 1.25;
+  --text-telefoon--letter-spacing: 0.01em;
+  --text-telefoon--font-weight: 600;
+  --text-lead: clamp(1.25rem, 1.1107rem + 0.5714vw, 1.625rem);
+  --text-lead--line-height: 1.45;
+  --text-lead--letter-spacing: 0;
+  --text-lead--font-weight: 400;
+  /* --text-body houdt zijn oude waarde (9.2); de nieuwe body-clamp landt met F3. */
   --text-body: 17px;
+  --text-label: clamp(0.875rem, 0.8518rem + 0.0952vw, 0.9375rem);
+  --text-label--line-height: 1.35;
+  --text-label--letter-spacing: 0.02em;
+  --text-label--font-weight: 600;
+  --text-klok: clamp(0.9375rem, 0.8911rem + 0.1905vw, 1.0625rem);
+  --text-klok--line-height: 1.3;
+  --text-klok--letter-spacing: 0.02em;
+  --text-klok--font-weight: 500;
+  --text-knop: clamp(1.0625rem, 1.0393rem + 0.0952vw, 1.125rem);
+  --text-knop--line-height: 1.2;
+  --text-knop--letter-spacing: 0.005em;
+  --text-knop--font-weight: 600;
+  --text-voet: clamp(0.9375rem, 0.9143rem + 0.0952vw, 1rem);
+  --text-voet--line-height: 1.55;
+  --text-voet--letter-spacing: 0;
+  --text-voet--font-weight: 400;
+
+  /* Oude maten: houden hun waarde voor de bestaande pagina's (9.2) */
   --text-small: 14px;
   --text-nav: 15px;
-
-  /* Koppen: dezelfde clamp-reeksen als de huidige site */
-  --text-h1: clamp(28px, 1.6rem + 1.6vw, 42px);
-  --text-h2: clamp(24px, 1.3rem + 1vw, 34px);
   --text-h3: clamp(20px, 1.1rem + 0.5vw, 24px);
   --text-h4: clamp(18px, 1rem + 0.3vw, 20px);
   --text-hero: clamp(26px, 1.2rem + 2.6vw, 50px);
 
+  /* Ruimte en raster (4.1, 4.4) */
+  --spacing-marge: clamp(1.5rem, 0.3857rem + 4.5714vw, 5rem);
+  --spacing-kop: var(--kop-hoogte);
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-ontwerp: 90rem;
+  --container-blad: 80rem;
+
   /* Vorm */
-  --radius-pill: 30px;
-  --spacing-header: 92px; /* .hdr min-height */
+  --radius-vak: 2px;
+  --radius-pill: 30px; /* oud, blijft voor oude componenten */
+  --spacing-header: 92px; /* oud: .hdr min-height */
+
+  /* Easing (6.2): geen y-waarde buiten 0..1, dus geen overshoot */
+  --ease-uit: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-uit: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-weg: cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* Voortgang van pagina en pins (NAMEN.md), getypt zodat ze kunnen animeren. */
+@property --sc-p {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+@property --hero-p {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+@property --piek-p {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+:root {
+  /* Duur (6.1) */
+  --duur-druk: 120ms;
+  --duur-kort: 200ms;
+  --duur-kom: 380ms;
+  --duur-blad: 600ms;
+  --duur-lijn: 900ms;
+
+  /* Afgeleide kleuren (1.2): geen nieuwe tokens, alleen color-mix van de zes */
+  --inkt-zacht: color-mix(in srgb, var(--color-inkt) 72%, var(--color-papier)); /* #636A6B */
+  --lijn: color-mix(in srgb, var(--color-inkt) 16%, var(--color-papier)); /* #D2D7D6 */
+  --veldrand: color-mix(in srgb, var(--color-inkt) 56%, var(--color-papier)); /* #838989 */
+  --inkt-uit: color-mix(in srgb, var(--color-inkt) 50%, var(--color-papier)); /* #8F9595 */
+  --plaat: color-mix(in srgb, var(--color-papier) 92%, transparent);
+  --rozet-midden: color-mix(in srgb, var(--color-petrol) 70%, var(--color-mint));
+
+  --kop-hoogte: 3.5rem;
+  --unie-schaal: 1;
+}
+
+@media (min-width: 64rem) {
+  :root {
+    --kop-hoogte: 4.5rem;
+  }
+}
+
+/* Uniewoord per taal (3.2). Gemeten 18 nov 2026 in Chromium met platypi-var.woff2,
+   wght 600, letter-spacing -0.02em; doel op 390 px: 88 tot 100 % van 342 px. */
+html[lang='tr'] {
+  --unie-schaal: 1; /* gemeten: Birliği 2,898em, 336 px op 390 = 98 % */
+}
+html[lang='nl'] {
+  --unie-schaal: 1.25; /* gemeten: Unie 2,169em, bij 1 maar 74 %; bij 1,25 is het 315 px = 92 % */
+}
+html[lang='fr'] {
+  --unie-schaal: 1; /* gemeten: Union 2,889em, 335 px op 390 = 98 % */
+}
+
+/* Zonder scroll-driven animation (of met minder beweging) is het logo heel (9.1, 6.7). */
+@supports not (animation-timeline: scroll()) {
+  :root {
+    --sc-p: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --sc-p: 1;
+  }
 }
 
 /* Tailwind 4 levert de basislaag; hier alleen wat de huisstijl zelf vastlegt. */
 @layer base {
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
   html {
-    scroll-behavior: smooth;
+    font-synthesis: none;
+    font-kerning: normal;
   }
 
   body {
@@ -65,13 +265,31 @@
     font-weight: 600;
     color: var(--color-ink);
     text-wrap: balance;
+    hyphens: manual;
+    overflow-wrap: normal;
+    word-break: normal;
   }
 
   h1 {
     font-size: var(--text-h1);
+    line-height: var(--text-h1--line-height);
+    letter-spacing: var(--text-h1--letter-spacing);
   }
   h2 {
     font-size: var(--text-h2);
+    line-height: var(--text-h2--line-height);
+    letter-spacing: var(--text-h2--letter-spacing);
+  }
+  /* Onder 390 px is de schaal niet gedefinieerd (3.1: daaronder vast). Op 320 px liepen
+     "Verantwoordelijke" (h2, 36 px) en lange h1-woorden buiten het venster; hier volgt de
+     kop de breedte, zodat nooit een woord breekt of de pagina horizontaal scrolt (3.3 regel 5). */
+  @media (max-width: 24.3125rem) {
+    h1 {
+      font-size: 10vw;
+    }
+    h2 {
+      font-size: 9vw;
+    }
   }
   h3 {
     font-size: var(--text-h3);
@@ -89,14 +307,14 @@
     text-decoration: underline;
   }
 
-  /* Zichtbare focus, dezelfde vorm als de huidige site maar met genoeg contrast. */
+  /* Focusring petrol-diep: 5,81:1 op papier (petrol haalde maar 2,99:1). */
   :focus-visible {
-    outline: 3px solid var(--color-brand);
+    outline: 3px solid var(--color-petrol-diep);
     outline-offset: 2px;
     border-radius: 2px;
   }
 
-  /* Op donkere vlakken is de lichte ring beter zichtbaar. */
+  /* Op donkere vlakken (de topbalk op petrol-diep) is de lichte ring beter zichtbaar. */
   .on-dark :focus-visible {
     outline-color: var(--color-brand-light);
   }
