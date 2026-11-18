@@ -140,9 +140,9 @@ const LEGAL_LINKS = (
 
 <style>
   .site-footer {
-    background: var(--color-footer);
-    color: var(--color-footer-text);
-    border-top: 1px solid var(--color-footer-line);
+    background: var(--color-papier);
+    color: var(--color-inkt);
+    border-top: 1px solid var(--lijn);
   }
 
   .footer-logo {
@@ -150,7 +150,7 @@ const LEGAL_LINKS = (
     width: 224px;
     max-width: 100%;
     height: auto;
-    background: #fff;
+    background: var(--color-wit);
     border-radius: 6px;
     padding: 6px 10px;
   }
@@ -159,22 +159,28 @@ const LEGAL_LINKS = (
     font-family: var(--font-body);
     font-size: var(--text-h4);
     font-weight: 700;
-    color: var(--color-footer-text);
+    color: var(--color-inkt);
   }
 
   .footer-link {
-    color: var(--color-footer-text);
+    color: var(--color-inkt);
     text-decoration: none;
   }
 
-  .footer-link:hover,
   .footer-link:focus-visible {
-    color: var(--color-brand-dark);
+    color: var(--color-petrol-diep);
     text-decoration: underline;
   }
 
+  @media (hover: hover) {
+    .footer-link:hover {
+      color: var(--color-petrol-diep);
+      text-decoration: underline;
+    }
+  }
+
   .footer-bottom {
-    border-top: 1px solid var(--color-footer-line);
+    border-top: 1px solid var(--lijn);
   }
   /* Onderaan de pagina blijft de laatste regel anders onder de WhatsApp-knop staan
      (DESIGNSYSTEEM: zone 88 x 88 rechtsonder zonder tekst). Vanaf 1264 px eindigt
