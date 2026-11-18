@@ -44,6 +44,11 @@ function scrub(sectie: HTMLElement, podium: HTMLElement, lengte: number, zet: (p
       end: () => `+=${lengte * (maat?.offsetHeight || window.innerHeight)}`,
       scrub: 0.3,
       invalidateOnRefresh: true,
+      /* Een refresh (fonts, een film die klaar is) zet de tween even op 0 en weer
+         terug zonder `onUpdate`: wie dan stilstaat, zag de scène op p 0 tot de
+         volgende scrollbeweging (gemeten 18-11: --piek-p 0,46 viel na een refresh
+         op 0 en bleef daar). Daarom na elke refresh de stand opnieuw zetten. */
+      onRefresh: () => zet(staat.p),
     },
   });
   return staat;

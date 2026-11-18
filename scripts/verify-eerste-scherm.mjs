@@ -259,6 +259,9 @@ async function naarScene(page, kies, deel) {
       timeout: 8000,
     })
     .catch(() => {});
+  // Letters eerst: `document.fonts.ready` zet in `start.ts` een ScrollTrigger-refresh
+  // klaar, en die hoort niet midden in de meting te vallen.
+  await page.evaluate(() => document.fonts?.ready);
   await naarPodium(page, deel, kies);
   await page.waitForTimeout(800);
 }
@@ -342,11 +345,22 @@ async function tegentoets(browser, baseUrl) {
     await page.goto(baseUrl + '/', { waitUntil: 'load' });
     await page.addStyleTag({ content: ZONDER_FOTO });
     await naarScene(page, PIEK, 0.5);
+    // Het nagemaakte geval telt alleen als de scène echt in haar midden staat. Op
+    // 18-11 stond ze hier na een refresh nog op p 0 (kop en kleine rozet op
+    // papier, spreiding rond 30) en wankelde de tegentoets rond de lat. Staat de
+    // scène niet voorbij 0,3, dan is het beeld niet wat we bedoelen en is dat FOUT.
+    const p = await page.evaluate(
+      (k) => Number(getComputedStyle(document.querySelector(k)).getPropertyValue('--piek-p')) || 0,
+      PIEK,
+    );
     const m = meet(await podiumBeeld(page), LAT.eind);
     await schiet(page, 'tegentoets-piek-zonder-foto');
     oordeel(
-      !m.goed,
-      "tegentoets piek-scène zonder foto's op de echte pagina wordt afgekeurd: " + cijfers(m, LAT.eind),
+      !m.goed && p >= 0.3,
+      "tegentoets piek-scène zonder foto's op de echte pagina wordt afgekeurd: " +
+        cijfers(m, LAT.eind) +
+        ', --piek-p ' +
+        p.toFixed(3),
     );
   } finally {
     await context.close();
