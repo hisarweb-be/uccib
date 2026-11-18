@@ -150,7 +150,8 @@ await toets('status en bestandssoorten per shot', () => {
 let f3Tekst = null;
 if (existsSync(f3Pad)) {
   const t = readFileSync(f3Pad, 'utf8');
-  if (t.includes('mediaAi')) f3Tekst = t.slice(t.indexOf('mediaAi'), t.indexOf('mediaAi') + 800);
+  // Alleen de waarderegels (`mediaAi: '...'`), niet de typedefinitie die eerder in het bestand staat.
+  if (t.includes('mediaAi')) f3Tekst = t.split('\n').filter((r) => /mediaAi:\s*['"`]/.test(r)).join('\n');
 }
 await toets(`aiFilm-vlaggen en vermelding (${f3Tekst ? 'gelijk aan f3.mediaAi' : 'f3.mediaAi nog niet aanwezig: vaste tekst uit CONTRACT 3.3'})`, () => {
   const f = [];
