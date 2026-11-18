@@ -6,6 +6,7 @@
  * Bron: `src/data/media-manifest.json` (schrijft alleen F2a). Zolang dat er niet
  * is, of als er één shot in ontbreekt, komt dat shot uit de plaatshouder van F2b
  * (`media-manifest.plaatshouder.json`, zelfde schema, `status: "terugval"`).
+ * Het veld `status` beslist nergens iets: zie `vormVan`.
  * Zo valt het echte manifest erin zonder codewijziging.
  */
 import plaatshouder from '../data/media-manifest.plaatshouder.json';
@@ -103,6 +104,42 @@ export function shot(naam: ShotNaam): Shot {
   return s;
 }
 
+/**
+ * Doet dit shot mee op de pagina?
+ *
+ * Zonder echt manifest doet alles uit de plaatshouder mee. Met een echt manifest
+ * doet elk shot mee dat erin staat, wat zijn `status` ook is: "vervallen" zegt
+ * dat de FILM vervallen is, niet het shot (BIJSTURING ronde 2d). Een shot valt
+ * alleen weg als het manifest de sectie van dat shot wel levert maar dit shot
+ * niet (zonder film `p3` komt er geen `p4`). Levert het manifest van een sectie
+ * nog niets, dan komt die hele sectie uit de plaatshouder.
+ */
+export function aanwezig(naam: ShotNaam): boolean {
+  const s = perShot.get(naam);
+  if (!s) return false;
+  if (!echt) return true;
+  if (echt.shots.some((e) => e.shot === naam)) return true;
+  return !echt.shots.some((e) => e.sectie === s.sectie);
+}
+
+/** Wat er van één shot te zien is. */
+export type Vorm = 'film' | 'poster' | 'weg';
+
+/**
+ * De ene regel die de vorm van een shot bepaalt (BIJSTURING ronde 2d punt 2).
+ * Ze kijkt alleen naar wat er ligt, nooit naar het veld `status`:
+ * - het shot ontbreekt: `weg`, zijn deel valt uit de scrollweg;
+ * - er ligt een film of een frame-reeks (op een van de breekpunten): `film`,
+ *   de scrub;
+ * - er ligt alleen een poster: `poster`, de echte foto met beweging en licht in
+ *   code, zonder de vermelding "Film: AI-gegenereerd".
+ */
+export function vormVan(naam: ShotNaam): Vorm {
+  if (!aanwezig(naam)) return 'weg';
+  const { d, m } = shot(naam).bestanden;
+  return d.film || m.film || d.reeks || m.reeks ? 'film' : 'poster';
+}
+
 /** De shots van één sectie, in de volgorde van het manifest. */
 export function shotsVan(sectie: Shot['sectie']): Shot[] {
   return [...perShot.values()].filter((s) => s.sectie === sectie);
@@ -110,21 +147,19 @@ export function shotsVan(sectie: Shot['sectie']): Shot[] {
 
 export const poster = (naam: ShotNaam, bp: Breekpunt): Poster => shot(naam).bestanden[bp].poster;
 
-/** Alleen een film als het shot geleverd is; een vervallen shot of de plaatshouder geeft null. */
-export const film = (naam: ShotNaam, bp: Breekpunt): Film | null =>
-  shot(naam).status === 'geleverd' ? shot(naam).bestanden[bp].film : null;
+/** De film van een shot als die er ligt; de status telt niet mee (zie `vormVan`). */
+export const film = (naam: ShotNaam, bp: Breekpunt): Film | null => shot(naam).bestanden[bp].film;
 
-export const reeks = (naam: ShotNaam, bp: Breekpunt): Reeks | null =>
-  shot(naam).status === 'geleverd' ? shot(naam).bestanden[bp].reeks : null;
+export const reeks = (naam: ShotNaam, bp: Breekpunt): Reeks | null => shot(naam).bestanden[bp].reeks;
 
 /** `object-position` per breekpunt. */
 export const anker = (naam: ShotNaam, bp: Breekpunt): string => shot(naam).anker[bp];
 
 export const alt = (naam: ShotNaam, locale: Locale): string => shot(naam).alt[locale];
 
-/** De AI-vermelding van één shot, of null als het shot geen AI-film is. */
+/** De AI-vermelding van één shot: alleen als er een film ligt én die film AI is. */
 export const vermelding = (naam: ShotNaam, locale: Locale): string | null =>
-  shot(naam).aiFilm ? (shot(naam).vermelding?.[locale] ?? null) : null;
+  vormVan(naam) === 'film' && shot(naam).aiFilm ? (shot(naam).vermelding?.[locale] ?? null) : null;
 
 /** De vermelding voor de voet: is er op de pagina één AI-film, dan één regel. */
 export function vermeldingPagina(locale: Locale): string | null {

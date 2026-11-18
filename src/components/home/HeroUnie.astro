@@ -1,0 +1,219 @@
+---
+/**
+ * Hero-unie: het eerste scherm van de startpagina en de scène die eruit groeit
+ * (STORYBOARD D01 tot D07, M01 tot M04).
+ *
+ * Eén DOM voor drie toestanden:
+ * - zonder JavaScript of met beperkte beweging: het eerste scherm, daaronder vijf
+ *   sleutelbeelden (rozet per stand met klokwoord, kop en zin) en de twee knoppen;
+ * - met beweging: hetzelfde eerste scherm staat vast, `--hero-p` (0 tot 1 over
+ *   3 schermhoogten) tekent de rozet rond het venster en wisselt de fasetekst;
+ * - met een echt manifest: de frame-reeks van `h1` loopt in hetzelfde venster.
+ *
+ * Alle standen staan in `src/styles/home.css` als functie van `--hero-p`; het
+ * script (`src/scripts/home/scene.ts`) zet alleen die variabele en een paar maten.
+ * De poster is het LCP-beeld: gewone `<img>` met de maten uit het manifest.
+ */
+import MediaVermelding from '../MediaVermelding.astro';
+import Sleutelbeelden, { type Sleutelrij } from '../Sleutelbeelden.astro';
+import type { RozetStand } from '../Rozet.astro';
+import { getDictionary, type Locale } from '../../i18n';
+import { f3 } from '../../i18n/f3';
+import { alt, anker, poster, reeks } from '../../lib/media';
+import { R, KERN_PUNT, KERN_INKEPING, hoeken, lijnen } from './rozetpad';
+
+interface Props {
+  locale: Locale;
+  h1: string;
+  intro?: string | null;
+}
+
+const { locale, h1, intro } = Astro.props;
+const t = getDictionary(locale);
+const teksten = f3(locale);
+
+/**
+ * Het uniewoord is het ene woord dat groot staat; de rest van de naam staat er
+ * klein bij. De kop blijft één h1 in de volgorde van de bron (de volgorde op het
+ * scherm regelt CSS). Staat het woord niet waar we het verwachten (dhr. Omer past
+ * de kop aan in het CMS), dan is de hele kop gewoon de naamregel.
+ */
+const UNIEWOORD: Record<Locale, string> = { tr: 'Birliği', nl: 'Unie', fr: 'Union' };
+const woord = UNIEWOORD[locale];
+const kop = h1.trim();
+let naam = kop;
+let unie: string | null = null;
+let unieEerst = false;
+if (kop.endsWith(` ${woord}`)) {
+  naam = kop.slice(0, -woord.length).trim();
+  unie = woord;
+} else if (kop.startsWith(`${woord} `)) {
+  naam = kop.slice(woord.length).trim();
+  unie = woord;
+  unieEerst = true;
+}
+
+const posterD = poster('h1', 'd');
+const posterM = poster('h1', 'm');
+const reeksD = reeks('h1', 'd');
+const reeksM = reeks('h1', 'm');
+
+/**
+ * Het venster krimpt in fase 5 van vierkant naar de kern van de rozet. Zestien
+ * punten, elk een rechte lijn tussen zijn plek op de vierkantsrand (k = 0) en zijn
+ * plek op de kernster in de logostand (k = 1). Percentages van het venster.
+ */
+const zijde = 2 * R * Math.SQRT1_2;
+const kernBuiten = ((R * KERN_PUNT) / zijde) * 100;
+const kernBinnen = ((R * KERN_INKEPING) / zijde) * 100;
+const vensterPad = hoeken(0, 22.5, 16)
+  .map((graden, i) => {
+    const a = (graden * Math.PI) / 180;
+    const c = Math.cos(a);
+    const s = Math.sin(a);
+    const vier = 50 / Math.max(Math.abs(c), Math.abs(s));
+    const doel = i % 2 === 1 ? kernBuiten : kernBinnen;
+    const x = (straal: number) => (straal * c).toFixed(3);
+    const y = (straal: number) => (-straal * s).toFixed(3);
+    return `calc(50% + ${x(vier)}% + ${x(doel - vier)}% * var(--hero-k)) calc(50% + ${y(vier)}% + ${y(doel - vier)}% * var(--hero-k))`;
+  })
+  .join(', ');
+
+const STANDEN: RozetStand[] = ['cirkel', 'vierkant', 'acht-punten', 'vlecht', 'vol'];
+const rijen: Sleutelrij[] = teksten.mijlpalen.slice(0, 5).map((mijlpaal, i) => ({
+  beeld: { rozet: STANDEN[i] ?? 'vol' },
+  label: mijlpaal.jaar,
+  kop: mijlpaal.label,
+  tekst: mijlpaal.tekst,
+}));
+
+/** Waar elke fasetekst staat op `--hero-p`; buren overlappen, zodat er altijd tekst staat. */
+const FASEN = [
+  [0.09, 0.265],
+  [0.265, 0.47],
+  [0.47, 0.675],
+  [0.675, 0.815],
+  [0.815, 0.92],
+] as const;
+---
+
+<section
+  id="hero-unie"
+  class:list={['hero-unie', unieEerst ? 'hero-unie--unie-eerst' : 'hero-unie--naam-eerst']}
+  data-sectie="hero-unie"
+  data-fasen={FASEN.map(([van]) => van).join(',')}
+>
+  <div class="sh-maat" aria-hidden="true"></div>
+  <div class="hero-podium">
+    <div class="hero-eerste">
+      <p class="hero-label hero-weg">{teksten.heroKlein}</p>
+      <h1 class="hero-kop">
+        {
+          unie === null ? (
+            <span class="hero-naam hero-weg">{naam}</span>
+          ) : unieEerst ? (
+            <>
+              <span class="hero-unie-woord">{unie}</span> <span class="hero-naam hero-weg">{naam}</span>
+            </>
+          ) : (
+            <>
+              <span class="hero-naam hero-weg">{naam}</span> <span class="hero-unie-woord">{unie}</span>
+            </>
+          )
+        }
+      </h1>
+      {intro ? <p class="hero-intro hero-weg">{intro}</p> : null}
+      <div class="hero-knoppen hero-weg" data-hero-knoppen="eerste">
+        <a class="knop knop-eerst" href="#steun">{t.donateCta}</a>
+        <a class="knop knop-tweede" href="#contact">{teksten.contactKop}</a>
+      </div>
+      <div class="hero-beeld">
+        <figure class="hero-venster" data-hero-venster>
+          <svg class="hero-rozet" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+            <g class="hero-vlakken">
+              <path class="vlak-buiten" d={lijnen.buitenster}></path>
+              <path class="vlak-ring" d={lijnen.binnen}></path>
+              <path class="vlak-kern" d={lijnen.kern}></path>
+            </g>
+            <g class="hero-lijnen">
+              <path class="lijn lijn-cirkel" d={lijnen.cirkel} pathLength="1"></path>
+              <path class="lijn lijn-a" d={lijnen.a} pathLength="1"></path>
+              <path class="lijn lijn-b" d={lijnen.b} pathLength="1"></path>
+              <path class="lijn lijn-binnen" d={lijnen.binnen} pathLength="1"></path>
+              <path class="lijn lijn-kern" d={lijnen.kern} pathLength="1"></path>
+            </g>
+          </svg>
+          <div class="hero-foto" style={`--venster-pad: polygon(${vensterPad})`}>
+            <picture>
+              {
+                posterM.avif ? (
+                  <source media="(max-width: 47.9375rem)" type="image/avif" srcset={posterM.avif} />
+                ) : null
+              }
+              <source media="(max-width: 47.9375rem)" srcset={posterM.pad} />
+              {posterD.avif ? <source type="image/avif" srcset={posterD.avif} /> : null}
+              <img
+                data-shot="h1"
+                src={posterD.pad}
+                width={posterD.breedte}
+                height={posterD.hoogte}
+                alt={alt('h1', locale)}
+                fetchpriority="high"
+                loading="eager"
+                decoding="async"
+                style={`--anker-d:${anker('h1', 'd')};--anker-m:${anker('h1', 'm')}`}
+              />
+            </picture>
+            {
+              reeksD || reeksM ? (
+                <canvas
+                  class="hero-reeks"
+                  data-reeks-d={reeksD ? JSON.stringify(reeksD) : undefined}
+                  data-reeks-m={reeksM ? JSON.stringify(reeksM) : undefined}
+                  aria-hidden="true"
+                />
+              ) : null
+            }
+          </div>
+          <span class="hero-stip" aria-hidden="true"></span>
+          <MediaVermelding shot="h1" locale={locale} class="hero-vermelding" />
+        </figure>
+      </div>
+    </div>
+
+    <Sleutelbeelden rijen={rijen} locale={locale} soort="rozet" class="hero-sleutels alleen-stil" />
+
+    <div class="hero-fasen alleen-beweging">
+      <p class="hero-lopend" aria-hidden="true">{kop}</p>
+      <div class="hero-verhaal">
+        <ol class="hero-klok" aria-hidden="true">
+          {
+            teksten.mijlpalen.slice(0, 5).map((mijlpaal) => (
+              <li>
+                <span>{mijlpaal.jaar}</span>
+              </li>
+            ))
+          }
+        </ol>
+        <div class="hero-fasetekst">
+          {
+            teksten.mijlpalen.slice(0, 5).map((mijlpaal, i) => (
+              <div class="hero-fase" data-slag={i + 1} style={`--van:${FASEN[i]?.[0] ?? 2};--tot:${FASEN[i]?.[1] ?? 2}`}>
+                <p class="hero-fasekop">{mijlpaal.label}</p>
+                <p class="hero-fasezin">{mijlpaal.tekst}</p>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-slot" data-hero-slot>
+      {intro ? <p class="hero-belofte alleen-beweging">{intro}</p> : null}
+      <div class="hero-knoppen" data-hero-knoppen="slot">
+        <a class="knop knop-eerst" href="#steun">{t.donateCta}</a>
+        <a class="knop knop-tweede" href="#contact">{teksten.contactKop}</a>
+      </div>
+    </div>
+  </div>
+</section>

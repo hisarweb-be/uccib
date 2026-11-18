@@ -52,7 +52,7 @@
   line-gap-override: 0%; /* gemeten */
 }
 
-@theme {
+@theme static {
   /* Kleur: de zes tokens (1.1) */
   --color-papier: #f2f6f5;
   --color-inkt: #2b3335;
