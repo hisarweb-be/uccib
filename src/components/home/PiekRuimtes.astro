@@ -12,13 +12,18 @@
  * er in het manifest ligt (nooit uit het veld `status`):
  * - `film`: de film loopt mee met de scrub (video, geladen als de sectie nadert)
  *   en de vermelding staat erbij als het een AI-film is;
- * - `poster`: de echte foto beweegt in code. Ze zoomt langzaam in naar haar
- *   anker, de randen gaan open van donker naar licht (diepte) en er trekt warm
- *   licht door de ruimte: bij `p1` over de wand van de gebedsruimte, bij `p2` en
- *   `p3` over tafels en vloer (het raam, de deur en de trap blijven ongemoeid).
- *   Over het open beeld blijft de rozet als dunne lichte lijn meedraaien: zij
- *   opent elke ruimte en houdt de drie bij elkaar. Geen vermelding, want er is
- *   geen AI in beeld;
+ * - `poster`: de echte foto beweegt in code. Ze schuift door het venster van de
+ *   rozet en er trekt één warme lichtvlek door de ruimte: bij `p1` over de wand
+ *   van de gebedsruimte, bij `p2` over tafels en vloer (het raam blijft
+ *   ongemoeid), bij `p3` over de loper de zaal in (de deur en de trap blijven
+ *   ongemoeid). Geen vermelding, want er is geen AI in beeld.
+ *
+ * De rozet draagt het beeld: haar kern is het venster waardoor je de ruimte ziet.
+ * Bij elke wissel knijpt ze helemaal dicht, draait een slag en gaat open op de
+ * volgende ruimte. Hoe ver ze opengaat, volgt uit de eigen pixels van de foto
+ * (`eigenBreedte`): een foto wordt nooit groter dan 110 % getoond. Is ze te klein
+ * voor het hele scherm, dan blijft ze in het venster; een grotere poster gaat
+ * vanzelf schermvullend;
  * - `weg`: ontbreekt `p4`, dan valt zijn stuk (0,78 tot 0,86) uit de scrollweg: de pin
  *   is dan 4,6 schermhoogten en de standen in CSS blijven dezelfde, omdat het
  *   script de sprong overslaat.
@@ -27,8 +32,8 @@ import MediaVermelding from '../MediaVermelding.astro';
 import Sleutelbeelden, { type Sleutelrij } from '../Sleutelbeelden.astro';
 import { getDictionary, type Locale } from '../../i18n';
 import { f3 } from '../../i18n/f3';
-import { alt, anker, film, poster, shot, vormVan, type ShotNaam } from '../../lib/media';
-import { KERN_INKEPING, KERN_PUNT, hoeken, lijnen } from './rozetpad';
+import { alt, anker, eigenBreedte, film, poster, shot, vormVan, type ShotNaam } from '../../lib/media';
+import { lijnen } from './rozetpad';
 
 interface Props {
   locale: Locale;
@@ -45,6 +50,9 @@ const P4 = [0.78, 0.86] as const;
 
 const heeftP4 = vormVan('p4') !== 'weg';
 const namen: ShotNaam[] = heeftP4 ? ['p1', 'p2', 'p3', 'p4'] : ['p1', 'p2', 'p3'];
+/* Elke ruimte heeft haar stuk van de tijdlijn: van de wissel ervoor (midden tussen
+   de twee fasen) tot de wissel erna; de eerste begint als de kern opengaat. */
+const wissels = namen.slice(1).map((naam, i) => Number(((shot(namen[i]!).fase.tot + shot(naam).fase.van) / 2).toFixed(3)));
 const lagen = namen.map((naam, i) => {
   const vorm = vormVan(naam);
   const d = film(naam, 'd');
@@ -53,23 +61,16 @@ const lagen = namen.map((naam, i) => {
     naam,
     laag: i + 1,
     fase: shot(naam).fase,
+    a: i === 0 ? 0.06 : wissels[i - 1]!,
+    b: wissels[i] ?? 1,
     vorm,
+    eigen: `${eigenBreedte(naam, 'd')},${eigenBreedte(naam, 'm')}`,
+    aspect: `${poster(naam, 'd').breedte / poster(naam, 'd').hoogte},${poster(naam, 'm').breedte / poster(naam, 'm').hoogte}`,
     /* Een frame-reeks hoort bij de hero; hier scrubt alleen een video. */
     film: vorm === 'film' && (d || m) ? JSON.stringify({ d, m }) : null,
   };
 });
 const lengte = heeftP4 ? PIN : Number((PIN * (1 - (P4[1] - P4[0]))).toFixed(2));
-
-/** De kern als uitsnede: zestien punten rond het midden, straal uit `--piek-straal`. */
-const kernPad = hoeken(0, 22.5, 16)
-  .map((graden, i) => {
-    const a = (graden * Math.PI) / 180;
-    const f = i % 2 === 0 ? 1 : KERN_INKEPING / KERN_PUNT;
-    const x = (f * Math.cos(a)).toFixed(4);
-    const y = (-f * Math.sin(a)).toFixed(4);
-    return `calc(50% + var(--piek-straal) * ${x}) calc(50% + var(--piek-straal) * ${y})`;
-  })
-  .join(', ');
 
 const rijen: Sleutelrij[] = (['p1', 'p2', 'p3'] as const).map((naam, i) => ({
   beeld: { shot: naam },
@@ -88,64 +89,76 @@ const rijen: Sleutelrij[] = (['p1', 'p2', 'p3'] as const).map((naam, i) => ({
   <div class="sh-maat" aria-hidden="true"></div>
   <div class="piek-podium">
     <div class="piek-beeld alleen-beweging">
-      <div class="piek-kern" style={`--kern-pad: polygon(${kernPad})`}>
+      <div class="piek-kern">
         <div class="piek-fotos">
           {
-            lagen.map(({ naam, laag, fase, vorm, film: filmData }) => (
-              <div class="piek-laag" data-laag={laag} data-vorm={vorm} style={`--van:${fase.van};--tot:${fase.tot}`}>
-                <picture>
-                  {poster(naam, 'm').avif ? (
-                    <source media="(max-width: 47.9375rem)" type="image/avif" srcset={poster(naam, 'm').avif} />
+            lagen.map(({ naam, laag, fase, a, b, vorm, eigen, aspect, film: filmData }) => (
+              <div
+                class="piek-laag"
+                data-laag={laag}
+                data-vorm={vorm}
+                data-a={a}
+                data-b={b}
+                data-eigen={eigen}
+                data-aspect={aspect}
+                style={`--a:${a};--b:${b}`}
+              >
+                <div class="piek-raam">
+                  <picture>
+                    {poster(naam, 'm').avif ? (
+                      <source media="(max-width: 47.9375rem)" type="image/avif" srcset={poster(naam, 'm').avif} />
+                    ) : null}
+                    <source media="(max-width: 47.9375rem)" srcset={poster(naam, 'm').pad} />
+                    {poster(naam, 'd').avif ? <source type="image/avif" srcset={poster(naam, 'd').avif} /> : null}
+                    <img
+                      class="piek-foto"
+                      data-shot={naam}
+                      src={poster(naam, 'd').pad}
+                      width={poster(naam, 'd').breedte}
+                      height={poster(naam, 'd').hoogte}
+                      alt={alt(naam, locale)}
+                      loading="lazy"
+                      decoding="async"
+                      style={`--anker-d:${anker(naam, 'd')};--anker-m:${anker(naam, 'm')}`}
+                    />
+                  </picture>
+                  {filmData ? (
+                    <video
+                      class="piek-film"
+                      data-film-shot={naam}
+                      data-film={filmData}
+                      data-van={fase.van}
+                      data-tot={fase.tot}
+                      muted
+                      playsinline
+                      preload="none"
+                      aria-hidden="true"
+                      tabindex="-1"
+                      style={`--anker-d:${anker(naam, 'd')};--anker-m:${anker(naam, 'm')}`}
+                    />
                   ) : null}
-                  <source media="(max-width: 47.9375rem)" srcset={poster(naam, 'm').pad} />
-                  {poster(naam, 'd').avif ? <source type="image/avif" srcset={poster(naam, 'd').avif} /> : null}
-                  <img
-                    class:list={['piek-foto', vorm === 'poster' ? 'piek-zoom' : null]}
-                    data-shot={naam}
-                    src={poster(naam, 'd').pad}
-                    width={poster(naam, 'd').breedte}
-                    height={poster(naam, 'd').hoogte}
-                    alt={alt(naam, locale)}
-                    loading="lazy"
-                    decoding="async"
-                    style={`--anker-d:${anker(naam, 'd')};--anker-m:${anker(naam, 'm')}`}
-                  />
-                </picture>
-                {filmData ? (
-                  <video
-                    class="piek-film"
-                    data-film-shot={naam}
-                    data-film={filmData}
-                    data-van={fase.van}
-                    data-tot={fase.tot}
-                    muted
-                    playsinline
-                    preload="none"
-                    aria-hidden="true"
-                    tabindex="-1"
-                    style={`--anker-d:${anker(naam, 'd')};--anker-m:${anker(naam, 'm')}`}
-                  />
-                ) : null}
-                {vorm === 'poster' ? <span class="piek-licht" data-licht={naam} aria-hidden="true" /> : null}
-                {vorm === 'poster' ? <span class="piek-diepte" aria-hidden="true" /> : null}
+                  {vorm === 'poster' ? <span class="piek-licht" data-licht={naam} aria-hidden="true" /> : null}
+                </div>
                 <MediaVermelding shot={naam} locale={locale} class="piek-vermelding" />
               </div>
             ))
           }
         </div>
       </div>
-      <svg class="piek-rozet" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
-        <path d={lijnen.cirkel}></path>
-        <path d={lijnen.a}></path>
-        <path d={lijnen.b}></path>
-        <path d={lijnen.binnen}></path>
-        <path d={lijnen.kern}></path>
+      {/* Het venster: papier met de kern van de rozet als gat, dat met transform opengaat. */}
+      <svg class="piek-masker" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+        <g>
+          <path fill-rule="evenodd" d={`M-1000 -1000H1100V1100H-1000Z${lijnen.kern}`}></path>
+        </g>
       </svg>
-      <svg class="piek-ster" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
-        <path d={lijnen.cirkel}></path>
-        <path d={lijnen.a}></path>
-        <path d={lijnen.b}></path>
-        <path class="piek-ster-kern" d={lijnen.kern}></path>
+      <svg class="piek-rozet" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+        <g>
+          <path d={lijnen.cirkel}></path>
+          <path d={lijnen.a}></path>
+          <path d={lijnen.b}></path>
+          <path d={lijnen.binnen}></path>
+          <path d={lijnen.kern}></path>
+        </g>
       </svg>
     </div>
 

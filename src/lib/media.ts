@@ -169,3 +169,18 @@ export function vermeldingPagina(locale: Locale): string | null {
   }
   return null;
 }
+
+/**
+ * Hoeveel eigen pixels de breedte van een shot heeft (BIJSTURING ronde 2g punt 2).
+ * Een poster die uit een kleinere uitsnede is opgeschaald, heeft maar zoveel
+ * pixels als die uitsnede (desktop: `startUitsnede`). Een film telt met zijn eigen
+ * breedte. Het script toont een beeld nooit groter dan 110 % hiervan: wat te klein
+ * is voor het hele scherm, komt in het venster van de rozet.
+ */
+export function eigenBreedte(naam: ShotNaam, bp: Breekpunt): number {
+  const s = shot(naam);
+  const b = s.bestanden[bp];
+  if (b.film) return b.film.breedte;
+  const uit = bp === 'd' ? s.startUitsnede?.breedte : undefined;
+  return uit && uit > 0 ? Math.min(b.poster.breedte, uit) : b.poster.breedte;
+}

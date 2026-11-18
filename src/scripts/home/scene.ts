@@ -239,15 +239,72 @@ function piek(sectie: HTMLElement) {
     return t <= sprongVan ? t : t + gat;
   };
 
-  let maxSchaal = 8;
+  /* De ruimtes: elk een eigen stuk van de tijdlijn [a, b], met haar foto in een raam. */
+  const kamers = [...sectie.querySelectorAll<HTMLElement>('.piek-laag')].flatMap((el, i) => {
+    const raam = el.querySelector<HTMLElement>('.piek-raam');
+    const a = Number(el.dataset.a);
+    const b = Number(el.dataset.b);
+    if (!raam || !(b > a)) return [];
+    return [
+      {
+        raam,
+        a,
+        b,
+        /* Een poster beweegt in code; een film beweegt zelf. Om en om naar links en naar rechts. */
+        pan: el.dataset.vorm === 'poster' ? 1 : 0,
+        richting: i % 2 === 0 ? 1 : -1,
+        eigen: (el.dataset.eigen ?? '').split(',').map(Number),
+        aspect: (el.dataset.aspect ?? '').split(',').map(Number),
+        sMax: 1,
+        venster: false,
+        x: [0, 0],
+        y: [0, 0],
+      },
+    ];
+  });
+  /* De wissels: daar knijpt de kern dicht en draait ze een slag. */
+  const wissels = kamers.slice(0, -1).map((k) => k.b);
+
+  let r0 = 1;
   function meet() {
-    const doos = rozet!.getBoundingClientRect().width / (Number(podium!.style.getPropertyValue('--piek-s')) || 1);
+    const doos = rozet!.getBoundingClientRect().width;
     const B = beeld!.clientWidth;
     const H = beeld!.clientHeight;
     if (!doos || !B || !H) return;
+    r0 = 0.188 * doos;
     /* De inkeping van de kern ligt op 0,75 van de punt: zo ver open dat ook die buiten beeld valt. */
-    const ver = Math.hypot(B, H) / 2 / 0.72;
-    maxSchaal = Math.max(1, ver / (0.188 * doos));
+    const vol = Math.hypot(B, H) / 2 / 0.72;
+    const bp = breed.matches ? 0 : 1;
+    for (const k of kamers) {
+      const eigen = k.eigen[bp] || k.eigen[0] || B;
+      const aspect = k.aspect[bp] || k.aspect[0] || B / H;
+      /* Zoveel van haar breedte schuift de foto over haar hele stuk: per tiende van de tijdlijn een tiende. */
+      const D = Math.min(0.5, k.pan * (k.b - k.a));
+      /* Nooit groter dan 110 % van de eigen pixels (BIJSTURING-MOEDER ronde 2g). */
+      const maxW = 1.1 * eigen;
+      let W = Math.max(B / (1 - D), H * aspect);
+      let Rx = B / 2;
+      let Ry = H / 2;
+      k.venster = W > maxW;
+      if (k.venster) {
+        /* Te klein voor het hele scherm: de foto blijft in het venster van de rozet. */
+        W = maxW;
+        const R = Math.max(r0, Math.min((W * (1 - D)) / 2, (0.94 * W) / aspect / 2));
+        Rx = R;
+        Ry = R;
+        k.sMax = R / r0;
+      } else k.sMax = Math.max(1, vol / r0);
+      const Hf = W / aspect;
+      k.raam.style.setProperty('--rw', `${W.toFixed(1)}px`);
+      k.raam.style.setProperty('--rh', `${Hf.toFixed(1)}px`);
+      /* Het raam dekt altijd het venster (of het hele beeld): links tussen deze twee grenzen. */
+      const links: [number, number] = [B / 2 + Rx - W, B / 2 - Rx];
+      const boven: [number, number] = [H / 2 + Ry - Hf, H / 2 - Ry];
+      k.x = k.richting > 0 ? [links[1], links[0]] : links;
+      const midden = (boven[0] + boven[1]) / 2;
+      const zak = Math.min((boven[1] - boven[0]) / 2, 0.03 * Hf);
+      k.y = [midden + zak, midden - zak];
+    }
     podium!.style.setProperty('--piek-eenheid', String(doos / 100));
     if (knoppen) {
       const marge = parseFloat(getComputedStyle(knoppen).marginTop) || 0;
@@ -315,18 +372,28 @@ function piek(sectie: HTMLElement) {
     const q = naarTijdlijn(u);
     sectie.style.setProperty('--piek-p', q.toFixed(4));
 
-    /* De kern gaat open, en knijpt bij elke wissel even dicht terwijl ze een slag draait. */
-    const dip = (midden: number) => klem(1 - Math.abs(q - midden) / 0.02);
-    const e = klem(klem((q - 0.08) / 0.12) - 0.8 * dip(0.44) - 0.8 * dip(0.6));
+    /* De kern gaat open en knijpt bij elke wissel helemaal dicht terwijl ze een slag
+       draait: de rozet draagt de overgang naar de volgende ruimte. */
+    const dicht = wissels.reduce((som, m) => som + klem(1 - Math.abs(q - m) / 0.04), 0);
+    const e = klem(klem((q - 0.07) / 0.11) - dicht);
+    const nu = kamers.findLast((k) => q >= k.a) ?? kamers[0];
+    const s = nu ? Math.pow(nu.sMax, e) : 1;
     const stijl = podium!.style;
-    stijl.setProperty('--piek-s', Math.pow(maxSchaal, e).toFixed(4));
-    stijl.setProperty('--piek-phi', `${(45 * (klem((q - 0.42) / 0.04) + klem((q - 0.58) / 0.04))).toFixed(2)}deg`);
-    stijl.setProperty('--piek-rozet-o', klem(1 - (e - 0.3) / 0.4).toFixed(3));
+    stijl.setProperty('--piek-s', s.toFixed(4));
+    stijl.setProperty('--piek-phi', `${wissels.reduce((som, m) => som + 45 * klem((q - m + 0.02) / 0.04), 0).toFixed(2)}deg`);
+    /* De petrol rozet blijft rond een venster staan; gaat het beeld schermvullend, dan wijkt ze. */
+    stijl.setProperty('--piek-rozet-o', (nu?.venster ? 1 : klem(1 - (e - 0.3) / 0.4)).toFixed(3));
+    for (const k of kamers) {
+      const t = klem((q - k.a) / (k.b - k.a));
+      const x = k.x[0] + (k.x[1] - k.x[0]) * t;
+      const y = k.y[0] + (k.y[1] - k.y[0]) * t;
+      k.raam.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
+    }
 
-    const nu = q >= 0.86;
-    if (knoppen && nu !== open) {
-      open = nu;
-      knoppen.inert = !nu;
+    const klaar = q >= 0.86;
+    if (knoppen && klaar !== open) {
+      open = klaar;
+      knoppen.inert = !klaar;
     }
 
     for (const film of films) {

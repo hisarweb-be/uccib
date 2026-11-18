@@ -656,8 +656,6 @@
     }
     .piek-podium {
       --piek-doos: min(64svh, 80vw);
-      --piek-r0: calc(var(--piek-doos) * 0.188);
-      --piek-straal: calc(var(--piek-r0) * var(--piek-s, 1));
       --beeld-h: 100%;
       --lijn-px: 3px;
       position: sticky;
@@ -673,23 +671,21 @@
       height: var(--beeld-h);
       overflow: clip;
     }
-    .piek-kern {
-      position: absolute;
-      inset: 0;
-      transform: rotate(var(--piek-phi, 0deg));
-      clip-path: var(--kern-pad);
-      opacity: clamp(0, (var(--piek-p) - 0.06) / 0.03, 1);
-    }
+    /* De ruimtes zelf staan stil op ware grootte; het venster ervoor (`.piek-masker`)
+       gaat open. Zo blijft het beeld scherp en animeert alleen transform. */
+    .piek-kern,
     .piek-fotos {
       position: absolute;
       inset: 0;
-      transform: rotate(calc(-1 * var(--piek-phi, 0deg)));
+    }
+    .piek-kern {
+      opacity: clamp(0, (var(--piek-p) - 0.06) / 0.03, 1);
     }
     .piek-laag {
       position: absolute;
       inset: 0;
-      /* Hoe ver deze ruimte is op haar eigen stuk van de scrollweg, 0 tot 1. */
-      --l: clamp(0, (var(--piek-p) - var(--van)) / (var(--tot) - var(--van)), 1);
+      /* Hoe ver deze ruimte is op haar eigen stuk van de tijdlijn, 0 tot 1. */
+      --l: clamp(0, (var(--piek-p) - var(--a)) / (var(--b) - var(--a)), 1);
     }
     .piek-laag[data-laag='2'] {
       opacity: clamp(0, (var(--piek-p) - 0.435) / 0.01, 1);
@@ -700,6 +696,16 @@
     .piek-laag[data-laag='4'] {
       opacity: clamp(0, (var(--piek-p) - 0.775) / 0.01, 1);
     }
+    /* De foto in haar eigen verhouding; maat en plaats zet het script (`meet`, `zet`):
+       nooit breder dan 110 % van haar eigen pixels, verschoven met translate3d. */
+    .piek-raam {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: var(--rw, 100%);
+      height: var(--rh, 100%);
+      will-change: transform;
+    }
     .piek-foto,
     .piek-film {
       position: absolute;
@@ -708,72 +714,54 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      object-position: var(--anker-m);
     }
-    /* Alleen de poster: de echte foto beweegt in code (BIJSTURING ronde 2d).
-       Ze zoomt in naar haar anker, de randen gaan open en er trekt warm licht
-       door de ruimte. De drie lopen elk in een eigen tempo: dat geeft diepte. */
-    .piek-zoom {
-      transform-origin: var(--anker-m);
-      transform: scale(
-        calc(1 + 0.11 * clamp(0, (var(--piek-p) - var(--van) + 0.12) / (var(--tot) - var(--van) + 0.12), 1))
-      );
-    }
-    /* Het licht van de ruimte zelf komt op; in `p2` niet, daar blijft het raam zoals het is. */
-    .piek-zoom:is([data-shot='p1'], [data-shot='p3']) {
-      filter: brightness(calc(0.94 + 0.14 * var(--l)));
-    }
-    .piek-licht,
-    .piek-diepte {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-    }
+    /* Het licht van de ruimte: één warme vlek, één keer getekend, die alleen met
+       translate3d en opacity door de ruimte trekt (BIJSTURING-MOEDER ronde 2g).
+       --fx/--fy is het midden als deel van de foto, --lw/--lh de maat van de vlek. */
     .piek-licht {
-      --warm: 255 196 120;
-      mix-blend-mode: soft-light;
-      opacity: calc(0.35 + 0.65 * var(--l));
-      /* Een ruimte zonder eigen licht hieronder: een zachte warme vloer. */
-      background: linear-gradient(to top, rgb(var(--warm) / 0.7), rgb(var(--warm) / 0) 30%);
-    }
-    /* p1: een baan licht trekt over de wand van de gebedsruimte, van links naar rechts. */
-    .piek-licht[data-licht='p1'] {
-      background:
-        radial-gradient(
-          ellipse 46% 80% at calc(12% + 62% * var(--l)) 40%,
-          rgb(var(--warm) / 0.95),
-          rgb(var(--warm) / 0) 72%
-        ),
-        linear-gradient(to top, rgb(var(--warm) / 0.5), rgb(var(--warm) / 0) 26%);
-    }
-    /* p2: warm licht over tafels en vloer; boven 70 % van de hoogte (het raam) gebeurt niets. */
-    .piek-licht[data-licht='p2'] {
-      background:
-        radial-gradient(
-          ellipse 60% 34% at calc(22% + 50% * var(--l)) 100%,
-          rgb(var(--warm) / 1),
-          rgb(var(--warm) / 0) 72%
-        ),
-        linear-gradient(to top, rgb(var(--warm) / 0.75), rgb(var(--warm) / 0) 28%);
-    }
-    /* p3: het licht loopt over de loper de zaal in; de deur en de trap blijven zoals ze zijn. */
-    .piek-licht[data-licht='p3'] {
-      background:
-        radial-gradient(
-          ellipse 44% 40% at 50% calc(104% - 22% * var(--l)),
-          rgb(var(--warm) / 1),
-          rgb(var(--warm) / 0) 72%
-        ),
-        linear-gradient(to top, rgb(var(--warm) / 0.6), rgb(var(--warm) / 0) 30%);
-    }
-    /* Diepte: de randen beginnen donker en gaan open terwijl je de ruimte in gaat. */
-    .piek-diepte {
-      background: radial-gradient(
-        ellipse 78% 78% at 50% 46%,
-        rgb(8 28 32 / 0) 42%,
-        rgb(8 28 32 / 0.62) 100%
+      --fx: calc(var(--x0) + (var(--x1) - var(--x0)) * var(--l));
+      --fy: calc(var(--y0) + (var(--y1) - var(--y0)) * var(--l));
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: calc(var(--lw) * 100%);
+      height: calc(var(--lh) * 100%);
+      pointer-events: none;
+      background: radial-gradient(closest-side, var(--licht-warm), transparent);
+      transform: translate3d(
+        calc((var(--fx) / var(--lw) - 0.5) * 100%),
+        calc((var(--fy) / var(--lh) - 0.5) * 100%),
+        0
       );
-      opacity: calc(0.95 - 0.6 * var(--l));
+      opacity: calc(0.45 + 0.45 * var(--l));
+      will-change: transform, opacity;
+    }
+    /* p1: over de wand van de gebedsruimte, van links naar rechts. */
+    .piek-licht[data-licht='p1'] {
+      --lw: 0.5;
+      --lh: 0.62;
+      --x0: 0.14;
+      --x1: 0.86;
+      --y0: 0.34;
+      --y1: 0.3;
+    }
+    /* p2: over tafels en vloer; het raam (boven 70 % van de hoogte) blijft ongemoeid. */
+    .piek-licht[data-licht='p2'] {
+      --lw: 0.56;
+      --lh: 0.3;
+      --x0: 0.2;
+      --x1: 0.78;
+      --y0: 0.86;
+      --y1: 0.86;
+    }
+    /* p3: over de loper de zaal in; de deur en de trap blijven ongemoeid. */
+    .piek-licht[data-licht='p3'] {
+      --lw: 0.5;
+      --lh: 0.3;
+      --x0: 0.5;
+      --x1: 0.5;
+      --y0: 1;
+      --y1: 0.78;
     }
     .piek-film {
       opacity: 0;
@@ -786,6 +774,10 @@
       right: 1rem;
       bottom: 1rem;
     }
+    /* Het venster en de petrol rozet eromheen: dezelfde maat, samen gedraaid en
+       geschaald met transform; de kern van de rozet is de rand van het venster en de
+       lijn blijft even dik (non-scaling-stroke). */
+    .piek-masker,
     .piek-rozet {
       display: block;
       position: absolute;
@@ -795,44 +787,26 @@
       height: var(--piek-doos);
       margin: calc(var(--piek-doos) / -2) 0 0 calc(var(--piek-doos) / -2);
       overflow: visible;
-      transform: rotate(var(--piek-phi, 0deg)) scale(var(--piek-s, 1));
+      pointer-events: none;
+    }
+    .piek-rozet {
       opacity: var(--piek-rozet-o, 1);
+    }
+    .piek-masker path {
+      fill: var(--color-papier);
+    }
+    .piek-masker g,
+    .piek-rozet g {
+      transform-box: view-box;
+      transform-origin: 50% 50%;
+      transform: rotate(var(--piek-phi, 0deg)) scale(var(--piek-s, 1));
     }
     .piek-rozet path {
       fill: none;
       stroke: var(--color-petrol-diep);
-      stroke-width: calc(var(--lijn-px) / var(--piek-eenheid, 6) / var(--piek-s, 1));
+      stroke-width: var(--lijn-px);
       stroke-linejoin: round;
-    }
-    /* De rozet draagt het verhaal ook als de kern open is: een dunne lichte lijn
-       over het beeld, die traag doordraait en bij elke wissel plaats maakt voor
-       de petrol rozet die dichtknijpt. */
-    .piek-ster {
-      display: block;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: calc(var(--piek-doos) * 1.18);
-      height: calc(var(--piek-doos) * 1.18);
-      margin: calc(var(--piek-doos) * -0.59) 0 0 calc(var(--piek-doos) * -0.59);
-      overflow: visible;
-      pointer-events: none;
-      transform: rotate(calc(var(--piek-phi, 0deg) + var(--piek-p) * 60deg))
-        scale(calc(0.9 + 0.16 * var(--piek-p)));
-      opacity: calc(
-        0.6 * (1 - var(--piek-rozet-o, 1)) * clamp(0, (var(--piek-p) - 0.16) / 0.05, 1) *
-          clamp(0, 1 - (var(--piek-p) - 0.9) / 0.04, 1)
-      );
-    }
-    .piek-ster path {
-      fill: none;
-      stroke: var(--color-papier);
-      stroke-width: calc(1.75px / var(--piek-eenheid, 6));
-      stroke-linejoin: round;
-    }
-    /* De kern van de rozet is een venster van warm licht op het midden van de ruimte. */
-    .piek-ster .piek-ster-kern {
-      fill: rgb(255 226 178 / 0.2);
+      vector-effect: non-scaling-stroke;
     }
 
     .piek-kop {
@@ -915,12 +889,6 @@
       --beeld-h: min(68%, calc(100% - 14rem));
       --lijn-px: 2px;
     }
-    /* Smal scherm: de lichte rozet blijft binnen het beeld. */
-    .piek-ster {
-      width: var(--piek-doos);
-      height: var(--piek-doos);
-      margin: calc(var(--piek-doos) / -2) 0 0 calc(var(--piek-doos) / -2);
-    }
     .piek-kop {
       top: calc(var(--beeld-h) + 1rem);
       font-size: var(--text-citaat);
@@ -931,10 +899,6 @@
 
 @media (min-height: 35rem) and (min-width: 48rem) {
   html.beweging-aan:not(.home-stil) {
-    .piek-foto,
-    .piek-film {
-      object-position: var(--anker-d);
-    }
     .piek-kop {
       /* Drie korte regels: de kop blijft links van de cirkel. */
       max-width: 11ch;
