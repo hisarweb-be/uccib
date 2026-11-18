@@ -27,7 +27,7 @@
     het document werd 375 px). Een adres is één woord zonder spaties, dus de
     browser moet het mogen afkappen.
   */
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .tekst > * + * {
