@@ -257,8 +257,8 @@ function piek(sectie: HTMLElement) {
         aspect: (el.dataset.aspect ?? '').split(',').map(Number),
         sMax: 1,
         venster: false,
-        x: [0, 0],
-        y: [0, 0],
+        x: [0, 0] as [number, number],
+        y: [0, 0] as [number, number],
       },
     ];
   });
