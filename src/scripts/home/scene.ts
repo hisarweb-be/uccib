@@ -26,7 +26,14 @@ const verbinding = (navigator as Navigator & { connection?: Verbinding }).connec
 /** Zuinige of trage verbinding: alleen de posters (CONTRACT 3). */
 const zuinig = Boolean(verbinding?.saveData) || /(^|-)(2g|3g)$/.test(verbinding?.effectiveType ?? '');
 
+/** Meldt dat de film van een shot echt in beeld staat; pas dan mag de AI-vermelding erbij. */
 function filmKlaar(shot: string) {
+  document
+    .querySelectorAll(`[data-vermelding-film="${CSS.escape(shot)}"]`)
+    .forEach((regel) => {
+      regel.classList.add('is-getoond');
+      regel.closest('.media-vermelding.vermelding-film')?.classList.add('is-getoond');
+    });
   document.dispatchEvent(new CustomEvent('uccib:film-klaar', { detail: { shot } }));
 }
 
