@@ -12,7 +12,8 @@
  * regel draagt `data-binnenkort="<slug>"`: de linkkeuring laat alleen dan een link
  * naar die ene concept-slug toe. Bağış gaat naar `#steun` op deze pagina.
  *
- * De rozet staat klein in de linkermarge; de regel die het midden van het scherm
+ * Vanaf 64rem staat de rozet klein in de linkermarge; daaronder staat ze in stand
+ * vol, 56 px, statisch boven de kop (M05). De regel die het midden van het scherm
  * passeert, wordt "aangewezen" (lijn petrol-diep). Dat doet een kleine observer;
  * zonder JavaScript is er geen aangewezen regel en is de index volledig.
  */
@@ -48,6 +49,9 @@ const regels = teksten.diensten.map((dienst) => {
 {
   regels.length > 0 ? (
     <section id="diensten-index" data-sectie="diensten-index" class="diensten-index">
+      <div class="index-rozet-mobiel" aria-hidden="true">
+        <Rozet stand="vol" maat={56} />
+      </div>
       <div class="index-rozet" aria-hidden="true">
         <Rozet stand="vol" maat={32} />
       </div>
@@ -100,6 +104,13 @@ const regels = teksten.diensten.map((dienst) => {
   .index-rozet {
     display: none;
   }
+  /* Onder 64rem (STORYBOARD M05 en 0.2, DESIGNSYSTEEM 4.1): de rozet staat niet in
+     een marge maar boven de sectiekop, stand vol, 56 px, links uitgelijnd en
+     statisch. Vrije ruimte rondom minstens een achtste van haar diameter (4.3). */
+  .index-rozet-mobiel {
+    align-self: flex-start;
+    margin: 0 0 1.5rem;
+  }
   .index-kop {
     margin: 0 0 2rem;
     font-family: var(--font-kop);
@@ -132,8 +143,22 @@ const regels = teksten.diensten.map((dienst) => {
     padding: 1.5rem 0;
     color: var(--color-inkt);
     text-decoration: none;
+    position: relative;
     box-shadow: inset 0 -1px 0 var(--lijn);
-    transition: box-shadow var(--duur-kort) var(--ease-uit);
+  }
+  /* De petrol lijn van 2 px ligt klaar over de haarlijn en verschijnt met opacity
+     (DESIGNSYSTEEM 6: alleen transform en opacity bewegen). */
+  .index-link::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: var(--color-petrol-diep);
+    opacity: 0;
+    transition: opacity var(--duur-kort) var(--ease-uit);
+    pointer-events: none;
   }
   .index-titel {
     grid-column: 1;
@@ -168,9 +193,10 @@ const regels = teksten.diensten.map((dienst) => {
     color: var(--color-petrol-diep);
     transition: transform var(--duur-kort) var(--ease-uit);
   }
-  .index-link:hover,
-  .index-regel[data-aangewezen] .index-link {
-    box-shadow: inset 0 -2px 0 var(--color-petrol-diep);
+  .index-link:hover::after,
+  .index-link:focus-visible::after,
+  .index-regel[data-aangewezen] .index-link::after {
+    opacity: 1;
   }
   .index-link:hover .index-titel {
     color: var(--color-petrol-diep);
@@ -181,13 +207,15 @@ const regels = teksten.diensten.map((dienst) => {
   .index-link:focus-visible {
     outline: 3px solid var(--color-petrol);
     outline-offset: 2px;
-    box-shadow: inset 0 -2px 0 var(--color-petrol-diep);
   }
   .index-link:active {
     transform: translateY(1px);
   }
 
   @media (min-width: 64rem) {
+    .index-rozet-mobiel {
+      display: none;
+    }
     .index-rozet {
       display: block;
       position: absolute;
