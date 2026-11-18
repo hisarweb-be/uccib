@@ -1,0 +1,58 @@
+---
+/**
+ * De eerlijke vermelding bij een shot (CONTRACT 3, moskee-zorg).
+ *
+ * Twee regels, elk alleen als het manifest het zegt:
+ * - "Film: AI-gegenereerd" als het shot een AI-film toont (`aiFilm` plus een
+ *   film of frame-reeks die er ligt; bij alleen de poster is er geen AI in beeld,
+ *   ook niet als de film van dat shot "vervallen" is);
+ * - "Foto bijgewerkt" als de poster een bewerkte foto is.
+ *
+ * Met de plaatshouder geeft het manifest geen van beide: dan staat er niets, ook
+ * geen leeg element.
+ */
+import type { Locale } from '../i18n';
+import { f3 } from '../i18n/f3';
+import { shot, vermelding, vormVan, type ShotNaam } from '../lib/media';
+
+interface Props {
+  shot: ShotNaam;
+  locale: Locale;
+  class?: string;
+}
+
+const { shot: naam, locale, class: klasse } = Astro.props;
+const teksten = f3(locale);
+const heeftFilm = vormVan(naam) === 'film';
+const ai = heeftFilm ? (vermelding(naam, locale) ?? (shot(naam).aiFilm ? teksten.mediaAi : null)) : null;
+const bewerkt = shot(naam).bewerkt ? teksten.mediaBewerkt : null;
+const regels = [ai, bewerkt].filter((regel): regel is string => regel !== null);
+---
+
+{
+  regels.length > 0 ? (
+    <p class:list={['media-vermelding', klasse]} data-vermelding={naam}>
+      {regels.map((regel) => (
+        <span>{regel}</span>
+      ))}
+    </p>
+  ) : null
+}
+
+<style>
+  .media-vermelding {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.75rem;
+    font-family: var(--font-tekst);
+    font-size: var(--text-label);
+    line-height: var(--text-label--line-height);
+    letter-spacing: var(--text-label--letter-spacing);
+    font-weight: var(--text-label--font-weight);
+    color: var(--color-inkt);
+    background: var(--plaat);
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--radius-vak);
+  }
+</style>

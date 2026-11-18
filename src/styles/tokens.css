@@ -52,7 +52,7 @@
   line-gap-override: 0%; /* gemeten */
 }
 
-@theme {
+@theme static {
   /* Kleur: de zes tokens (1.1) */
   --color-papier: #f2f6f5;
   --color-inkt: #2b3335;
@@ -199,6 +199,10 @@
   --inkt-uit: color-mix(in srgb, var(--color-inkt) 50%, var(--color-papier)); /* #8F9595 */
   --plaat: color-mix(in srgb, var(--color-papier) 92%, transparent);
   --rozet-midden: color-mix(in srgb, var(--color-petrol) 70%, var(--color-mint));
+
+  /* Het enige warme token (BIJSTURING-MOEDER ronde 2g, beslissing dirigent): alleen
+     voor de lichtlaag van de piek, die het licht van de ruimte zelf naspeelt. */
+  --licht-warm: #ffd49a;
 
   --kop-hoogte: 3.5rem;
   --unie-schaal: 1;

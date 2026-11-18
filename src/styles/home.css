@@ -1,0 +1,1013 @@
+/**
+ * De startpagina: hero-unie en piek-ruimtes (F2b PR3).
+ *
+ * Twee toestanden, één DOM:
+ * - stil (geen JavaScript, `prefers-reduced-motion`, laag venster, of GSAP laadt
+ *   niet): alles staat onder elkaar en is leesbaar; niets is doorzichtig;
+ * - beweging (`html.beweging-aan`, gezet vóór de eerste verf): het podium staat
+ *   vast met `position: sticky` en elke stand is een functie van `--hero-p` of
+ *   `--piek-p` (0 tot 1). Het script zet alleen die variabele en een paar maten.
+ *
+ * Er wordt alleen `transform`, `opacity`, `clip-path`, `stroke-dashoffset` en
+ * kleur via een variabele bewogen; nooit een maat of een marge. Alle kleuren,
+ * letters en maten komen uit `tokens.css`.
+ */
+
+.hero-unie,
+.piek-ruimtes {
+  --kop: var(--kop-echt, calc(var(--kop-hoogte) + 1px));
+  --podium-h: calc(100svh - var(--kop));
+  --blad: max(var(--spacing-marge), calc((100% - var(--container-blad)) / 2));
+  position: relative;
+  background: var(--color-papier);
+  color: var(--color-inkt);
+}
+
+/* Meet één schermhoogte in px voor het script (svh, dus zonder de adresbalk). */
+.sh-maat {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100svh;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.alleen-beweging {
+  display: none;
+}
+
+/* ── Knoppen (DESIGNSYSTEEM 7.1) ── */
+
+.hero-unie .knop,
+.piek-ruimtes .knop {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 3.25rem;
+  padding: 0 1.5rem;
+  border: 1.5px solid var(--color-petrol-diep);
+  border-radius: var(--radius-vak);
+  font-family: var(--font-tekst);
+  font-size: var(--text-knop);
+  line-height: var(--text-knop--line-height);
+  letter-spacing: var(--text-knop--letter-spacing);
+  font-weight: var(--text-knop--font-weight);
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color 160ms var(--ease-uit),
+    border-color 160ms var(--ease-uit),
+    color 160ms var(--ease-uit);
+}
+.hero-unie .knop-eerst,
+.piek-ruimtes .knop-eerst {
+  background: var(--color-petrol-diep);
+  color: var(--color-wit);
+}
+.hero-unie .knop-eerst:hover,
+.piek-ruimtes .knop-eerst:hover {
+  background: var(--color-inkt);
+  border-color: var(--color-inkt);
+}
+.hero-unie .knop-tweede,
+.piek-ruimtes .knop-tweede {
+  background: transparent;
+  color: var(--color-petrol-diep);
+}
+.hero-unie .knop-tweede:hover,
+.piek-ruimtes .knop-tweede:hover {
+  border-color: var(--color-inkt);
+  color: var(--color-inkt);
+}
+.hero-unie .knop:active,
+.piek-ruimtes .knop:active {
+  transform: translateY(1px);
+}
+.hero-unie .knop:focus-visible,
+.piek-ruimtes .knop:focus-visible {
+  outline: 3px solid var(--color-petrol);
+  outline-offset: 3px;
+}
+
+.hero-knoppen,
+.piek-knoppen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+/* ── Hero: het eerste scherm ── */
+
+.hero-eerste {
+  --unie-maat: min(var(--text-unie), 30vw * var(--unie-schaal));
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-height: var(--podium-h);
+  padding: 1.25rem var(--blad) 1.5rem;
+}
+
+.hero-label {
+  order: 1;
+  margin: 0;
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: var(--text-label--font-weight);
+  color: var(--color-petrol-diep);
+}
+
+.hero-kop {
+  order: 2;
+  margin: 0.375rem 0 0;
+  display: flex;
+  flex-direction: column;
+  font-size: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  text-wrap: wrap;
+}
+.hero-naam {
+  display: block;
+  font-family: var(--font-kop);
+  font-size: var(--text-naam);
+  line-height: var(--text-naam--line-height);
+  font-weight: var(--text-naam--font-weight);
+  letter-spacing: 0;
+  color: var(--color-inkt);
+  text-wrap: balance;
+}
+.hero-unie-woord {
+  display: block;
+  width: max-content;
+  max-width: none;
+  font-family: var(--font-kop);
+  font-size: var(--unie-maat);
+  line-height: var(--text-unie--line-height);
+  letter-spacing: var(--text-unie--letter-spacing);
+  font-weight: var(--text-unie--font-weight);
+  color: var(--color-petrol-diep);
+  white-space: nowrap;
+  /* De regelhoogte van 0,9 snijdt anders de staart van de ğ af. */
+  padding-bottom: 0.08em;
+}
+.hero-unie--unie-eerst .hero-naam {
+  margin-top: 0.25rem;
+}
+
+.hero-beeld {
+  order: 3;
+  flex: 1 1 0;
+  min-height: 9rem;
+  margin-top: 1rem;
+  container-type: size;
+  display: flex;
+  align-items: flex-start;
+}
+.hero-venster {
+  position: relative;
+  margin: 0;
+  width: min(100cqw, 100cqh, 40rem);
+  aspect-ratio: 1;
+  flex: none;
+}
+.hero-rozet {
+  display: none;
+}
+.hero-foto {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--lijn);
+}
+.hero-foto img,
+.hero-foto canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--anker-m);
+}
+.hero-foto canvas {
+  opacity: 0;
+}
+.hero-foto canvas.is-klaar {
+  opacity: 1;
+}
+.hero-stip {
+  position: absolute;
+  top: -0.375rem;
+  left: -0.375rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background: var(--color-petrol);
+}
+.hero-vermelding {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+}
+
+.hero-intro {
+  order: 4;
+  margin: 1rem 0 0;
+  max-width: 48ch;
+  font-size: var(--text-lead);
+  line-height: var(--text-lead--line-height);
+  color: var(--color-inkt);
+}
+.hero-eerste .hero-knoppen {
+  order: 5;
+  margin-top: 1rem;
+  /* Rechtsonder zweeft de WhatsApp-knop: de rij blijft links van die zone. */
+  max-width: calc(100% - 4rem);
+}
+
+/* ── Hero: stil (sleutelbeelden en de twee knoppen) ── */
+
+.hero-sleutels {
+  padding: 3rem var(--blad) 0;
+}
+.hero-slot {
+  padding: 3rem var(--blad) 4rem;
+}
+.hero-slot .hero-knoppen {
+  max-width: calc(100% - 4rem);
+}
+
+@media (min-width: 48rem) {
+  .hero-foto img,
+  .hero-foto canvas {
+    object-position: var(--anker-d);
+  }
+}
+
+/* ── Hero: twee banden vanaf 1024 px (STORYBOARD D01) ── */
+
+@media (min-width: 64rem) {
+  .hero-eerste {
+    --unie-maat: min(var(--text-unie), 30svh * var(--unie-schaal));
+    --unie-regel: calc(var(--unie-maat) * 0.98);
+    --unie-blok: var(--unie-regel);
+    /* De staart van de ğ hangt onder de regel: die ruimte hoort bij de onderrand. */
+    --onder: calc(1.5rem + var(--unie-maat) * 0.14);
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: auto auto auto auto minmax(0, 1fr) var(--unie-blok);
+    column-gap: 2rem;
+    padding: 2.5rem var(--blad) var(--onder);
+  }
+  .hero-unie--unie-eerst .hero-eerste {
+    --unie-blok: calc(var(--unie-regel) + 3rem);
+  }
+  .hero-label,
+  .hero-kop,
+  .hero-intro,
+  .hero-eerste .hero-knoppen {
+    grid-column: 1 / span 6;
+  }
+  .hero-label {
+    grid-row: 1;
+  }
+  .hero-kop {
+    grid-row: 2;
+    margin-top: 0.75rem;
+  }
+  .hero-intro {
+    grid-row: 3;
+    margin-top: 1.25rem;
+  }
+  .hero-eerste .hero-knoppen {
+    grid-row: 4;
+    margin-top: 1.75rem;
+    max-width: none;
+  }
+  /* Het uniewoord staat in de onderste band; in de bron blijft het in de h1. */
+  .hero-unie--naam-eerst .hero-unie-woord,
+  .hero-unie--unie-eerst .hero-kop {
+    position: absolute;
+    left: var(--blad);
+    bottom: var(--onder);
+    margin: 0;
+  }
+  .hero-unie--naam-eerst .hero-unie-woord {
+    height: var(--unie-regel);
+    padding-bottom: 0;
+  }
+  .hero-unie--unie-eerst .hero-kop {
+    /* Los van het raster: anders is de rastercel het ankervlak en schuift de
+       kop een marge op en breekt de naam op de kolombreedte. */
+    grid-area: auto;
+    height: var(--unie-blok);
+    justify-content: flex-end;
+  }
+  .hero-unie--unie-eerst .hero-naam {
+    white-space: nowrap;
+  }
+  .hero-unie--unie-eerst .hero-unie-woord {
+    padding-bottom: 0;
+  }
+  .hero-unie--unie-eerst .hero-naam {
+    height: 3rem;
+    margin-top: 0;
+    display: flex;
+    align-items: flex-end;
+  }
+  .hero-beeld {
+    grid-column: 8 / span 5;
+    grid-row: 1 / span 5;
+    margin-top: 0;
+    min-height: 12rem;
+    justify-content: flex-end;
+    padding-bottom: 1.5rem;
+  }
+  .hero-slot .hero-knoppen {
+    max-width: none;
+  }
+}
+
+/* ── Hero: beweging ── */
+
+@media (min-height: 35rem) {
+  html.beweging-aan:not(.home-stil) {
+    .alleen-stil {
+      display: none;
+    }
+    .alleen-beweging {
+      display: block;
+    }
+
+    .hero-unie {
+      /* Eén podium plus drie schermhoogten scroll. */
+      height: calc(var(--podium-h) + 300svh);
+    }
+    .hero-podium {
+      --t1: clamp(0, (var(--hero-p) - 0.09) / 0.11, 1);
+      /* Het slot: de rozet parkeert 0,90-0,95, pas daarna komt de belofte (vanaf 0,955). */
+      --t2: clamp(0, (var(--hero-p) - 0.9) / 0.05, 1);
+      --hero-k: clamp(0, (var(--hero-p) - 0.81) / 0.09, 1);
+      --weg: clamp(0, 1 - (var(--hero-p) - 0.09) / 0.05, 1);
+      --fig-s: calc(1 + (var(--fs, 1) - 1) * var(--t1) + (var(--gs, 1) - var(--fs, 1)) * var(--t2));
+      position: sticky;
+      top: var(--kop);
+      height: var(--podium-h);
+      overflow: clip;
+    }
+    .hero-eerste {
+      height: 100%;
+      min-height: 0;
+    }
+    .hero-weg {
+      opacity: var(--weg);
+    }
+    .hero-unie-woord {
+      opacity: var(--weg);
+    }
+    .hero-unie[data-stand='fasen'] .hero-eerste .hero-knoppen,
+    .hero-unie[data-stand='slot'] .hero-eerste .hero-knoppen {
+      pointer-events: none;
+    }
+
+    /* Het venster verhuist (FLIP: de maten zet het script, de stand volgt uit p). */
+    .hero-venster {
+      transform-origin: 0 0;
+      transform: translate3d(
+          calc(var(--fx, 0px) * var(--t1) + (var(--gx, 0px) - var(--fx, 0px)) * var(--t2)),
+          calc(var(--fy, 0px) * var(--t1) + (var(--gy, 0px) - var(--fy, 0px)) * var(--t2)),
+          0
+        )
+        scale(var(--fig-s));
+      will-change: transform;
+    }
+    .hero-foto {
+      background: none;
+      overflow: visible;
+    }
+    .hero-foto img,
+    .hero-foto canvas.is-klaar {
+      clip-path: var(--venster-pad);
+      opacity: clamp(0, 1 - (var(--hero-p) - 0.9) / 0.03, 1);
+    }
+    /* De vermelding hoort bij de film: weg zodra het venster naar het slot verhuist. */
+    .hero-vermelding {
+      opacity: calc(1 - clamp(0, (var(--hero-p) - 0.89) / 0.01, 1));
+    }
+    .hero-stip {
+      transform: scale(calc(1 / var(--fig-s)));
+      opacity: clamp(0, 1 - (var(--hero-p) - 0.26) / 0.04, 1);
+    }
+
+    /* De rozet rond het venster: vierkant A valt op de rand van het venster. */
+    .hero-rozet {
+      display: block;
+      position: absolute;
+      inset: -25.223%;
+      width: 150.446%;
+      height: 150.446%;
+      overflow: visible;
+      transform: rotate(calc(22.5deg * var(--hero-k)));
+    }
+    /* Lijnen: vaste dikte op het scherm, kleur wisselt alleen via de dekking van twee lagen. */
+    .hero-rozet .lijn {
+      fill: none;
+      stroke: var(--color-petrol-diep);
+      stroke-width: var(--lijn-px, 2px);
+      stroke-linejoin: round;
+      stroke-dasharray: 1 1;
+      vector-effect: non-scaling-stroke;
+    }
+    .hero-rozet .lijnen-wit .lijn {
+      stroke: var(--color-wit);
+    }
+    .lijnen-diep {
+      opacity: clamp(0, 2 - 2 * var(--hero-k), 1);
+    }
+    .lijnen-wit {
+      opacity: var(--hero-k);
+    }
+    .lijn-cirkel {
+      stroke-dashoffset: clamp(0, 1 - (var(--hero-p) - 0.12) / 0.14, 1);
+      opacity: calc(
+        clamp(0, (var(--hero-p) - 0.12) * 200, 1) * (1 - 0.7 * clamp(0, (var(--hero-p) - 0.4) / 0.07, 1)) *
+          (1 - var(--hero-k))
+      );
+    }
+    .lijn-a {
+      stroke-dashoffset: clamp(0, 1 - (var(--hero-p) - 0.27) / 0.18, 1);
+      opacity: clamp(0, (var(--hero-p) - 0.27) * 200, 1);
+    }
+    .lijn-b {
+      stroke-dashoffset: clamp(0, 1 - (var(--hero-p) - 0.48) / 0.18, 1);
+      opacity: clamp(0, (var(--hero-p) - 0.48) * 200, 1);
+    }
+    .lijn-binnen {
+      stroke-dashoffset: clamp(0, 1 - (var(--hero-p) - 0.68) / 0.08, 1);
+      opacity: clamp(0, (var(--hero-p) - 0.68) * 200, 1);
+    }
+    .lijn-kern {
+      stroke-dashoffset: clamp(0, 1 - (var(--hero-p) - 0.73) / 0.07, 1);
+      opacity: clamp(0, (var(--hero-p) - 0.73) * 200, 1);
+    }
+    .hero-vlakken {
+      opacity: var(--hero-k);
+    }
+    .vlak-buiten {
+      fill: var(--color-petrol);
+    }
+    .vlak-ring {
+      fill: var(--rozet-midden);
+    }
+    .vlak-kern {
+      fill: var(--color-mint);
+    }
+
+    /* De fasetekst: één cel; buren wisselen kort na de grens, nooit tegelijk zichtbaar. */
+    .hero-fasen {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .hero-lopend {
+      display: none;
+    }
+    .hero-verhaal {
+      /* Pas als het eerste scherm weg is: nooit twee teksten door elkaar. */
+      opacity: clamp(0, (var(--hero-p) - 0.135) / 0.04, 1);
+      position: absolute;
+      top: 50%;
+      left: var(--blad);
+      right: var(--blad);
+    }
+    .hero-klok {
+      display: flex;
+      flex-wrap: nowrap;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      font-size: var(--text-klok);
+      font-weight: var(--text-klok--font-weight);
+      color: var(--inkt-zacht);
+      white-space: nowrap;
+      opacity: calc(clamp(0, (var(--hero-p) - 0.09) / 0.04, 1) * clamp(0, (0.9 - var(--hero-p)) / 0.02, 1));
+    }
+    .hero-klok li + li::before {
+      content: '·';
+      margin: 0 0.5em;
+      font-weight: 500;
+      color: var(--inkt-zacht);
+    }
+    .hero-klok li[aria-current] {
+      font-weight: 700;
+      color: var(--color-petrol-diep);
+    }
+    .hero-fasetekst {
+      display: grid;
+      margin-top: 0.75rem;
+    }
+    .hero-fase {
+      grid-area: 1 / 1;
+      /* Na elkaar, nooit door elkaar: tot de grens staat de vorige vol, die is weg op
+         grens + 0,006 en pas dan komt de volgende (vol op grens + 0,018). */
+      opacity: clamp(
+        0,
+        min((var(--hero-p) - var(--van) - 0.006) / 0.012, (var(--tot) + 0.006 - var(--hero-p)) / 0.006),
+        1
+      );
+    }
+    .hero-fase p {
+      margin: 0;
+    }
+    .hero-fasekop {
+      font-family: var(--font-kop);
+      font-size: var(--text-h2);
+      line-height: var(--text-h2--line-height);
+      letter-spacing: var(--text-h2--letter-spacing);
+      font-weight: var(--text-h2--font-weight);
+      color: var(--color-inkt);
+    }
+    .hero-fasezin {
+      margin-top: 0.5rem !important;
+      max-width: 48ch;
+      font-size: var(--text-lead);
+      line-height: var(--text-lead--line-height);
+      color: var(--color-inkt);
+    }
+    .hero-fasen.is-krap .hero-fasezin {
+      padding-right: 4.5rem;
+    }
+
+    /* Het slot: de belofte groot, de twee knoppen, de volle rozet klein ernaast. */
+    .hero-slot {
+      --slot-rozet: 7rem;
+      position: absolute;
+      top: 1.5rem;
+      left: 0;
+      right: 0;
+      padding: calc(var(--slot-rozet) + 1.5rem) var(--blad) 0;
+      opacity: clamp(0, (var(--hero-p) - 0.955) / 0.035, 1);
+      pointer-events: none;
+    }
+    .hero-unie[data-stand='slot'] .hero-slot {
+      pointer-events: auto;
+    }
+    .hero-belofte {
+      margin: 0 0 1.5rem;
+      max-width: 24ch;
+      font-family: var(--font-kop);
+      font-size: var(--text-h2);
+      line-height: var(--text-h2--line-height);
+      letter-spacing: var(--text-h2--letter-spacing);
+      font-weight: var(--text-h2--font-weight);
+      color: var(--color-inkt);
+      text-wrap: balance;
+    }
+  }
+}
+
+@media (min-height: 35rem) and (max-width: 24.3125rem) {
+  html.beweging-aan:not(.home-stil) {
+    /* Smal scherm: het actieve klokwoord voluit, de andere als punt. */
+    .hero-klok li:not([aria-current]) span {
+      display: inline-block;
+      width: 0.375rem;
+      height: 0.375rem;
+      overflow: hidden;
+      border-radius: 50%;
+      background: var(--inkt-zacht);
+      color: transparent;
+      vertical-align: middle;
+    }
+    .hero-klok li + li::before {
+      content: '';
+      margin: 0 0.3em;
+    }
+    .hero-belofte {
+      font-size: 7.5vw;
+    }
+  }
+}
+
+@media (min-height: 35rem) and (min-width: 64rem) {
+  html.beweging-aan:not(.home-stil) {
+    /* Het uniewoord krimpt naar linksboven en gaat over in de lopende titel. */
+    .hero-unie-woord {
+      transform-origin: 0 0;
+      transform: translateY(calc(var(--t1) * -1 * (var(--podium-h) - var(--onder) - var(--unie-blok) - 2rem)))
+        scale(calc(1 - 0.86 * var(--t1)));
+      opacity: clamp(0, 1 - (var(--hero-p) - 0.1) / 0.05, 1);
+      will-change: transform;
+    }
+    .hero-lopend {
+      display: block;
+      position: absolute;
+      top: 2rem;
+      left: var(--blad);
+      margin: 0;
+      font-family: var(--font-kop);
+      font-size: var(--text-naam);
+      line-height: var(--text-naam--line-height);
+      font-weight: var(--text-naam--font-weight);
+      color: var(--color-inkt);
+      opacity: clamp(0, (var(--hero-p) - 0.14) / 0.04, 1);
+    }
+    .hero-verhaal {
+      top: 0;
+      bottom: 0;
+      right: auto;
+      width: calc((100% - 2 * var(--blad)) * 5 / 12 - 1rem);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .hero-podium {
+      --lijn-px: 3px;
+    }
+    .hero-slot {
+      --slot-rozet: 6rem;
+      top: 36%;
+      padding: 0 var(--blad) 0 calc(var(--blad) + var(--slot-rozet) + 2.5rem);
+    }
+    .hero-belofte {
+      max-width: 26ch;
+    }
+  }
+}
+
+/* ══ Piek: de ruimtes ══ */
+
+.piek-podium {
+  padding: 4rem var(--blad);
+}
+.piek-kop {
+  margin: 0;
+  max-width: 20ch;
+}
+.piek-stil {
+  margin-top: 2.5rem;
+}
+.piek-stil .piek-knoppen {
+  margin-top: 2.5rem;
+  max-width: calc(100% - 4rem);
+}
+@media (min-width: 48rem) {
+  .piek-sleutels {
+    max-width: 60rem;
+  }
+}
+
+@media (min-height: 35rem) {
+  html.beweging-aan:not(.home-stil) {
+    .piek-ruimtes {
+      /* Podium, de scrub (`--piek-lengte` schermhoogten) en de staart waarin het
+         papier van de volgende sectie over het stilstaande beeld schuift: dat
+         begint op p 0,94, dus 0,3 schermhoogte voor het einde van de scrub. */
+      height: calc(2 * var(--podium-h) + var(--piek-lengte, 5) * 100svh - 30svh);
+      margin-bottom: calc(-1 * var(--podium-h));
+    }
+    .piek-podium {
+      --piek-doos: min(64svh, 80vw);
+      --beeld-h: 100%;
+      --lijn-px: 3px;
+      position: sticky;
+      top: var(--kop);
+      height: var(--podium-h);
+      padding: 0;
+      overflow: clip;
+      background: var(--color-papier);
+    }
+    .piek-beeld {
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: var(--beeld-h);
+      overflow: clip;
+    }
+    /* De ruimtes zelf staan stil op ware grootte; het venster ervoor (`.piek-masker`)
+       gaat open. Zo blijft het beeld scherp en animeert alleen transform. */
+    .piek-kern,
+    .piek-fotos {
+      position: absolute;
+      inset: 0;
+    }
+    .piek-kern {
+      opacity: clamp(0, (var(--piek-p) - 0.06) / 0.03, 1);
+    }
+    .piek-laag {
+      position: absolute;
+      inset: 0;
+      /* Hoe ver deze ruimte is op haar eigen stuk van de tijdlijn, 0 tot 1. */
+      --l: clamp(0, (var(--piek-p) - var(--a)) / (var(--b) - var(--a)), 1);
+    }
+    .piek-laag[data-laag='2'] {
+      opacity: clamp(0, (var(--piek-p) - 0.435) / 0.01, 1);
+    }
+    .piek-laag[data-laag='3'] {
+      opacity: clamp(0, (var(--piek-p) - 0.595) / 0.01, 1);
+    }
+    .piek-laag[data-laag='4'] {
+      opacity: clamp(0, (var(--piek-p) - 0.775) / 0.01, 1);
+    }
+    /* De foto in haar eigen verhouding; maat en plaats zet het script (`meet`, `zet`):
+       nooit breder dan 110 % van haar eigen pixels, verschoven met translate3d. */
+    .piek-raam {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: var(--rw, 100%);
+      height: var(--rh, 100%);
+      will-change: transform;
+    }
+    .piek-foto,
+    .piek-film {
+      position: absolute;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    /* Het licht van de ruimte: één warme vlek, één keer getekend, die alleen met
+       translate3d en opacity door de ruimte trekt (BIJSTURING-MOEDER ronde 2g).
+       --fx/--fy is het midden als deel van de foto, --lw/--lh de maat van de vlek. */
+    .piek-licht {
+      --fx: calc(var(--x0) + (var(--x1) - var(--x0)) * var(--l));
+      --fy: calc(var(--y0) + (var(--y1) - var(--y0)) * var(--l));
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: calc(var(--lw) * 100%);
+      height: calc(var(--lh) * 100%);
+      pointer-events: none;
+      background: radial-gradient(closest-side, var(--licht-warm), transparent);
+      transform: translate3d(
+        calc((var(--fx) / var(--lw) - 0.5) * 100%),
+        calc((var(--fy) / var(--lh) - 0.5) * 100%),
+        0
+      );
+      opacity: calc(0.45 + 0.45 * var(--l));
+      will-change: transform, opacity;
+    }
+    /* p1: over de wand van de gebedsruimte, van links naar rechts. */
+    .piek-licht[data-licht='p1'] {
+      --lw: 0.5;
+      --lh: 0.62;
+      --x0: 0.14;
+      --x1: 0.86;
+      --y0: 0.34;
+      --y1: 0.3;
+    }
+    /* p2: over tafels en vloer; het raam (boven 70 % van de hoogte) blijft ongemoeid. */
+    .piek-licht[data-licht='p2'] {
+      --lw: 0.56;
+      --lh: 0.3;
+      --x0: 0.2;
+      --x1: 0.78;
+      --y0: 0.86;
+      --y1: 0.86;
+    }
+    /* p3: over de loper de zaal in; de deur en de trap blijven ongemoeid. */
+    .piek-licht[data-licht='p3'] {
+      --lw: 0.5;
+      --lh: 0.3;
+      --x0: 0.5;
+      --x1: 0.5;
+      --y0: 1;
+      --y1: 0.78;
+    }
+    .piek-film {
+      opacity: 0;
+    }
+    .piek-film.is-klaar {
+      opacity: 1;
+    }
+    .piek-vermelding {
+      position: absolute;
+      right: 1rem;
+      bottom: 1rem;
+    }
+    /* De vermelding van een ruimte staat er zolang haar foto de bovenste is; de eerste
+       pas als de kern (de foto's) in beeld komt, op p 0,06. */
+    .piek-plek {
+      --in: 0.06;
+      --uit: 2;
+      opacity: clamp(0, min((var(--piek-p) - var(--in)) / 0.01, 1 - (var(--piek-p) - var(--uit)) / 0.01), 1);
+    }
+    .piek-plek[data-laag='2'] {
+      --in: 0.435;
+    }
+    .piek-plek[data-laag='3'] {
+      --in: 0.595;
+    }
+    .piek-plek[data-laag='4'] {
+      --in: 0.775;
+    }
+    .piek-plek:has(+ .piek-plek[data-laag='2']) {
+      --uit: 0.435;
+    }
+    .piek-plek:has(+ .piek-plek[data-laag='3']) {
+      --uit: 0.595;
+    }
+    .piek-plek:has(+ .piek-plek[data-laag='4']) {
+      --uit: 0.775;
+    }
+    /* Het venster en de petrol rozet eromheen: dezelfde maat, samen gedraaid en
+       geschaald met transform; de kern van de rozet is de rand van het venster en de
+       lijn blijft even dik (non-scaling-stroke). */
+    .piek-masker,
+    .piek-rozet {
+      display: block;
+      position: absolute;
+      top: 50%;
+      /* --piek-dx: zover schuift het script het venster naar rechts, vrij van de tekstplaat. */
+      left: calc(50% + var(--piek-dx, 0px));
+      width: var(--piek-doos);
+      height: var(--piek-doos);
+      margin: calc(var(--piek-doos) / -2) 0 0 calc(var(--piek-doos) / -2);
+      overflow: visible;
+      pointer-events: none;
+    }
+    .piek-rozet {
+      opacity: var(--piek-rozet-o, 1);
+    }
+    .piek-masker path {
+      fill: var(--color-papier);
+    }
+    .piek-masker g,
+    .piek-rozet g {
+      transform-box: view-box;
+      transform-origin: 50% 50%;
+      transform: rotate(var(--piek-phi, 0deg)) scale(var(--piek-s, 1));
+    }
+    .piek-rozet path {
+      fill: none;
+      stroke: var(--color-petrol-diep);
+      stroke-width: var(--lijn-px);
+      stroke-linejoin: round;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .piek-kop {
+      position: absolute;
+      top: 2rem;
+      left: var(--blad);
+      right: var(--blad);
+      opacity: clamp(0, 1 - (var(--piek-p) - 0.05) / 0.04, 1);
+    }
+
+    /* De tekst: op een telefoon onder het beeld op papier, vanaf 768 px een plaat linksonder. */
+    .piek-tekst {
+      position: absolute;
+      left: var(--blad);
+      right: var(--blad);
+      top: calc(var(--beeld-h) + 1rem);
+      opacity: clamp(0, (var(--piek-p) - 0.09) / 0.04, 1);
+    }
+    .piek-tekst p {
+      margin: 0;
+    }
+    .piek-klein {
+      font-family: var(--font-kop);
+      font-size: var(--text-naam);
+      line-height: var(--text-naam--line-height);
+      font-weight: var(--text-naam--font-weight);
+      color: var(--color-inkt);
+    }
+    .piek-klein [data-na='2'] {
+      opacity: clamp(0, (var(--piek-p) - 0.435) / 0.02, 1);
+    }
+    .piek-klein [data-na='3'] {
+      opacity: clamp(0, (var(--piek-p) - 0.595) / 0.02, 1);
+    }
+    .piek-slagen {
+      display: grid;
+      margin-top: 0.25rem;
+    }
+    .piek-slag {
+      grid-area: 1 / 1;
+      max-width: 28ch;
+      font-family: var(--font-kop);
+      font-size: var(--text-citaat);
+      line-height: var(--text-citaat--line-height);
+      font-weight: var(--text-citaat--font-weight);
+      color: var(--color-petrol-diep);
+    }
+    .piek-slag[data-slag='1'] {
+      opacity: clamp(0, 1 - (var(--piek-p) - 0.42) / 0.015, 1);
+    }
+    .piek-slag[data-slag='2'] {
+      opacity: clamp(0, min((var(--piek-p) - 0.435) / 0.015, 1 - (var(--piek-p) - 0.58) / 0.015), 1);
+    }
+    .piek-slag[data-slag='3'] {
+      opacity: clamp(0, (var(--piek-p) - 0.595) / 0.015, 1);
+    }
+    .piek-tekst .piek-knoppen {
+      margin-top: 1rem;
+      max-width: calc(100% - 4rem);
+      gap: 0.5rem;
+      opacity: clamp(0, (var(--piek-p) - 0.86) / 0.02, 1);
+    }
+    .piek-tekst .piek-knoppen .knop {
+      padding: 0 1rem;
+    }
+
+    /* Wat na de piek komt, schuift als papier over het stilstaande beeld. */
+    .na-piek {
+      position: relative;
+      z-index: 2;
+      background: var(--color-papier);
+    }
+  }
+}
+
+@media (min-height: 35rem) and (max-width: 47.9375rem) {
+  html.beweging-aan:not(.home-stil) {
+    .piek-podium {
+      --piek-doos: min(48svh, 92vw);
+      --beeld-h: min(68%, calc(100% - 14rem));
+      --lijn-px: 2px;
+    }
+    .piek-kop {
+      top: calc(var(--beeld-h) + 1rem);
+      font-size: var(--text-citaat);
+      line-height: var(--text-citaat--line-height);
+    }
+  }
+}
+
+@media (min-height: 35rem) and (min-width: 48rem) {
+  html.beweging-aan:not(.home-stil) {
+    .piek-kop {
+      /* Drie korte regels: de kop blijft links van de cirkel. */
+      max-width: 11ch;
+    }
+    .piek-tekst {
+      top: auto;
+      right: auto;
+      bottom: 2rem;
+      box-sizing: border-box;
+      width: min(30rem, calc(100% - 2 * var(--blad)));
+      padding: 1.5rem;
+      background: var(--plaat);
+      border-radius: var(--radius-vak);
+      /* De knoppenrij komt pas op p 0,86: tot dan zakt de plaat met de hoogte van die rij
+         onder de rand van het podium weg (overflow: clip) en schuift ze daarna op.
+         Alleen transform: geen clip-path die per beeld verandert (vloei, ronde 2g). */
+      --dicht: calc(var(--piek-knop-h, 4.25rem) * (1 - clamp(0, (var(--piek-p) - 0.86) / 0.02, 1)));
+      transform: translate3d(0, var(--dicht), 0);
+    }
+    .piek-tekst .piek-knoppen {
+      max-width: none;
+      gap: 0.75rem;
+    }
+    .piek-tekst .piek-knoppen .knop {
+      padding: 0 1.5rem;
+    }
+    /* Rechtsboven: vrij van de tekstplaat linksonder en van de WhatsApp-knop rechtsonder. */
+    .piek-vermelding {
+      top: 1rem;
+      right: var(--blad);
+      bottom: auto;
+    }
+  }
+}
+
+@media (min-height: 35rem) and (min-width: 48rem) and (max-width: 79.9375rem) {
+  html.beweging-aan:not(.home-stil) {
+    /* Tussenmaat: de cirkel komt dichter bij de linkerrand, dus de kop een maat kleiner. */
+    .piek-kop {
+      font-size: var(--text-citaat);
+      line-height: var(--text-citaat--line-height);
+    }
+  }
+}
+
+/* Eén kolom (onder 1024 px): de foto volgt direct op het uniewoord, dus de
+   staart van de ğ krijgt haar eigen ruimte en verdwijnt niet achter de foto. */
+@media (max-width: 63.9375rem) {
+  .hero-unie-woord {
+    padding-bottom: 0.16em;
+  }
+}
+
+/* Laag telefoonscherm (iPhone SE): het beeld mag kleiner, zodat beide knoppen
+   ook in het Frans boven de vouw blijven. */
+@media (max-width: 47.9375rem) and (max-height: 43.75rem) {
+  .hero-beeld {
+    min-height: 5.5rem;
+    margin-top: 0.75rem;
+  }
+  .hero-intro,
+  .hero-eerste .hero-knoppen {
+    margin-top: 0.75rem;
+  }
+  .hero-eerste {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+}

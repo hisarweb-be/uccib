@@ -17,14 +17,24 @@
  * Drie standen per route, want er zijn drie momenten waarop het mis kan gaan:
  *   1. het eerste scherm (bovenaan): hoort licht te zijn, dit is wat een
  *      bezoeker als eerste ziet;
- *   2. de opening van de cinema (podium vastgepind op p=0): donker mag, want de
- *      foto komt uit het donker, maar het moet een foto zijn en geen vlak veld;
- *   3. het einde van de cinema (p=1): de eindfoto staat vol in beeld.
+ *   2. het midden van de hero-scène (`hero-unie`, p=0,5): de rozet groeit uit
+ *      de foto en de tekst wisselt; er moet een beeld staan, geen leeg papier;
+ *   3. het midden van de piek-scène (`piek-ruimtes`, p=0,5): de foto's van het
+ *      gebouw vullen het podium.
  *
- * Elke meting heeft een tegentoets, en de belangrijkste daarvan is de klacht zelf
- * op de echte pagina nagebootst: de oude stand van 17-11 (donkere foto uit,
- * contour vol) moet FOUT geven, ook al is de CSS dan "in orde". Zonder dat geval
- * bewijst groen niets (zelfde opzet als `verify-server.mjs`).
+ * Sinds F2b PR3 bestaat de donkere gebouw-cinema niet meer (`[data-cinema]`
+ * met de lagen kontour, massa en foto). De standen "cinema-opening" en
+ * "cinema-einde" maten dat podium; ze zijn vervangen door de twee scènes die er
+ * nu staan. De lat van het eerste scherm en die van de eindfoto zijn dezelfde
+ * gebleven: het nieuwe ontwerp is licht, dus de lage lat van de donkere opening
+ * dient alleen nog voor de nagemaakte tegentoetsen.
+ *
+ * Elke meting heeft een tegentoets. De klacht van 17-11 (bijna zwart met dunne
+ * lijnen) staat er nog als nagemaakte pagina en moet FOUT blijven geven. Op de
+ * echte pagina is de tegentoets nu: de foto's van de piek-scène weggehaald. Dan
+ * blijft er een podium zonder beeld over en dat moet FOUT geven, ook al is de
+ * CSS dan "in orde". Zonder dat geval bewijst groen niets (zelfde opzet als
+ * `verify-server.mjs`).
  *
  * De schermafbeeldingen blijven bewaard (standaard `D:/tmp/win/uccib-scherm/` op
  * de laptop, `os.tmpdir()` elders, en `UCCIB_BEELD` wint altijd), zodat het
@@ -46,6 +56,10 @@ import { openBrowser, startStaticServer } from './lib/keuring.mjs';
  *   eerste scherm   198 / 78               n.v.t.
  *   cinema-opening   30 / 20 (desktop)     ca. 13 / 1  (zwart met lijnen)
  *   cinema-einde    117 / 54               n.v.t.
+ *
+ * Sinds F2b PR3 (18-11): `scherm` geldt voor het eerste scherm en het midden van
+ * de hero-scène, `eind` voor het midden van de piek-scène (foto's vol in beeld),
+ * `opening` alleen nog voor de nagemaakte tegentoetsen.
  */
 const LAT = {
   scherm: { gemiddelde: 60, spreiding: 20 },
@@ -175,8 +189,12 @@ const CONTROLE_BEWEGING = `<!DOCTYPE html><html lang="nl"><head><meta charset="u
   requestAnimationFrame(kijk);
 </script></body></html>`;
 
-/** De oude stand van 17-11: de donkere foto uit beeld, de contour vol. */
-const OUDE_STAND = 'html.cinema-aan .cinema-laag[data-laag="massa"]{opacity:0!important}';
+/** De scènes van de startpagina (F2b PR3). */
+const HERO = '[data-sectie="hero-unie"]';
+const PIEK = '[data-sectie="piek-ruimtes"]';
+
+/** De klacht op de nieuwe pagina: de piek-scène zonder haar foto's. */
+const ZONDER_FOTO = '.piek-laag,.piek-film{opacity:0!important}';
 
 /**
  * Scrollt naar een stand van het podium en wacht tot de pagina daar stil staat.
@@ -193,18 +211,29 @@ const OUDE_STAND = 'html.cinema-aan .cinema-laag[data-laag="massa"]{opacity:0!im
  * De doelhoogte wordt in de pagina zelf begrensd op wat er te scrollen valt, dus
  * een kortere pagina geeft geen wachttijd die afloopt.
  */
-async function naarPodium(page, deel) {
-  const doel = await page.evaluate((d) => {
-    const el = document.querySelector('[data-cinema]');
-    if (!el) return null;
-    const top = el.getBoundingClientRect().top + window.scrollY;
-    const span = Math.max(0, el.getBoundingClientRect().height - window.innerHeight);
-    const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-    const y = Math.min(Math.max(0, top + span * d), max);
-    delete window.__schermpoortY;
-    window.scrollTo(0, y);
-    return y;
-  }, deel);
+async function naarPodium(page, deel, kies = '[data-cinema]') {
+  const doel = await page.evaluate(
+    ([d, k]) => {
+      const el = document.querySelector(k);
+      if (!el) return null;
+      let top = el.getBoundingClientRect().top + window.scrollY;
+      let span = Math.max(0, el.getBoundingClientRect().height - window.innerHeight);
+      // Een scène van de startpagina: het podium plakt onder de kop en de weg is
+      // `data-lengte` schermhoogten lang (de hero drie), gemeten aan `.sh-maat`.
+      const maat = el.querySelector('.sh-maat');
+      const podium = el.querySelector('.hero-podium, .piek-podium');
+      if (maat && podium) {
+        top -= parseFloat(getComputedStyle(podium).top) || 0;
+        span = maat.offsetHeight * (Number(el.dataset.lengte) || 3);
+      }
+      const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      const y = Math.min(Math.max(0, top + span * d), max);
+      delete window.__schermpoortY;
+      window.scrollTo(0, y);
+      return y;
+    },
+    [deel, kies],
+  );
   if (doel === null) return;
 
   await page.waitForFunction(
@@ -217,6 +246,24 @@ async function naarPodium(page, deel) {
     doel,
     { timeout: 4000, polling: 'raf' },
   );
+}
+
+/**
+ * Naar een stand van een scène. De voortgang loopt via ScrollTrigger met een
+ * naloop van 0,3 s (`scrub: 0.3`), en de bewegingslaag komt pas na `load`
+ * binnen: eerst wachten tot ze er is, dan scrollen, dan de naloop uitzitten.
+ */
+async function naarScene(page, kies, deel) {
+  await page
+    .waitForFunction(() => document.querySelector('[data-sectie="hero-unie"]')?.dataset.stand, null, {
+      timeout: 8000,
+    })
+    .catch(() => {});
+  // Letters eerst: `document.fonts.ready` zet in `start.ts` een ScrollTrigger-refresh
+  // klaar, en die hoort niet midden in de meting te vallen.
+  await page.evaluate(() => document.fonts?.ready);
+  await naarPodium(page, deel, kies);
+  await page.waitForTimeout(800);
 }
 
 /**
@@ -291,19 +338,29 @@ async function tegentoets(browser, baseUrl) {
     }
   }
 
-  // De klacht op de echte pagina: de oude stand van 17-11 moet FOUT geven.
+  // De klacht op de echte pagina: de piek-scène zonder haar foto's moet FOUT geven.
   const context = await browser.newContext({ viewport: SCHERMEN[0][1] });
   const page = await context.newPage();
   try {
     await page.goto(baseUrl + '/', { waitUntil: 'load' });
-    await page.addStyleTag({ content: OUDE_STAND });
-    await naarPodium(page, 0);
-    const m = meet(await podiumBeeld(page), LAT.opening);
-    await schiet(page, 'tegentoets-oude-stand');
+    await page.addStyleTag({ content: ZONDER_FOTO });
+    await naarScene(page, PIEK, 0.5);
+    // Het nagemaakte geval telt alleen als de scène echt in haar midden staat. Op
+    // 18-11 stond ze hier na een refresh nog op p 0 (kop en kleine rozet op
+    // papier, spreiding rond 30) en wankelde de tegentoets rond de lat. Staat de
+    // scène niet voorbij 0,3, dan is het beeld niet wat we bedoelen en is dat FOUT.
+    const p = await page.evaluate(
+      (k) => Number(getComputedStyle(document.querySelector(k)).getPropertyValue('--piek-p')) || 0,
+      PIEK,
+    );
+    const m = meet(await podiumBeeld(page), LAT.eind);
+    await schiet(page, 'tegentoets-piek-zonder-foto');
     oordeel(
-      !m.goed,
-      'tegentoets oude stand van 17-11 op de echte pagina wordt afgekeurd: ' +
-        cijfers(m, LAT.opening),
+      !m.goed && p >= 0.3,
+      "tegentoets piek-scène zonder foto's op de echte pagina wordt afgekeurd: " +
+        cijfers(m, LAT.eind) +
+        ', --piek-p ' +
+        p.toFixed(3),
     );
   } finally {
     await context.close();
@@ -320,17 +377,21 @@ try {
       LAT.scherm.gemiddelde +
       '/' +
       LAT.scherm.spreiding +
-      ', cinema-opening ' +
+      ', hero-midden ' +
+      LAT.scherm.gemiddelde +
+      '/' +
+      LAT.scherm.spreiding +
+      ', tegentoets donker ' +
       LAT.opening.gemiddelde +
       '/' +
       LAT.opening.spreiding +
-      ', cinema-einde ' +
+      ', piek-midden ' +
       LAT.eind.gemiddelde +
       '/' +
       LAT.eind.spreiding,
   );
   console.log('');
-  console.log('Tegentoets (deze drie moeten FOUT geven)');
+  console.log('Tegentoets (de nagemaakte gevallen moeten FOUT geven)');
   await tegentoets(browser, server.baseUrl);
 
   console.log('');
@@ -359,23 +420,19 @@ try {
           ],
         );
 
-        await naarPodium(page, 0);
-        const opening = meet(await podiumBeeld(page), LAT.opening);
-        await schiet(page, scherm + '-' + kort + '-cinema-opening');
-        oordeel(
-          opening.goed,
-          scherm + ' ' + route + ' cinema-opening: ' + cijfers(opening, LAT.opening),
-          ['afbeelding: ' + UIT + '/' + scherm + '-' + kort + '-cinema-opening.png'],
-        );
+        await naarScene(page, HERO, 0.5);
+        const hero = meet(await podiumBeeld(page), LAT.scherm);
+        await schiet(page, scherm + '-' + kort + '-hero-midden');
+        oordeel(hero.goed, scherm + ' ' + route + ' hero-midden: ' + cijfers(hero, LAT.scherm), [
+          'afbeelding: ' + UIT + '/' + scherm + '-' + kort + '-hero-midden.png',
+        ]);
 
-        await naarPodium(page, 1);
-        const eind = meet(await podiumBeeld(page), LAT.eind);
-        await schiet(page, scherm + '-' + kort + '-cinema-einde');
-        oordeel(
-          eind.goed,
-          scherm + ' ' + route + ' cinema-einde: ' + cijfers(eind, LAT.eind),
-          ['afbeelding: ' + UIT + '/' + scherm + '-' + kort + '-cinema-einde.png'],
-        );
+        await naarScene(page, PIEK, 0.5);
+        const piek = meet(await podiumBeeld(page), LAT.eind);
+        await schiet(page, scherm + '-' + kort + '-piek-midden');
+        oordeel(piek.goed, scherm + ' ' + route + ' piek-midden: ' + cijfers(piek, LAT.eind), [
+          'afbeelding: ' + UIT + '/' + scherm + '-' + kort + '-piek-midden.png',
+        ]);
       } finally {
         await context.close();
       }
