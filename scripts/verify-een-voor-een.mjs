@@ -329,14 +329,19 @@ async function main() {
     );
 
     // Een onbekend pad moet een echte 404 zijn, geen homepage met status 200.
-    for (const pad of ['/zzz-qw-8888', '/nl/zzz-qw-8888', '/fr/zzz-qw-8888']) {
+    // Elke taal heeft een eigen 404 (scripts/lib/taal-404.mjs zet nl/fr op <taal>/404.html).
+    for (const [pad, bestand, kop] of [
+      ['/zzz-qw-8888', '404.html', /Sayfa bulunamad/],
+      ['/nl/zzz-qw-8888', 'nl/404.html', /Pagina niet gevonden/],
+      ['/fr/zzz-qw-8888', 'fr/404.html', /Page introuvable/],
+    ]) {
       if (levend) {
         const antwoord = await fetch(`${siteBasis}${pad}`);
         const html = await antwoord.text();
-        meld(antwoord.status === 404 && /Sayfa bulunamad/.test(html), `onbekend ${pad}`, `status ${antwoord.status}`);
+        meld(antwoord.status === 404 && kop.test(html), `onbekend ${pad}`, `status ${antwoord.status}`);
       } else {
-        const html = await readFile(join(distDir, '404.html'), 'utf8');
-        meld(ontleed(html).h1 === 1 && ontleed(html).noindex, `404.html voor ${pad}`, 'bestaat, één h1, noindex');
+        const html = await readFile(join(distDir, bestand), 'utf8').catch(() => '');
+        meld(ontleed(html).h1 === 1 && ontleed(html).noindex && kop.test(html), `${bestand} voor ${pad}`, 'bestaat, één h1, noindex, juiste taal');
       }
     }
 
