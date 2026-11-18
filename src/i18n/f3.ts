@@ -88,6 +88,11 @@ export interface F3Teksten {
    * de meta-beschrijving. De Turkse kop zoekt verify-een-voor-een.
    */
   nietGevonden: { kop: string; lead: string; lijstLabel: string; beschrijving: string };
+  /**
+   * De bedankpagina na een donatie (/bagis-onayi/): alt-tekst van de Turkse
+   * dankkaart en de twee knoppen. Kop en beschrijving staan in de taal-json.
+   */
+  bedankt: { beeldAlt: string; terug: string; opnieuw: string };
   /** Toegankelijke naam van de menuknop in de kop (DESIGNSYSTEEM 7.3). */
   rozetMenuOpen: string;
   rozetMenuSluit: string;
@@ -263,6 +268,12 @@ const TR: F3Teksten = {
     beschrijving:
       'Aradığınız sayfa bulunamadı. Ana sayfadan veya aşağıdaki sayfalardan devam edebilirsiniz.',
   },
+  bedankt: {
+    beeldAlt:
+      'Teşekkür kartı. Değerli Kardeşim, şimdiye kadar olduğu gibi maddi ve manevi yardımlarını esirgemeyen, yaptığı hayır-hasenatla destek olan, ilim öğrenen Kur’an talebelerine sahip çıkan, bu gibi hayırları fırsat bilip en güzel şekilde değerlendiren siz değerli kardeşlerimize, emeği geçen, üzerimizde hakkı olan herkese şükranlarımızı arzederiz. Teşekkür Ederiz. Hz Allah razı olsun. Altta UCCIB logosu.',
+    terug: 'Ana sayfaya dön',
+    opnieuw: 'Yeniden bağış yap',
+  },
   rozetMenuOpen: 'Menü',
   rozetMenuSluit: 'Menüyü kapat',
   mediaAi: 'Film: yapay zekâ ile üretildi',
@@ -426,6 +437,12 @@ const NL: F3Teksten = {
     beschrijving:
       'De pagina die u zoekt, bestaat hier niet. Ga verder via de startpagina of een van de pagina’s hieronder.',
   },
+  bedankt: {
+    beeldAlt:
+      'Turkse dankkaart van UCCIB: een dankwoord aan iedereen die met giften en hulp de werking en de Koranleerlingen steunt, afgesloten met „Teşekkür Ederiz” (wij danken u) en „Allah razı olsun” (moge God tevreden over u zijn). Onderaan het logo van UCCIB.',
+    terug: 'Terug naar de hoofdpagina',
+    opnieuw: 'Nog een donatie',
+  },
   rozetMenuOpen: 'Menu',
   rozetMenuSluit: 'Menu sluiten',
   mediaAi: 'Film: AI-gegenereerd',
@@ -588,6 +605,12 @@ const FR: F3Teksten = {
     lijstLabel: 'Pages du site',
     beschrijving:
       'La page que vous cherchez n’existe pas ici. Continuez par l’accueil ou l’une des pages ci-dessous.',
+  },
+  bedankt: {
+    beeldAlt:
+      'Carte de remerciement en turc de l’UCCIB : un mot de gratitude à toutes celles et ceux qui soutiennent par leurs dons et leur aide l’action de l’UCCIB et les élèves du Coran, conclu par « Teşekkür Ederiz » (nous vous remercions) et « Allah razı olsun » (que Dieu soit satisfait de vous). En bas, le logo de l’UCCIB.',
+    terug: 'Retour à la page d’accueil',
+    opnieuw: 'Faire un autre don',
   },
   rozetMenuOpen: 'Menu',
   rozetMenuSluit: 'Fermer le menu',
