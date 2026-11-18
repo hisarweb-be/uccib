@@ -919,10 +919,11 @@
       padding: 1.5rem;
       background: var(--plaat);
       border-radius: var(--radius-vak);
-      /* De knoppenrij komt pas op p 0,86: tot dan is de plaat zo hoog als haar tekst. */
+      /* De knoppenrij komt pas op p 0,86: tot dan zakt de plaat met de hoogte van die rij
+         onder de rand van het podium weg (overflow: clip) en schuift ze daarna op.
+         Alleen transform: geen clip-path die per beeld verandert (vloei, ronde 2g). */
       --dicht: calc(var(--piek-knop-h, 4.25rem) * (1 - clamp(0, (var(--piek-p) - 0.86) / 0.02, 1)));
-      clip-path: inset(0 0 var(--dicht) 0);
-      transform: translateY(var(--dicht));
+      transform: translate3d(0, var(--dicht), 0);
     }
     .piek-tekst .piek-knoppen {
       max-width: none;
