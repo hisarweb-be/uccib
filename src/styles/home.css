@@ -355,7 +355,6 @@
       --hero-k: clamp(0, (var(--hero-p) - 0.81) / 0.09, 1);
       --weg: clamp(0, 1 - (var(--hero-p) - 0.09) / 0.05, 1);
       --fig-s: calc(1 + (var(--fs, 1) - 1) * var(--t1) + (var(--gs, 1) - var(--fs, 1)) * var(--t2));
-      --lijn-dikte: calc(var(--lijn-px, 2px) / var(--hero-eenheid, 6) / var(--fig-s));
       position: sticky;
       top: var(--kop);
       height: var(--podium-h);
@@ -415,12 +414,23 @@
       overflow: visible;
       transform: rotate(calc(22.5deg * var(--hero-k)));
     }
+    /* Lijnen: vaste dikte op het scherm, kleur wisselt alleen via de dekking van twee lagen. */
     .hero-rozet .lijn {
       fill: none;
-      stroke: color-mix(in srgb, var(--color-wit) calc(var(--hero-k) * 100%), var(--color-petrol-diep));
-      stroke-width: var(--lijn-dikte);
+      stroke: var(--color-petrol-diep);
+      stroke-width: var(--lijn-px, 2px);
       stroke-linejoin: round;
       stroke-dasharray: 1 1;
+      vector-effect: non-scaling-stroke;
+    }
+    .hero-rozet .lijnen-wit .lijn {
+      stroke: var(--color-wit);
+    }
+    .lijnen-diep {
+      opacity: clamp(0, 2 - 2 * var(--hero-k), 1);
+    }
+    .lijnen-wit {
+      opacity: var(--hero-k);
     }
     .lijn-cirkel {
       stroke-dashoffset: clamp(0, 1 - (var(--hero-p) - 0.12) / 0.14, 1);

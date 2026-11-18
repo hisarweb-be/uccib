@@ -135,13 +135,17 @@ const FASEN = [
               <path class="vlak-ring" d={lijnen.binnen}></path>
               <path class="vlak-kern" d={lijnen.kern}></path>
             </g>
-            <g class="hero-lijnen">
-              <path class="lijn lijn-cirkel" d={lijnen.cirkel} pathLength="1"></path>
-              <path class="lijn lijn-a" d={lijnen.a} pathLength="1"></path>
-              <path class="lijn lijn-b" d={lijnen.b} pathLength="1"></path>
-              <path class="lijn lijn-binnen" d={lijnen.binnen} pathLength="1"></path>
-              <path class="lijn lijn-kern" d={lijnen.kern} pathLength="1"></path>
-            </g>
+            {
+              ['hero-lijnen lijnen-diep', 'hero-lijnen lijnen-wit'].map((klasse) => (
+                <g class={klasse}>
+                  <path class="lijn lijn-cirkel" d={lijnen.cirkel} pathLength="1" />
+                  <path class="lijn lijn-a" d={lijnen.a} pathLength="1" />
+                  <path class="lijn lijn-b" d={lijnen.b} pathLength="1" />
+                  <path class="lijn lijn-binnen" d={lijnen.binnen} pathLength="1" />
+                  <path class="lijn lijn-kern" d={lijnen.kern} pathLength="1" />
+                </g>
+              ))
+            }
           </svg>
           <div class="hero-foto" style={`--venster-pad: polygon(${vensterPad})`}>
             <picture>
