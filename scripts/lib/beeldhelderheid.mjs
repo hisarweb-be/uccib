@@ -116,3 +116,33 @@ export function helderheid(png) {
   const variantie = Math.max(0, somKwadraat / geteld - gemiddelde * gemiddelde);
   return { gemiddelde, spreiding: Math.sqrt(variantie), pixels: geteld };
 }
+
+/**
+ * Welk deel van het scherm licht is (DESIGNSYSTEEM, "geen scherm bijna zwart":
+ * minstens 60 % papier, wit of beeld boven 35 % helderheid). Het beeld wordt in
+ * vakken van `tegel` pixels gedeeld; een vak telt als licht als zijn gemiddelde
+ * helderheid minstens `drempel` is (0 tot 255). Uitkomst: aandeel lichte vakken.
+ */
+export function lichtAandeel(png, { tegel = 16, drempel = 0.35 * 255 } = {}) {
+  const beeld = ontleed(png);
+  const pixels = ontfilter(beeld);
+  const { breedte, hoogte, kanalen } = beeld;
+  let licht = 0;
+  let totaal = 0;
+  for (let ty = 0; ty < hoogte; ty += tegel) {
+    for (let tx = 0; tx < breedte; tx += tegel) {
+      let som = 0;
+      let n = 0;
+      for (let y = ty; y < Math.min(hoogte, ty + tegel); y += 2) {
+        for (let x = tx; x < Math.min(breedte, tx + tegel); x += 2) {
+          const i = (y * breedte + x) * kanalen;
+          som += 0.2126 * pixels[i] + 0.7152 * pixels[i + 1] + 0.0722 * pixels[i + 2];
+          n += 1;
+        }
+      }
+      totaal += 1;
+      if (som / n >= drempel) licht += 1;
+    }
+  }
+  return licht / totaal;
+}

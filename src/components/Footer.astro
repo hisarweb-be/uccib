@@ -149,9 +149,9 @@ const LEGAL_LINKS = (
     border-top: 1px solid var(--color-footer-line);
   }
   /* Onderaan de pagina blijft de laatste regel anders onder de WhatsApp-knop staan
-     (DESIGNSYSTEEM: zone 88 x 88 rechtsonder zonder tekst); op brede schermen
-     eindigt de inhoud ruim links van die zone. */
-  @media (max-width: 47.99rem) {
+     (DESIGNSYSTEEM: zone 88 x 88 rechtsonder zonder tekst). Vanaf 1264 px eindigt
+     de inhoud (max-w-6xl plus 32 px rand) links van die zone. */
+  @media (max-width: 78.99rem) {
     .footer-bottom {
       padding-bottom: 4.5rem;
     }
