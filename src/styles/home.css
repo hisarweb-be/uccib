@@ -209,10 +209,13 @@
   border-radius: 50%;
   background: var(--color-petrol);
 }
+/* DESIGNSYSTEEM 7.8: rechtsonder in het beeld, 24 px van de beeldrand. Onder het venster
+   viel de plaat over de intro-alinea (375 en 768 px). */
 .hero-vermelding {
   position: absolute;
-  top: calc(100% + 0.5rem);
-  right: 0;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  max-width: calc(100% - 3rem);
 }
 
 .hero-intro {
