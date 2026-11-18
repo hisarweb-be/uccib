@@ -133,7 +133,10 @@ const languageHref = (other: Locale) =>
     .topbar-link {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       min-height: 44px;
+      /* Atkinson is smaller dan Open Sans: "Türkçe" werd 43 px breed (18 nov). */
+      min-width: 44px;
     }
   }
 
