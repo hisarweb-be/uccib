@@ -789,7 +789,8 @@
       display: block;
       position: absolute;
       top: 50%;
-      left: 50%;
+      /* --piek-dx: zover schuift het script het venster naar rechts, vrij van de tekstplaat. */
+      left: calc(50% + var(--piek-dx, 0px));
       width: var(--piek-doos);
       height: var(--piek-doos);
       margin: calc(var(--piek-doos) / -2) 0 0 calc(var(--piek-doos) / -2);

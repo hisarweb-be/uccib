@@ -265,6 +265,7 @@ function piek(sectie: HTMLElement) {
   /* De wissels: daar knijpt de kern dicht en draait ze een slag. */
   const wissels = kamers.slice(0, -1).map((k) => k.b);
 
+  const tekst = sectie.querySelector<HTMLElement>('.piek-tekst');
   let r0 = 1;
   function meet() {
     const doos = rozet!.getBoundingClientRect().width;
@@ -272,9 +273,40 @@ function piek(sectie: HTMLElement) {
     const H = beeld!.clientHeight;
     if (!doos || !B || !H) return;
     r0 = 0.188 * doos;
-    /* De inkeping van de kern ligt op 0,75 van de punt: zo ver open dat ook die buiten beeld valt. */
-    const vol = Math.hypot(B, H) / 2 / 0.72;
     const bp = breed.matches ? 0 : 1;
+    /* Hoe groot een venster wil worden: wat de foto zelf toelaat (zie hieronder). */
+    const wens = (W: number, D: number, aspect: number) => Math.max(r0, Math.min((W * (1 - D)) / 2, (0.94 * W) / aspect / 2));
+    const nodig = kamers.reduce((m, k) => {
+      const eigen = k.eigen[bp] || k.eigen[0] || B;
+      const aspect = k.aspect[bp] || k.aspect[0] || B / H;
+      const D = Math.min(0.5, k.pan * (k.b - k.a));
+      const W = Math.max(B / (1 - D), H * aspect);
+      return W > 1.1 * eigen ? Math.max(m, wens(1.1 * eigen, D, aspect)) : m;
+    }, r0);
+    /* De tekstplaat bedekt het venster nooit (herkeuring PR3): het midden schuift naar rechts
+       tot het venster vrij van de plaat blijft (de rozet blijft heel in beeld), en wat dan nog
+       niet past, maakt het venster kleiner. Plaat in de eindstand, met de knoppenrij erbij. */
+    const plaat = tekst && tekst.offsetWidth ? {
+      l: tekst.offsetLeft - beeld!.offsetLeft,
+      t: tekst.offsetTop - beeld!.offsetTop,
+      r: tekst.offsetLeft - beeld!.offsetLeft + tekst.offsetWidth,
+      o: tekst.offsetTop - beeld!.offsetTop + tekst.offsetHeight,
+    } : null;
+    const cy = H / 2;
+    const vrij = (cx: number) =>
+      plaat
+        ? Math.hypot(Math.max(plaat.l - cx, 0, cx - plaat.r), Math.max(plaat.t - cy, 0, cy - plaat.o)) - 16
+        : Infinity;
+    const dxMax = Math.max(0, B / 2 - doos / 2 - 0.04 * B);
+    let dx = 0;
+    for (let d = 0; d <= dxMax; d += 4) {
+      if (vrij(B / 2 + d) > vrij(B / 2 + dx)) dx = d;
+      if (vrij(B / 2 + dx) >= nodig) break;
+    }
+    const cx = B / 2 + dx;
+    const ruimte = vrij(cx);
+    /* De inkeping van de kern ligt op 0,75 van de punt: zo ver open dat ook die buiten beeld valt. */
+    const vol = Math.hypot(Math.max(cx, B - cx), H / 2) / 0.72;
     for (const k of kamers) {
       const eigen = k.eigen[bp] || k.eigen[0] || B;
       const aspect = k.aspect[bp] || k.aspect[0] || B / H;
@@ -283,13 +315,16 @@ function piek(sectie: HTMLElement) {
       /* Nooit groter dan 110 % van de eigen pixels (BIJSTURING-MOEDER ronde 2g). */
       const maxW = 1.1 * eigen;
       let W = Math.max(B / (1 - D), H * aspect);
+      /* Het midden en de halve maat van wat het raam moet dekken: het venster of het hele beeld. */
+      let mx = B / 2;
       let Rx = B / 2;
       let Ry = H / 2;
       k.venster = W > maxW;
       if (k.venster) {
         /* Te klein voor het hele scherm: de foto blijft in het venster van de rozet. */
         W = maxW;
-        const R = Math.max(r0, Math.min((W * (1 - D)) / 2, (0.94 * W) / aspect / 2));
+        const R = Math.max(r0, Math.min(wens(W, D, aspect), ruimte));
+        mx = cx;
         Rx = R;
         Ry = R;
         k.sMax = R / r0;
@@ -298,7 +333,7 @@ function piek(sectie: HTMLElement) {
       k.raam.style.setProperty('--rw', `${W.toFixed(1)}px`);
       k.raam.style.setProperty('--rh', `${Hf.toFixed(1)}px`);
       /* Het raam dekt altijd het venster (of het hele beeld): links tussen deze twee grenzen. */
-      const links: [number, number] = [B / 2 + Rx - W, B / 2 - Rx];
+      const links: [number, number] = [mx + Rx - W, mx - Rx];
       const boven: [number, number] = [H / 2 + Ry - Hf, H / 2 - Ry];
       k.x = k.richting > 0 ? [links[1], links[0]] : links;
       const midden = (boven[0] + boven[1]) / 2;
@@ -306,6 +341,7 @@ function piek(sectie: HTMLElement) {
       k.y = [midden + zak, midden - zak];
     }
     podium!.style.setProperty('--piek-eenheid', String(doos / 100));
+    podium!.style.setProperty('--piek-dx', `${dx}px`);
     if (knoppen) {
       const marge = parseFloat(getComputedStyle(knoppen).marginTop) || 0;
       podium!.style.setProperty('--piek-knop-h', `${knoppen.offsetHeight + marge}px`);
