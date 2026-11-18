@@ -254,9 +254,8 @@ const naam = `steun-${locale}`;
     white-space: nowrap;
     text-decoration: none;
     cursor: pointer;
-    transition:
-      border-color var(--duur-kort) var(--ease-uit),
-      background-color var(--duur-kort) var(--ease-uit);
+    /* Alleen achtergrondkleur loopt over (DESIGNSYSTEEM 6); de rand wisselt meteen. */
+    transition: background-color var(--duur-kort) var(--ease-uit);
   }
   .steun-label:hover {
     border-color: var(--color-petrol-diep);
@@ -288,7 +287,9 @@ const naam = `steun-${locale}`;
     min-height: 3.25rem;
     margin-top: 1.5rem;
     padding: 0 1.5rem;
-    border: 1.5px solid var(--color-petrol-diep);
+    /* Doorzichtige rand: het vlak loopt eronder door, zodat de rand meekleurt met
+       de overgang van background-color (DESIGNSYSTEEM 6, geen border-color). */
+    border: 1.5px solid transparent;
     border-radius: var(--radius-vak);
     background: var(--color-petrol-diep);
     color: var(--color-wit);
@@ -297,14 +298,11 @@ const naam = `steun-${locale}`;
     line-height: var(--text-knop--line-height);
     font-weight: var(--text-knop--font-weight);
     text-decoration: none;
-    transition:
-      background-color var(--duur-kort) var(--ease-uit),
-      border-color var(--duur-kort) var(--ease-uit);
+    transition: background-color var(--duur-kort) var(--ease-uit);
   }
   .steun-knop:hover,
   .steun-leeg-link:hover {
     background: var(--color-inkt);
-    border-color: var(--color-inkt);
   }
   .steun-knop:active {
     transform: translateY(1px);
