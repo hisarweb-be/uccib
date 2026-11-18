@@ -781,9 +781,10 @@
       right: 1rem;
       bottom: 1rem;
     }
-    /* De vermelding van een ruimte staat er zolang haar foto de bovenste is. */
+    /* De vermelding van een ruimte staat er zolang haar foto de bovenste is; de eerste
+       pas als de kern (de foto's) in beeld komt, op p 0,06. */
     .piek-plek {
-      --in: -1;
+      --in: 0.06;
       --uit: 2;
       opacity: clamp(0, min((var(--piek-p) - var(--in)) / 0.01, 1 - (var(--piek-p) - var(--uit)) / 0.01), 1);
     }
