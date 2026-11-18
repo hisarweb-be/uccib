@@ -9,7 +9,8 @@
  * Twee eigenaardigheden van de oude site worden hier nagebootst, zodat het
  * omzetten van Sanity naar Markdown niets zichtbaar verandert:
  *
- * 1. Een alinea die uit precies één link bestaat, is een knop. Staat er een
+ * 1. Een alinea die uit precies één link bestaat, is een knop (klasse
+ *    `knop-alinea`, gezet in `src/lib/remark-knop-alinea.ts`). Staat er een
  *    reeks van zulke alinea's onder elkaar, dan vormen ze samen één rij:
  *    daarvoor maken we de alinea zelf `inline-flex` en halen we de tussenruimte
  *    weg tussen twee knoppen die direct op elkaar volgen. Zo blijven ze op
@@ -101,18 +102,18 @@
 
 /* ---------- Een alinea met één link is een knop ---------- */
 
-.tekst > p:has(> a:only-child) {
+.tekst > p.knop-alinea {
   display: inline-flex;
   margin: 0 0.65rem 0.65rem 0;
   vertical-align: top;
 }
 
 /* Twee knoppen na elkaar staan op dezelfde regel: geen ruimte ertussen. */
-.tekst > p:has(> a:only-child) + p:has(> a:only-child) {
+.tekst > p.knop-alinea + p.knop-alinea {
   margin-top: 0;
 }
 
-.tekst > p:has(> a:only-child) > a {
+.tekst > p.knop-alinea > a {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
@@ -129,7 +130,7 @@
     border-color 0.18s ease;
 }
 
-.tekst > p:has(> a:only-child) > a:hover {
+.tekst > p.knop-alinea > a:hover {
   border-color: var(--color-brand);
   background: var(--color-brand-light);
 }
@@ -147,7 +148,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tekst > p:has(> a:only-child) > a {
+  .tekst > p.knop-alinea > a {
     transition: none;
   }
 }
