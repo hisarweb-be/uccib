@@ -250,8 +250,8 @@ function piek(sectie: HTMLElement) {
         raam,
         a,
         b,
-        /* Een poster beweegt in code; een film beweegt zelf. Om en om naar links en naar rechts. */
-        pan: el.dataset.vorm === 'poster' ? 1 : 0,
+        /* Elk raam schuift, ook onder een film (herkeuring PR3: nooit stil). Om en om naar links en naar rechts. */
+        film: el.dataset.vorm === 'film',
         richting: i % 2 === 0 ? 1 : -1,
         eigen: (el.dataset.eigen ?? '').split(',').map(Number),
         aspect: (el.dataset.aspect ?? '').split(',').map(Number),
@@ -276,10 +276,17 @@ function piek(sectie: HTMLElement) {
     const bp = breed.matches ? 0 : 1;
     /* Hoe groot een venster wil worden: wat de foto zelf toelaat (zie hieronder). */
     const wens = (W: number, D: number, aspect: number) => Math.max(r0, Math.min((W * (1 - D)) / 2, (0.94 * W) / aspect / 2));
+    /* Zoveel van haar breedte schuift de foto over haar hele stuk: per tiende van de tijdlijn een tiende.
+       Een film die schermvullend past, schuift hooguit zover dat ze schermvullend blijft. */
+    const schuif = (k: (typeof kamers)[number], eigen: number, aspect: number) => {
+      const D = Math.min(0.5, k.b - k.a);
+      const ruim = 1 - B / (1.1 * eigen);
+      return k.film && H * aspect <= 1.1 * eigen && ruim > 0 ? Math.min(D, ruim) : D;
+    };
     const nodig = kamers.reduce((m, k) => {
       const eigen = k.eigen[bp] || k.eigen[0] || B;
       const aspect = k.aspect[bp] || k.aspect[0] || B / H;
-      const D = Math.min(0.5, k.pan * (k.b - k.a));
+      const D = schuif(k, eigen, aspect);
       const W = Math.max(B / (1 - D), H * aspect);
       return W > 1.1 * eigen ? Math.max(m, wens(1.1 * eigen, D, aspect)) : m;
     }, r0);
@@ -310,8 +317,7 @@ function piek(sectie: HTMLElement) {
     for (const k of kamers) {
       const eigen = k.eigen[bp] || k.eigen[0] || B;
       const aspect = k.aspect[bp] || k.aspect[0] || B / H;
-      /* Zoveel van haar breedte schuift de foto over haar hele stuk: per tiende van de tijdlijn een tiende. */
-      const D = Math.min(0.5, k.pan * (k.b - k.a));
+      const D = schuif(k, eigen, aspect);
       /* Nooit groter dan 110 % van de eigen pixels (BIJSTURING-MOEDER ronde 2g). */
       const maxW = 1.1 * eigen;
       let W = Math.max(B / (1 - D), H * aspect);
