@@ -1,0 +1,200 @@
+{
+  "versie": 2,
+  "shots": [
+    {
+      "shot": "h1",
+      "sectie": "hero-unie",
+      "rol": "scrub",
+      "vorm": "frames",
+      "bron": "MESCIT-1.jpg",
+      "bewerkt": true,
+      "retouche": [
+        "stopcontact onderaan in de nis",
+        "kabels en stekkerblok rechtsonder in de nis (opnieuw, kleiner; kleed blijft origineel)",
+        "losse draadjes uit de lattenwand linksboven",
+        "rode stekker met zwarte kabel links van de minbar",
+        "stopcontact naast de houten deur rechts",
+        "stopcontact met stekker op de wandlat tussen nis en minbar (2.2 punt 7)",
+        "kabelbundel bovenaan de lattenwand rechts van de nis",
+        "kabel bovenaan de lattenwand rechtsboven"
+      ],
+      "aiFilm": true,
+      "model": "veo-3.1-fast",
+      "startUitsnede": {
+        "x": 0,
+        "y": 100,
+        "breedte": 1600,
+        "hoogte": 900
+      },
+      "uitsnede": {
+        "d": {
+          "vorm": "1:1",
+          "x": 0.0813,
+          "breedte": 0.5625
+        },
+        "m": {
+          "vorm": "1:1",
+          "x": 0.0813,
+          "breedte": 0.5625
+        }
+      },
+      "anker": {
+        "d": "50% 50%",
+        "m": "50% 50%"
+      },
+      "ankers": {
+        "d": [],
+        "m": []
+      },
+      "fase": {
+        "van": 0.09,
+        "tot": 0.92,
+        "variabele": "--hero-p"
+      },
+      "vermelding": {
+        "tr": "Film: yapay zekâ ile üretildi",
+        "nl": "Film: AI-gegenereerd",
+        "fr": "Film : généré par IA"
+      },
+      "alt": {
+        "tr": "Mescit: solda beyaz bir sütun ve kürsü, ortada mihrap, duvar lambalarının sıcak ışığı.",
+        "nl": "Gebedsruimte: links het spreekgestoelte, in het midden een witte zuil en de mihrab, warm licht van de wandlampen.",
+        "fr": "Salle de prière : à gauche le pupitre, au centre une colonne blanche et le mihrab, lumière chaude des appliques."
+      },
+      "status": "geleverd",
+      "bestanden": {
+        "d": {
+          "film": null,
+          "reeks": {
+            "map": "/media/wow/h1-d/",
+            "patroon": "f-%04d.webp",
+            "aantal": 52,
+            "breedte": 640,
+            "hoogte": 640,
+            "fps": 13,
+            "duur": 4,
+            "gewicht": 1793916
+          },
+          "poster": {
+            "pad": "/media/wow/h1-d-poster.webp",
+            "breedte": 640,
+            "hoogte": 640,
+            "gewicht": 51194,
+            "avif": "/media/wow/h1-d-poster.avif"
+          },
+          "frame0": {
+            "pad": "/media/wow/h1-d-frame0.webp",
+            "breedte": 640,
+            "hoogte": 640,
+            "gewicht": 51194
+          },
+          "eind": null
+        },
+        "m": {
+          "film": null,
+          "reeks": {
+            "map": "/media/wow/h1-m/",
+            "patroon": "f-%04d.webp",
+            "aantal": 52,
+            "breedte": 480,
+            "hoogte": 480,
+            "fps": 13,
+            "duur": 4,
+            "gewicht": 877400
+          },
+          "poster": {
+            "pad": "/media/wow/h1-m-poster.webp",
+            "breedte": 480,
+            "hoogte": 480,
+            "gewicht": 31264,
+            "avif": "/media/wow/h1-m-poster.avif"
+          },
+          "frame0": {
+            "pad": "/media/wow/h1-m-frame0.webp",
+            "breedte": 480,
+            "hoogte": 480,
+            "gewicht": 31264
+          },
+          "eind": null
+        }
+      }
+    },
+    {
+      "shot": "p3",
+      "sectie": "piek-ruimtes",
+      "rol": "scrub",
+      "vorm": "video",
+      "bron": "IMG_2180.jpg",
+      "bewerkt": true,
+      "retouche": [
+        "open plafondtegel rechts",
+        "witte zekeringkast met sticker en schaduw",
+        "groen nooduitgangbordje met zijn groene gloed op latei en zuilkop",
+        "stopcontact onder de kast"
+      ],
+      "aiFilm": false,
+      "model": null,
+      "startUitsnede": {
+        "x": 0,
+        "y": 150,
+        "breedte": 1600,
+        "hoogte": 900
+      },
+      "uitsnede": {
+        "d": "16:9",
+        "m": {
+          "x": 0.35,
+          "breedte": 0.45
+        }
+      },
+      "anker": {
+        "d": "50% 50%",
+        "m": "35% 50%"
+      },
+      "ankers": {
+        "d": [],
+        "m": []
+      },
+      "fase": {
+        "van": 0.62,
+        "tot": 0.78,
+        "variabele": "--piek-p"
+      },
+      "vermelding": null,
+      "alt": {
+        "tr": "Masalar ve sandalyelerle dolu bir salon; ortada bir halı yolu, arkada merdiven ve çift kanatlı ahşap bir kapı.",
+        "nl": "Een zaal met tafels en stoelen; in het midden een loper, achteraan een trap en een dubbele houten deur.",
+        "fr": "Une salle avec des tables et des chaises ; au centre un tapis de passage, au fond un escalier et une double porte en bois."
+      },
+      "status": "vervallen",
+      "bestanden": {
+        "d": {
+          "film": null,
+          "reeks": null,
+          "poster": {
+            "pad": "/media/wow/p3-d-poster.webp",
+            "breedte": 1280,
+            "hoogte": 720,
+            "gewicht": 106746,
+            "avif": "/media/wow/p3-d-poster.avif"
+          },
+          "frame0": null,
+          "eind": null
+        },
+        "m": {
+          "film": null,
+          "reeks": null,
+          "poster": {
+            "pad": "/media/wow/p3-m-poster.webp",
+            "breedte": 720,
+            "hoogte": 900,
+            "gewicht": 88964,
+            "avif": "/media/wow/p3-m-poster.avif"
+          },
+          "frame0": null,
+          "eind": null
+        }
+      }
+    }
+  ]
+}

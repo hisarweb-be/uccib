@@ -20,7 +20,8 @@
     "verify:mobiel": "node scripts/verify-mobiel.mjs",
     "verify:scherm": "node scripts/verify-eerste-scherm.mjs",
     "verify:live": "node scripts/verify-een-voor-een.mjs --basis=https://uccib.com",
-    "verify:sponsor": "node scripts/verify-sponsor.mjs"
+    "verify:sponsor": "node scripts/verify-sponsor.mjs",
+    "verify:media": "node scripts/verify-media.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "3.7.4",
