@@ -1,0 +1,226 @@
+---
+/**
+ * De dienstenindex (STORYBOARD D08 tot D10, M05; DESIGNSYSTEEM 7.4).
+ *
+ * Elke dienst uit `f3.diensten[]` is één regel: titel, één regel uitleg en een
+ * pijl, met een haarlijn eronder. Geen nummer, pictogram of kaartvak, en nergens
+ * een telwoord. Alle regels staan er altijd; het aantal volgt de bron.
+ *
+ * Doel van een regel (CONTRACT 4.2): de eigen pagina in de eigen taal. Staat die
+ * pagina uit, dan linkt de regel toch naar haar eigen adres (de binnenkort-pagina,
+ * status 200) en is de uitleg de leeg-titel uit f3, nooit verzonnen inhoud. Zo'n
+ * regel draagt `data-binnenkort="<slug>"`: de linkkeuring laat alleen dan een link
+ * naar die ene concept-slug toe. Bağış gaat naar `#steun` op deze pagina.
+ *
+ * De rozet staat klein in de linkermarge; de regel die het midden van het scherm
+ * passeert, wordt "aangewezen" (lijn petrol-diep). Dat doet een kleine observer;
+ * zonder JavaScript is er geen aangewezen regel en is de index volledig.
+ */
+import Rozet from '../Rozet.astro';
+import { type Locale } from '../../i18n';
+import { pagePath, isSlug } from '../../i18n/config';
+import { f3, LEEG_SLUGS, type LeegSlug } from '../../i18n/f3';
+import { conceptSlugs } from '../../lib/actief';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const teksten = f3(locale);
+const uit = new Set<string>(conceptSlugs());
+
+const regels = teksten.diensten.map((dienst) => {
+  const slug = dienst.href.replace(/^\//, '').split(/[/#?]/)[0] ?? '';
+  if (slug === 'bagislar') return { ...dienst, doel: '#steun', binnenkort: undefined, uitleg: dienst.tekst, leeg: false };
+  if (!isSlug(slug)) throw new Error(`DienstenIndex: onbekend doel ${dienst.href} voor "${dienst.titel}".`);
+  const leeg = uit.has(slug) && (LEEG_SLUGS as readonly string[]).includes(slug);
+  return {
+    ...dienst,
+    doel: pagePath(locale, slug),
+    binnenkort: uit.has(slug) ? slug : undefined,
+    uitleg: leeg ? teksten.leeg[slug as LeegSlug].titel : dienst.tekst,
+    leeg,
+  };
+});
+---
+
+{
+  regels.length > 0 ? (
+    <section id="diensten-index" data-sectie="diensten-index" class="diensten-index">
+      <div class="index-rozet" aria-hidden="true">
+        <Rozet stand="vol" maat={32} />
+      </div>
+      <h2 class="index-kop">{teksten.dienstenKop}</h2>
+      <ul class="index-lijst" role="list">
+        {regels.map((regel) => (
+          <li class="index-regel">
+            <a class="index-link" href={regel.doel} data-binnenkort={regel.binnenkort}>
+              <span class="index-titel">{regel.titel}</span>
+              <span class:list={['index-uitleg', { 'is-leeg': regel.leeg }]}>{regel.uitleg}</span>
+              <svg class="index-pijl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true" focusable="false">
+                <path d="M3 12h16M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ) : null
+}
+
+<script>
+  /* De regel die het midden van het scherm passeert, wordt aangewezen (alleen kleur). */
+  const regels = [...document.querySelectorAll<HTMLElement>('.diensten-index .index-regel')];
+  if (regels.length > 0 && 'IntersectionObserver' in window) {
+    const kijker = new IntersectionObserver(
+      (items) => {
+        for (const item of items) {
+          if (!item.isIntersecting) continue;
+          regels.forEach((r) => r.toggleAttribute('data-aangewezen', r === item.target));
+        }
+      },
+      { rootMargin: '-50% 0px -50% 0px' },
+    );
+    regels.forEach((r) => kijker.observe(r));
+  }
+</script>
+
+<style>
+  .diensten-index {
+    --blad: max(var(--spacing-marge), calc((100% - var(--container-blad)) / 2));
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100svh - var(--kop-hoogte));
+    padding: 4rem var(--blad) 3rem;
+    background: var(--color-papier);
+    color: var(--color-inkt);
+  }
+  .index-rozet {
+    display: none;
+  }
+  .index-kop {
+    margin: 0 0 2rem;
+    font-family: var(--font-kop);
+    font-size: var(--text-h2);
+    line-height: var(--text-h2--line-height);
+    letter-spacing: var(--text-h2--letter-spacing);
+    font-weight: var(--text-h2--font-weight);
+  }
+  .index-lijst {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--lijn);
+  }
+  .index-regel {
+    flex: 1 0 auto;
+    display: flex;
+  }
+  .index-link {
+    flex: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 1rem;
+    row-gap: 0.5rem;
+    align-content: center;
+    min-height: 6rem;
+    padding: 1.5rem 0;
+    color: var(--color-inkt);
+    text-decoration: none;
+    box-shadow: inset 0 -1px 0 var(--lijn);
+    transition: box-shadow var(--duur-kort) var(--ease-uit);
+  }
+  .index-titel {
+    grid-column: 1;
+    font-family: var(--font-kop);
+    font-size: var(--text-dienst);
+    line-height: var(--text-dienst--line-height);
+    letter-spacing: var(--text-dienst--letter-spacing);
+    font-weight: var(--text-dienst--font-weight);
+    overflow-wrap: normal;
+    hyphens: manual;
+    transition: color var(--duur-kort) var(--ease-uit);
+  }
+  .index-uitleg {
+    grid-column: 1 / -1;
+    font-family: var(--font-tekst);
+    font-size: var(--text-body);
+    line-height: 1.5;
+    color: var(--color-inkt);
+  }
+  .index-uitleg.is-leeg {
+    font-size: var(--text-label);
+    line-height: var(--text-label--line-height);
+    letter-spacing: var(--text-label--letter-spacing);
+    font-weight: var(--text-label--font-weight);
+  }
+  .index-pijl {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    color: var(--color-petrol-diep);
+    transition: transform var(--duur-kort) var(--ease-uit);
+  }
+  .index-link:hover,
+  .index-regel[data-aangewezen] .index-link {
+    box-shadow: inset 0 -2px 0 var(--color-petrol-diep);
+  }
+  .index-link:hover .index-titel {
+    color: var(--color-petrol-diep);
+  }
+  .index-link:hover .index-pijl {
+    transform: translateX(4px);
+  }
+  .index-link:focus-visible {
+    outline: 3px solid var(--color-petrol);
+    outline-offset: 2px;
+    box-shadow: inset 0 -2px 0 var(--color-petrol-diep);
+  }
+  .index-link:active {
+    transform: translateY(1px);
+  }
+
+  @media (min-width: 64rem) {
+    .index-rozet {
+      display: block;
+      position: absolute;
+      top: 4rem;
+      bottom: 3rem;
+      left: calc(var(--blad) / 2 - 16px);
+      color: var(--color-petrol-diep);
+    }
+    .index-rozet :global(svg) {
+      position: sticky;
+      top: calc(50svh - 16px);
+    }
+    .index-kop,
+    .index-lijst {
+      margin-left: calc((100% - 11 * 1.5rem) / 12 + 1.5rem);
+    }
+    .index-link {
+      grid-template-columns: repeat(11, minmax(0, 1fr));
+      column-gap: 1.5rem;
+      align-items: center;
+      min-height: 7rem;
+      padding: 2rem 0;
+    }
+    .index-titel {
+      grid-column: 1 / 7;
+    }
+    .index-uitleg {
+      grid-column: 7 / 11;
+      grid-row: 1;
+    }
+    .index-pijl {
+      grid-column: 11;
+      justify-self: end;
+    }
+  }
+</style>

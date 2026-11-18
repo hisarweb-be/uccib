@@ -1,0 +1,222 @@
+---
+/**
+ * Het adresblad (STORYBOARD D23, M12; DESIGNSYSTEEM 7.6): het einde van de
+ * startpagina en het doel van elke knop "Bize ulaşın".
+ *
+ * Volgorde: adres, telefoon, e-mail, en alleen als het veld gevuld is: uren,
+ * routelink, WhatsApp (gewone tekstlink, F2B-STAND punt 4) en ondernemingsnummer.
+ * Adres, telefoon en e-mail komen uit `site.ts`; uren, KBO, rechtsvorm en de
+ * coördinaten voor de route alleen uit `src/data/kerngegevens.json`, dat leeg
+ * begint. `SITE.openingHours` en `SITE.geo` worden bewust niet gelezen
+ * (BIJSTURING ronde 1b): geen gegeven tonen dat de vzw niet zelf bevestigde.
+ */
+import Rozet from '../Rozet.astro';
+import { type Locale } from '../../i18n';
+import { f3 } from '../../i18n/f3';
+import { SITE } from '../../data/site';
+import kern from '../../data/kerngegevens.json';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const teksten = f3(locale);
+
+const gevuld = (w: unknown): w is string => typeof w === 'string' && w.trim() !== '';
+const uren = gevuld(kern.openingsuren) ? kern.openingsuren.trim() : null;
+const kbo = gevuld(kern.kbo) ? kern.kbo.trim() : null;
+const rechtsvorm = gevuld(kern.rechtsvorm) ? kern.rechtsvorm.trim() : null;
+const route =
+  typeof kern.lat === 'number' && typeof kern.lng === 'number'
+    ? `https://www.openstreetmap.org/?mlat=${kern.lat}&mlon=${kern.lng}#map=17/${kern.lat}/${kern.lng}`
+    : null;
+const whatsapp = gevuld(SITE.whatsapp) ? `https://wa.me/${SITE.whatsapp.replace('+', '')}` : null;
+---
+
+<section id="contact" data-sectie="contact" class="adresblad">
+  <div class="blad-merk" aria-hidden="true">
+    <Rozet stand="vol" maat={32} />
+    <span class="blad-woordmerk">uccib</span>
+  </div>
+  <h2 class="blad-kop">{teksten.contactKop}</h2>
+  <p class="blad-intro">{teksten.contactIntro}</p>
+  <address class="blad-adres">
+    <div class="blad-groep">
+      <p class="blad-regel">
+        <span class="blad-label">{teksten.labelAdres}</span>
+        <span class="blad-waarde blad-lead">
+          Union des Centres Culturels Islamiques Belgium{rechtsvorm ? ` ${rechtsvorm}` : ''}
+          <br />
+          {SITE.street}
+          <br />
+          {SITE.postalCode} {SITE.city}
+        </span>
+      </p>
+    </div>
+    <div class="blad-groep">
+      <p class="blad-regel">
+        <span class="blad-label">{teksten.labelTelefoon}</span>
+        <a class="blad-waarde blad-telefoon" href={`tel:${SITE.phoneHref}`}>{SITE.phone}</a>
+      </p>
+      <p class="blad-regel">
+        <span class="blad-label">{teksten.labelEmail}</span>
+        <a class="blad-waarde blad-lead" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+      </p>
+      {
+        whatsapp ? (
+          <p class="blad-regel">
+            <a class="blad-waarde blad-tekstlink" href={whatsapp} target="_blank" rel="noopener" aria-label={teksten.whatsappAria}>
+              {teksten.whatsappLabel}
+            </a>
+          </p>
+        ) : null
+      }
+    </div>
+    {
+      uren || route ? (
+        <div class="blad-groep">
+          {uren ? (
+            <dl class="blad-regel">
+              <dt class="blad-label">{teksten.labelUren}</dt>
+              <dd class="blad-waarde blad-lead">{uren}</dd>
+            </dl>
+          ) : null}
+          {route ? (
+            <p class="blad-regel">
+              <span class="blad-label">{teksten.labelRoute}</span>
+              <a class="blad-waarde blad-tekstlink" href={route} target="_blank" rel="noopener">
+                {teksten.routeTekst}
+              </a>
+            </p>
+          ) : null}
+        </div>
+      ) : null
+    }
+    {
+      kbo ? (
+        <div class="blad-groep">
+          <p class="blad-regel">
+            <span class="blad-label">{teksten.labelKbo}</span>
+            <span class="blad-waarde blad-voet">{kbo}</span>
+          </p>
+        </div>
+      ) : null
+    }
+  </address>
+</section>
+
+<style>
+  .adresblad {
+    --blad: max(var(--spacing-marge), calc((100% - var(--container-blad)) / 2));
+    padding: 5rem var(--blad) 5rem;
+    background: var(--color-papier);
+    color: var(--color-inkt);
+    border-top: 1px solid var(--lijn);
+  }
+  .blad-merk {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    margin-bottom: 2rem;
+    color: var(--color-petrol-diep);
+  }
+  .blad-woordmerk {
+    font-family: var(--font-kop);
+    font-size: var(--text-naam);
+    font-weight: 600;
+    line-height: 1;
+  }
+  .blad-kop {
+    margin: 0;
+    font-family: var(--font-kop);
+    font-size: var(--text-h2);
+    line-height: var(--text-h2--line-height);
+    letter-spacing: var(--text-h2--letter-spacing);
+    font-weight: var(--text-h2--font-weight);
+  }
+  .blad-intro {
+    max-width: 40rem;
+    margin: 1rem 0 0;
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+  }
+  .blad-adres {
+    margin-top: 2.5rem;
+    font-style: normal;
+  }
+  .blad-groep {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--lijn);
+  }
+  .blad-regel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: 0;
+  }
+  .blad-label {
+    font-size: var(--text-label);
+    line-height: var(--text-label--line-height);
+    letter-spacing: var(--text-label--letter-spacing);
+    font-weight: var(--text-label--font-weight);
+    color: var(--inkt-zacht);
+  }
+  .blad-waarde {
+    margin: 0;
+    color: var(--color-inkt);
+  }
+  .blad-lead {
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+    overflow-wrap: break-word;
+  }
+  .blad-telefoon {
+    font-family: var(--font-tekst);
+    font-size: var(--text-telefoon);
+    line-height: var(--text-telefoon--line-height);
+    letter-spacing: var(--text-telefoon--letter-spacing);
+    font-weight: var(--text-telefoon--font-weight);
+    font-variant-numeric: tabular-nums;
+  }
+  .blad-voet {
+    font-size: var(--text-voet);
+    line-height: var(--text-voet--line-height);
+  }
+  a.blad-waarde {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    min-height: 44px;
+    color: var(--color-petrol-diep);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+  }
+  a.blad-waarde:hover {
+    color: var(--color-inkt);
+  }
+  a.blad-waarde:focus-visible {
+    outline: 3px solid var(--color-petrol);
+    outline-offset: 3px;
+  }
+  .blad-tekstlink {
+    font-size: var(--text-body);
+    font-weight: 600;
+  }
+
+  @media (min-width: 64rem) {
+    .adresblad > * {
+      margin-left: calc((100% - 11 * 1.5rem) / 12 + 1.5rem);
+    }
+    .blad-adres {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 3rem;
+      max-width: 60rem;
+    }
+  }
+</style>

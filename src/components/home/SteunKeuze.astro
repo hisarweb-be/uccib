@@ -1,0 +1,351 @@
+---
+/**
+ * Steun: de bedragrij (STORYBOARD D20 tot D22, M11; DESIGNSYSTEEM 7.5).
+ *
+ * Met JavaScript: een radiogroep in een `fieldset` (de legend is de h2), het
+ * gekozen bedrag groot in een `output aria-live="polite"`, en één knop (`a`)
+ * waarvan het script de `href` op de betaallink van het gekozen blok zet. De
+ * toetsen zijn die van gewone radio's; er is geen eigen toetsenscript.
+ * Zonder JavaScript (`html.js-aan` ontbreekt): elk bedragvak is zelf de link naar
+ * zijn betaalpagina in een nieuw tabblad, en de losse knop rendert niet.
+ *
+ * Bron: de collectie `sponsorblokken` zoals op main. Een blok zonder bedrag (het
+ * vrije bedrag) staat niet in de rij, want het heeft geen eigen keuze. Links zijn
+ * letterlijk `blok.link ?? /iletisim/`; dit blok wijzigt er geen.
+ * Voorkeuze: het middelste blok van de actieve reeks (er is geen CMS-veld voor).
+ * Leeg (geen enkel blok met bedrag): kop, steunTekst zin 1 en een link naar
+ * /bagislar/ (CONTRACT 4.2).
+ */
+import { getCollection } from 'astro:content';
+import Rozet from '../Rozet.astro';
+import { getDictionary, type Locale } from '../../i18n';
+import { pagePath } from '../../i18n/config';
+import { f3 } from '../../i18n/f3';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale);
+const teksten = f3(locale);
+
+/* Alleen de vorm hangt van de taal af; het getal komt uit het CMS. */
+const GETAL = new Intl.NumberFormat(locale === 'tr' ? 'tr-TR' : locale === 'nl' ? 'nl-BE' : 'fr-BE', {
+  maximumFractionDigits: 0,
+});
+const VORM: Record<Locale, (n: string) => string> = {
+  tr: (n) => `${n}€`,
+  nl: (n) => `€ ${n}`,
+  fr: (n) => `${n} €`,
+};
+const bedragTekst = (n: number) => VORM[locale](GETAL.format(n));
+
+const blokken = (await getCollection('sponsorblokken'))
+  .filter((blok) => blok.data.active !== false && typeof blok.data.amount === 'number')
+  .sort((a, b) => a.data.order - b.data.order)
+  .map((blok) => ({
+    tekst: bedragTekst(blok.data.amount as number),
+    link: blok.data.link ?? pagePath(locale, 'iletisim'),
+  }));
+const voor = Math.floor((blokken.length - 1) / 2);
+const gekozen = blokken[voor];
+
+/* steunTekst is twee zinnen: de doelzin, en de zin over het nieuwe tabblad. */
+const [doelzin, ...rest] = teksten.steunTekst.split(/(?<=\.)\s+/);
+const tabzin = rest.join(' ');
+const naam = `steun-${locale}`;
+---
+
+<section id="steun" data-sectie="steun" class="steun">
+  {
+    gekozen ? (
+      <fieldset class="steun-groep">
+        <legend class="steun-legend">
+          <h2 class="steun-kop">{teksten.steunKop}</h2>
+        </legend>
+        <p class="steun-doel">{doelzin}</p>
+        <div class="steun-midden">
+          <span class="steun-zegel" aria-hidden="true">
+            <Rozet stand="vol" maat={56} />
+          </span>
+          <output class="steun-bedrag steun-js" aria-live="polite" for={blokken.map((_, i) => `${naam}-${i}`).join(' ')}>
+            <span class="steun-bedrag-tekst">{gekozen.tekst}</span>
+          </output>
+        </div>
+        <ul class="steun-rij" role="list">
+          {blokken.map((blok, i) => (
+            <li class="steun-vak">
+              <input
+                class="steun-radio steun-js"
+                type="radio"
+                name={naam}
+                id={`${naam}-${i}`}
+                value={blok.link}
+                data-bedrag={blok.tekst}
+                checked={i === voor}
+              />
+              <label class="steun-label steun-js" for={`${naam}-${i}`}>
+                {blok.tekst}
+              </label>
+              <a class="steun-label steun-zonder-js" href={blok.link} target="_blank" rel="noopener">
+                {blok.tekst}
+              </a>
+            </li>
+          ))}
+        </ul>
+        <p class="steun-hint" id={`${naam}-hint`}>
+          {tabzin ? <span>{tabzin} </span> : null}
+          <span>{teksten.steunHint}</span>
+        </p>
+        <a
+          class="steun-knop steun-js"
+          href={gekozen.link}
+          target="_blank"
+          rel="noopener"
+          aria-describedby={`${naam}-hint`}
+          data-steun-knop
+        >
+          {t.donateCta}
+        </a>
+      </fieldset>
+    ) : (
+      <div class="steun-groep">
+        <h2 class="steun-kop">{teksten.steunKop}</h2>
+        <p class="steun-doel">{doelzin}</p>
+        <a class="steun-leeg-link" href={pagePath(locale, 'bagislar')}>
+          {t.pages.bagislar.h1}
+        </a>
+      </div>
+    )
+  }
+</section>
+
+<script>
+  /* Keuze: knop en groot bedrag volgen de gekozen radio (alleen opacity bewegen). */
+  const beperkt = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const duur = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--duur-blad')) || 600;
+
+  document.querySelectorAll<HTMLFieldSetElement>('.steun .steun-groep').forEach((groep) => {
+    const knop = groep.querySelector<HTMLAnchorElement>('[data-steun-knop]');
+    const output = groep.querySelector<HTMLOutputElement>('.steun-bedrag');
+    if (!knop || !output) return;
+    groep.addEventListener('change', (e) => {
+      const radio = e.target;
+      if (!(radio instanceof HTMLInputElement) || radio.type !== 'radio') return;
+      knop.href = radio.value;
+      const oud = output.querySelector<HTMLElement>('.steun-bedrag-tekst:not(.is-weg)');
+      const nieuw = document.createElement('span');
+      nieuw.className = 'steun-bedrag-tekst';
+      nieuw.textContent = radio.dataset.bedrag ?? '';
+      if (!oud || beperkt.matches) {
+        output.replaceChildren(nieuw);
+        return;
+      }
+      /* Kruisovergang: het oude bedrag vervaagt boven het nieuwe en verdwijnt dan. */
+      output.querySelectorAll('.is-weg').forEach((el) => el.remove());
+      oud.classList.add('is-weg');
+      oud.setAttribute('aria-hidden', 'true');
+      output.append(nieuw);
+      const ms = duur();
+      nieuw.animate([{ opacity: 0 }, { opacity: 1 }], { duration: ms, easing: 'ease-out' });
+      oud.animate([{ opacity: 1 }, { opacity: 0 }], { duration: ms, easing: 'ease-out', fill: 'forwards' }).finished.then(
+        () => oud.remove(),
+        () => oud.remove(),
+      );
+    });
+  });
+</script>
+
+<style>
+  .steun {
+    --blad: max(var(--spacing-marge), calc((100% - var(--container-blad)) / 2));
+    padding: 5rem var(--blad) 4rem;
+    background: var(--color-papier);
+    color: var(--color-inkt);
+    border-top: 1px solid var(--lijn);
+  }
+  .steun-groep {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .steun-legend {
+    padding: 0;
+  }
+  .steun-kop {
+    margin: 0;
+    font-family: var(--font-kop);
+    font-size: var(--text-h2);
+    line-height: var(--text-h2--line-height);
+    letter-spacing: var(--text-h2--letter-spacing);
+    font-weight: var(--text-h2--font-weight);
+  }
+  .steun-doel {
+    max-width: 40rem;
+    margin: 1rem 0 0;
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+  }
+  .steun-midden {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+  .steun-zegel {
+    color: var(--color-petrol-diep);
+    line-height: 0;
+  }
+  .steun-bedrag {
+    display: grid;
+    font-family: var(--font-kop);
+    font-size: var(--text-bedrag);
+    line-height: var(--text-bedrag--line-height);
+    letter-spacing: var(--text-bedrag--letter-spacing);
+    font-weight: var(--text-bedrag--font-weight);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-petrol-diep);
+  }
+  /* Oud en nieuw bedrag op dezelfde plek voor de kruisovergang. */
+  .steun-bedrag :global(.steun-bedrag-tekst) {
+    grid-area: 1 / 1;
+    white-space: nowrap;
+  }
+  .steun-rij {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin: 2rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .steun-vak {
+    position: relative;
+    display: flex;
+  }
+  .steun-radio {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    clip-path: inset(50%);
+  }
+  .steun-label {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-width: 4.5rem;
+    min-height: 3.5rem;
+    padding: 0 0.75rem;
+    border: 1.5px solid var(--veldrand);
+    border-radius: var(--radius-vak);
+    background: var(--color-papier);
+    color: var(--color-inkt);
+    font-family: var(--font-tekst);
+    font-size: var(--text-bedrag-klein);
+    line-height: var(--text-bedrag-klein--line-height);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      border-color var(--duur-kort) var(--ease-uit),
+      background-color var(--duur-kort) var(--ease-uit);
+  }
+  .steun-label:hover {
+    border-color: var(--color-petrol-diep);
+  }
+  .steun-radio:checked + .steun-label {
+    border: 2px solid var(--color-petrol-diep);
+    background: var(--color-mint);
+    box-shadow: inset 0 -4px 0 var(--color-petrol-diep);
+    font-weight: 700;
+  }
+  .steun-radio:focus-visible + .steun-label,
+  a.steun-label:focus-visible {
+    outline: 3px solid var(--color-petrol);
+    outline-offset: 3px;
+  }
+  .steun-hint {
+    max-width: 40rem;
+    margin: 1.5rem 0 0;
+    font-size: var(--text-body);
+    line-height: 1.5;
+    color: var(--inkt-zacht);
+  }
+  .steun-knop,
+  .steun-leeg-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-height: 3.25rem;
+    margin-top: 1.5rem;
+    padding: 0 1.5rem;
+    border: 1.5px solid var(--color-petrol-diep);
+    border-radius: var(--radius-vak);
+    background: var(--color-petrol-diep);
+    color: var(--color-wit);
+    font-family: var(--font-tekst);
+    font-size: var(--text-knop);
+    line-height: var(--text-knop--line-height);
+    font-weight: var(--text-knop--font-weight);
+    text-decoration: none;
+    transition:
+      background-color var(--duur-kort) var(--ease-uit),
+      border-color var(--duur-kort) var(--ease-uit);
+  }
+  .steun-knop:hover,
+  .steun-leeg-link:hover {
+    background: var(--color-inkt);
+    border-color: var(--color-inkt);
+  }
+  .steun-knop:active {
+    transform: translateY(1px);
+  }
+  .steun-knop:focus-visible,
+  .steun-leeg-link:focus-visible {
+    outline: 3px solid var(--color-petrol);
+    outline-offset: 3px;
+  }
+
+  /* Zonder JavaScript: alleen de links; met JavaScript: radio's, bedrag en knop. */
+  .steun-js {
+    display: none;
+  }
+  :global(html.js-aan) .steun-zonder-js {
+    display: none;
+  }
+  :global(html.js-aan) .steun-bedrag {
+    display: grid;
+  }
+  :global(html.js-aan) .steun-label.steun-js,
+  :global(html.js-aan) .steun-knop {
+    display: flex;
+  }
+  :global(html.js-aan) .steun-knop {
+    display: inline-flex;
+  }
+  :global(html.js-aan) .steun-radio {
+    display: block;
+  }
+
+  @media (min-width: 64rem) {
+    .steun-groep {
+      margin-left: calc((100% - 11 * 1.5rem) / 12 + 1.5rem);
+    }
+    .steun-rij {
+      display: flex;
+      flex-wrap: nowrap;
+    }
+    .steun-vak {
+      flex: 1 1 0;
+    }
+  }
+</style>
