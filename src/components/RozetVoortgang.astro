@@ -7,9 +7,10 @@
  * zonder scroll-driven animation of bij minder beweging is `--sc-p` 1 en staat het
  * volle logo er. Geen JavaScript.
  *
- * Op 0 is het een punt; de lijnen van A, B en de kern tekenen zich met de scroll;
- * tegen het einde vullen de vlakken zich en wordt de lijn wit (stand vol).
- * Animeert alleen stroke-dashoffset, opacity en kleur, nooit een maat.
+ * De lijnrozet staat er altijd helemaal (herkenbaar, ook bovenaan de pagina) en
+ * groeit met de scroll van 78 naar 100 % (bij 32 px nooit onder de 24 px); tegen
+ * het einde vullen de vlakken zich en wordt de lijn wit (stand vol).
+ * Animeert alleen transform, opacity en kleur, nooit een maat.
  */
 import Rozet from './Rozet.astro';
 
@@ -30,12 +31,12 @@ const { maat = 32 } = Astro.props;
     display: inline-flex;
     /* De vlakken komen pas in de laatste tiende; daarvoor is het een lijntekening. */
     --vol: clamp(0, (var(--sc-p) - 0.9) * 10, 1);
+    transform: scale(calc(0.78 + 0.22 * var(--sc-p)));
+    transform-origin: 50% 50%;
   }
 
   /* svg.rozet--vol erbij: anders wint de witte lijn van stand vol uit Rozet.astro. */
   .voortgang :global(svg.rozet--vol .rozet-lijn) {
-    stroke-dasharray: 1;
-    stroke-dashoffset: calc(1 - var(--sc-p));
     stroke: color-mix(in srgb, var(--color-wit) calc(var(--vol) * 100%), var(--color-petrol-diep));
   }
 
