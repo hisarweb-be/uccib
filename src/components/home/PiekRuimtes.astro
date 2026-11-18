@@ -139,7 +139,6 @@ const rijen: Sleutelrij[] = (['p1', 'p2', 'p3'] as const).map((naam, i) => ({
                   ) : null}
                   {vorm === 'poster' ? <span class="piek-licht" data-licht={naam} aria-hidden="true" /> : null}
                 </div>
-                <MediaVermelding shot={naam} locale={locale} class="piek-vermelding" />
               </div>
             ))
           }
@@ -160,6 +159,14 @@ const rijen: Sleutelrij[] = (['p1', 'p2', 'p3'] as const).map((naam, i) => ({
           <path d={lijnen.kern}></path>
         </g>
       </svg>
+      {/* De vermeldingen boven het venster: nooit door het papier afgeknipt, ook niet bij een wissel. */}
+      {
+        lagen.map(({ naam, laag }) => (
+          <div class="piek-plek" data-laag={laag}>
+            <MediaVermelding shot={naam} locale={locale} class="piek-vermelding" />
+          </div>
+        ))
+      }
     </div>
 
     <h2 class="piek-kop">{opening}</h2>
