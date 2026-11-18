@@ -1,8 +1,12 @@
 ---
 /**
- * De kop van elke pagina: een rustige band met de h1, een korte inleiding en
- * optioneel één sterk beeld. De band loopt van rand tot rand, de inhoud houdt
- * dezelfde kolom als de rest van de site.
+ * De kop van elke binnenpagina: de h1 in Platypi, een inleiding in lead-maat en
+ * optioneel één beeld, met een haarlijn eronder (DESIGNSYSTEEM 1.4, 3.1, 7).
+ *
+ * Geen vlak, geen versiering: diepte komt van de haarlijn en van wit op papier.
+ * Beelden hebben geen hoek en geen schaduw. De lettermaat van de h1 komt uit de
+ * basislaag (`--text-h1`, met de vangrail onder 390 px); hier staat alleen de
+ * letterfamilie expliciet, zodat de kop nooit op een andere letter terugvalt.
  */
 import Beeld from './Beeld.astro';
 
@@ -22,65 +26,112 @@ const {
   bovenkop,
   beeldSlug,
   beeldAlt = '',
-  beeldSizes = '(min-width: 1024px) 460px, (min-width: 640px) 50vw, 100vw',
+  // Op 1440 is de beeldkolom 5 van 12 kolommen van 1280 px: ongeveer 510 px.
+  beeldSizes = '(min-width: 80rem) 510px, (min-width: 64rem) 40vw, 100vw',
   prioriteit = false,
 } = Astro.props;
 ---
 
-<header class="relative overflow-hidden border-b border-line bg-surface-alt">
-  <div
-    aria-hidden="true"
-    class="pointer-events-none absolute -top-32 right-[-6rem] h-80 w-80 rounded-full bg-brand-light blur-3xl"
-  >
-  </div>
-  <div class="relative mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
-    <div
-      class:list={[
-        beeldSlug && 'grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)] lg:items-center',
-      ]}
-    >
-      <div>
-        {bovenkop ? (
-          <p class="mb-4 text-small font-semibold tracking-[0.18em] text-brand-dark uppercase">
-            {bovenkop}
-          </p>
-        ) : (
-          <span aria-hidden="true" class="mb-5 block h-1 w-16 rounded-full bg-brand"></span>
-        )}
-        <h1>{h1}</h1>
-        {intro ? <p class="mt-5 max-w-[52ch] text-ink-muted">{intro}</p> : null}
-      </div>
-      {
-        beeldSlug ? (
-          <Beeld
-            slug={beeldSlug}
-            alt={beeldAlt}
-            sizes={beeldSizes}
-            klasse="h-auto w-full rounded-2xl shadow-sm"
-            loading="eager"
-            prioriteit={prioriteit}
-          />
-        ) : null
-      }
+<header class="kopband">
+  <div class:list={['kopband-raster', beeldSlug && 'met-beeld']}>
+    <div class="kopband-tekst">
+      {bovenkop ? <p class="kopband-label">{bovenkop}</p> : null}
+      <h1 class="kopband-h1">{h1}</h1>
+      {intro ? <p class="kopband-lead">{intro}</p> : null}
     </div>
+    {
+      beeldSlug ? (
+        <Beeld
+          slug={beeldSlug}
+          alt={beeldAlt}
+          sizes={beeldSizes}
+          klasse="kopband-beeld"
+          loading="eager"
+          prioriteit={prioriteit}
+        />
+      ) : null
+    }
   </div>
 </header>
 
 <style>
-  @media (prefers-reduced-motion: no-preference) {
-    header h1 {
-      animation: kop-in 0.5s ease-out both;
+  .kopband {
+    border-bottom: 1px solid var(--lijn);
+    padding-block: 2rem 4rem;
+  }
+
+  .kopband-raster {
+    display: grid;
+    gap: 2rem;
+  }
+
+  @media (min-width: 64rem) {
+    .kopband {
+      padding-block: 3rem 6rem;
     }
 
-    @keyframes kop-in {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
+    .kopband-raster.met-beeld {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      align-items: end;
+      gap: 2rem;
+    }
+  }
+
+  .kopband-label {
+    margin: 0 0 1rem;
+    font-size: var(--text-label);
+    line-height: var(--text-label--line-height);
+    letter-spacing: var(--text-label--letter-spacing);
+    font-weight: var(--text-label--font-weight);
+    color: var(--color-petrol-diep);
+  }
+
+  .kopband-h1 {
+    margin: 0;
+    font-family: var(--font-kop);
+    color: var(--color-inkt);
+  }
+
+  .kopband-lead {
+    margin: 1rem 0 0;
+    max-inline-size: 48ch;
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+    color: var(--color-inkt);
+  }
+
+  @media (min-width: 64rem) {
+    .kopband-lead {
+      margin-top: 1.5rem;
+    }
+  }
+
+  .kopband :global(.kopband-beeld) {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 0;
+  }
+
+  /* Binnenkomst: 10 px van onder, alleen opacity en transform (6.4, 6.5). De
+     beginstand bestaat alleen met animation-timeline en zonder minder beweging
+     (6.7); daarbuiten staat de kop meteen in zijn eindstand. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .kopband-tekst {
+        animation: kopband-in var(--duur-kom) var(--ease-uit) both;
       }
-      to {
-        opacity: 1;
-        transform: none;
-      }
+    }
+  }
+
+  @keyframes kopband-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
     }
   }
 </style>
