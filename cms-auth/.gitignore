@@ -1,0 +1,4 @@
+# Alles hier is lokaal en hoort nooit in de repo.
+.dev.vars
+.wrangler/
+node_modules/

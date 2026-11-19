@@ -1,0 +1,22 @@
+name = "uccib-cms-auth"
+main = "src/index.js"
+# Datum van de bovenstroomse bron (sveltia-cms-auth, commit 26b168a, 18 nov 2026).
+# Niet zomaar verhogen: dit is de runtime waar de code op is getest.
+compatibility_date = "2026-11-11"
+
+# Geen KV, geen D1, geen cron: dit is één klein script dat twee routes kent.
+# De sessie van dhr. Omer leeft in het venster en in de opslag van zijn browser,
+# dus er is niets op te slaan. Gratis plan ruim voldoende (100.000 verzoeken per dag).
+
+[vars]
+# Welk domein deze Worker mag bedienen. Geen geheim: het is het adres van de
+# site zelf, en het staat leesbaar in de repo zodat niemand hoeft te raden waar
+# de weigering vandaan komt. Zonder deze lijst zou iedere website de Worker van
+# UCCIB kunnen gebruiken om tokens te laten uitgeven.
+#
+# uccib.pages.dev is waar het bewerkscherm vandaag staat. uccib.com en
+# www.uccib.com staan er alvast bij voor de dag dat het domein omgaat; ze doen
+# niets zolang daar de oude site staat. localhost is voor het bewerken op de
+# laptop van HisarWeb; Sveltia stuurt daar cms.netlify.com als domein, dat
+# staat er los bij.
+ALLOWED_DOMAINS = "uccib.pages.dev, uccib.com, www.uccib.com, localhost, cms.netlify.com"

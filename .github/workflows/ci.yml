@@ -61,6 +61,11 @@ jobs:
 
       - name: Menu met acht punten
         run: npm run verify:menu
+      # Het bewerkscherm: vaste Sveltia-versie, integrity-hash, en een base_url
+      # die naar de authenticator wijst. Zonder deze stap kan iemand de
+      # integrity-hash of de base_url breken zonder dat er iets rood wordt.
+      - name: Bewerkscherm en authenticator
+        run: npm run verify:cms
 
       - name: Schermafbeeldingen bewaren
         run: echo "UCCIB_BEELD=$RUNNER_TEMP/uccib-beeld" >> "$GITHUB_ENV"

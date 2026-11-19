@@ -26,7 +26,9 @@
     "verify:betaallinks": "node scripts/verify-betaallinks.mjs",
     "verify:menu": "node scripts/verify-menu.mjs",
     "verify:leeg": "node scripts/leeg-scherm.mjs",
-    "verify:verhuis": "node scripts/verify-verhuis.mjs"
+    "verify:verhuis": "node scripts/verify-verhuis.mjs",
+    "verify:cms": "node scripts/verify-cms.mjs",
+    "verify:cms:levend": "node scripts/verify-cms.mjs --levend"
   },
   "dependencies": {
     "@astrojs/sitemap": "3.7.4",

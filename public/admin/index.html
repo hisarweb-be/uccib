@@ -7,6 +7,16 @@
     <title>UCCIB beheer</title>
   </head>
   <body>
-    <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
+    <!-- Vaste versie, bewust geen "latest": een nieuwe Sveltia-release mag het
+         scherm van dhr. Omer niet stilzwijgend breken. Bijwerken is een
+         bewuste stap: versienummer hier omhoog, uitrollen, nameten.
+         De integrity-waarde is de sha384 van precies dit bestand: verandert de
+         cdn iets aan de inhoud, dan weigert de browser het script in plaats van
+         iets anders uit te voeren. -->
+    <script
+      src="https://unpkg.com/@sveltia/cms@0.269.2/dist/sveltia-cms.js"
+      integrity="sha384-IdrSYKGLspPC3PNkKQrS43FxTOXJfxT29pnM+ffrMjYfnpXI4nb1tJy47WpOR7p2"
+      crossorigin="anonymous"
+    ></script>
   </body>
 </html>
