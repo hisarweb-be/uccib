@@ -2,7 +2,9 @@
 
 Bu kılavuz UCCIB yönetimi için yazıldı. Teknik bilgi gerekmez. Her adım sırayla yapılır.
 
-Yazan: HisarWeb, 19 Kasım 2026. Sürüm 1.0.
+Yazan: HisarWeb, 19 Kasım 2026. Sürüm 1.1.
+
+Sürüm 1.1: adres, açılış saatleri, KBO numarası ve konum için **Kerngegevens** bölümü eklendi (bölüm 5).
 
 ---
 
@@ -30,12 +32,12 @@ taşındığında bu kılavuzdaki adresler `uccib.com` olarak değişecek; yapı
 4. Şu an geçerli olan yol **Sign In Using Access Token**: size bir kez verilen uzun harf dizisini (token) buraya
    yapıştırırsınız ve giriş yaparsınız. Token bir şifre gibidir, kimseyle paylaşılmaz.
 5. Giriş yaptıktan sonra sol tarafta menü görünür: **Sayfalar**, **Bağış tutarları**, **Şubeler**, **Bölge dernekleri**,
-   **Namaz vakitleri**, **Cuma hutbeleri**.
+   **Namaz vakitleri**, **Cuma hutbeleri**, **Kerngegevens**.
 
    Bazı başlıkların yanında parantez içinde Felemenkçe bir kelime görünür (örnek: "Şubeler (vestigingen)"). Bu yalnızca
    menünün iç adıdır, sizi ilgilendirmez. Parantezden önceki Türkçe ad geçerlidir.
 
-Not: Kısa süre içinde **Sign In with GitHub** düğmesi de çalışacak. O zaman token'a hiç gerek kalmayacak, kendi GitHub
+Not: **Sign In with GitHub** düğmesi kısa süre içinde çalışacak. O zaman token'a hiç gerek kalmayacak, kendi GitHub
 hesabınızla tek tıkla gireceksiniz. Bu değişiklik hazır olduğunda size ayrıca haber verilecek.
 
 ---
@@ -89,11 +91,36 @@ Not: **Yayında** anahtarı üç dil için birdendir. Bir kez açarsınız, Tür
    - **Açılış saatleri** (serbest yazı, örnek: "Her gün 10:00 - 18:00")
    - **Fotoğraf**: bilgisayarınızdan veya telefonunuzdan bir fotoğraf seçin. Sistem fotoğrafı kendisi küçültür ve siteye koyar.
    - **Sıra numarası**: listede nerede görünsün. Küçük sayı önce gelir (1, 2, 3...).
+   - **Enlem** ve **Boylam** (isteğe bağlı): şubenin haritadaki yeri. Boş bırakırsanız "Yol tarifi" bağlantısı
+     adresten yapılır, bu da yeterlidir. Doldurmak isterseniz: Google Maps'te şubeye sağ tıklayın, çıkan iki sayıyı
+     kopyalayın. Enlem -90 ile 90, boylam -180 ile 180 arasında olmalıdır.
    - **Yayında**: açık bırakın.
 4. **Save**'e basın.
 
-Aynı yöntem **Bölge dernekleri**, **Namaz vakitleri** ve **Cuma hutbeleri** için de geçerlidir. Cuma hutbesinde ayrıca
-**PDF** yükleyebilirsiniz: PDF düğmesine basıp dosyayı seçin.
+Aynı yöntem **Bölge dernekleri** için de geçerlidir; orada ayrıca **Bölge veya şehir**, **Kısa tanıtım**,
+**İlgili kişi** ve **Web sitesi** (https:// ile başlayan tam adres) alanları vardır. Enlem ve boylam orada da isteğe
+bağlıdır.
+
+**Namaz vakitleri** ve **Cuma hutbeleri** ayrı bölümlerdedir: aylık çizelge veya hutbe metni eklenir. Cuma hutbesinde
+ayrıca **PDF** yükleyebilirsiniz: PDF düğmesine basıp dosyayı seçin.
+
+---
+
+## 5b. Adres, açılış saatleri ve KBO: Kerngegevens
+
+Soldaki menüde **Kerngegevens** satırı, sitenin her yerinde görünen ortak bilgileri toplar. Bir kez doldurursunuz,
+ana sayfa ve iletişim sayfası kendiliğinden güncellenir.
+
+1. Menüden **Kerngegevens**'e tıklayın.
+2. Alanlar:
+   - **Açılış saatleri**: serbest yazı, örnek "Pazartesi - Cuma 09:00 - 17:00".
+   - **KBO numarası**: şirket numarası, örnek 0123.456.789. Boş bırakılırsa sitede görünmez.
+   - **Hukuki şekil**: Felemenkçe yazılır (örnek "Vereniging zonder winstoogmerk"). Resmî belgede nasıl yazıyorsa
+     öyle bırakın.
+   - **Enlem** ve **Boylam**: merkez binanın haritadaki yeri, isteğe bağlı.
+3. **Save**'e basın.
+
+Kural: bir alanı boş bırakırsanız o bilgi sitede hiç görünmez. Yanlış bilgi yazmaktansa boş bırakmak daha iyidir.
 
 ---
 
@@ -186,6 +213,9 @@ C: Evet. Tarayıcıdan aynı adrese girin. Telefonda menü altta açılır.
 
 - **Mollie ödeme bağlantısını** kendiniz değiştirmeyin; ödeme çalışmaz hale gelebilir.
 - **Sıra numarası** alanına çok büyük sayı yazmayın (999'dan küçük tutun).
+- **Enlem / boylam** alanlarına tahminle sayı yazmayın: yanlış sayı haritada yanlış yeri gösterir. Emin değilseniz boş
+  bırakın.
+- **KBO numarası** ve **hukuki şekil** resmî belgedeki gibi olmalıdır. Emin değilseniz boş bırakın, uydurmayın.
 - Ekranın üstündeki **Settings / Configuration** bölümüne girmeyin.
 - Aynı sayfayı iki kişi aynı anda düzenlemeyin. Önce biriniz kaydetsin, sonra diğeri açsın.
 
