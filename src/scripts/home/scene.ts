@@ -72,6 +72,9 @@ interface ReeksData {
   hoogte: number;
 }
 
+/** Frame uit p: de reeks loopt over het stuk van `h1` in het manifest (0,09 tot 0,92). */
+const frameUit = (p: number, aantal: number) => Math.round(klem((p - 0.09) / 0.83) * (aantal - 1));
+
 function heroReeks(canvas: HTMLCanvasElement) {
   const ruw = (breed.matches ? canvas.dataset.reeksD : canvas.dataset.reeksM) ?? canvas.dataset.reeksD ?? canvas.dataset.reeksM;
   const ctx = canvas.getContext('2d');
@@ -110,13 +113,18 @@ function heroReeks(canvas: HTMLCanvasElement) {
      elk wordt buiten de hoofdthread gedecodeerd (`decode()`) voor het getekend
      wordt: zo geen 52 decodes en tekenbeurten tegelijk op de hoofdthread
      (keuring F2b, herstelpunt 1). Tot een beeld er is, tekent `teken` het
-     dichtstbijzijnde beeld dat er al wel is. */
+     dichtstbijzijnde beeld dat er al wel is.
+     Dit bestand laadt pas na de eerste intentie (`start.ts`); ook dan gaan eerst
+     alleen de beelden tot p 0,2 met lage voorrang de deur uit, en de rest pas
+     als de hoofdthread rust heeft (`requestIdleCallback`), zodat de eerste veeg
+     vloeiend blijft (herkeuring F2b, herstelpunt 2). */
   const bron = (i: number) =>
     `${reeks.map.replace(/\/$/, '')}/${reeks.patroon.replace('%04d', String(i + 1).padStart(4, '0'))}`;
   const laadEen = (i: number) =>
     new Promise<void>((klaar) => {
       const beeld = new Image();
       beeld.decoding = 'async';
+      beeld.fetchPriority = 'low';
       beeld.src = bron(i);
       beeld
         .decode()
@@ -129,8 +137,19 @@ function heroReeks(canvas: HTMLCanvasElement) {
         .finally(klaar);
     });
   const PORTIE = 6;
+  /* Laatste beeld van het eerste stuk: p 0,2 op de tijdlijn van de reeks (zie `frameUit`). */
+  const eersteStuk = frameUit(0.2, reeks.aantal);
+  /* Wachten op rust. Zonder `requestIdleCallback` (Safari) een lege taak, zodat het
+     laden tenminste niet in dezelfde taak als het tekenen valt. Dit start niets:
+     het draait pas binnen de scène, na de intentie. */
+  const rust = () =>
+    new Promise<void>((verder) => {
+      if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(() => verder(), { timeout: 2000 });
+      else setTimeout(verder, 50);
+    });
   (async () => {
     for (let van = 0; van < reeks.aantal; van += PORTIE) {
+      if (van > eersteStuk) await rust();
       const portie: Promise<void>[] = [];
       for (let i = van; i < Math.min(reeks.aantal, van + PORTIE); i += 1) portie.push(laadEen(i));
       await Promise.all(portie);
@@ -141,8 +160,7 @@ function heroReeks(canvas: HTMLCanvasElement) {
     }
   })();
 
-  /* Frame uit p: de reeks loopt over het stuk van `h1` in het manifest (0,09 tot 0,92). */
-  return (p: number) => teken(Math.round(klem((p - 0.09) / 0.83) * (reeks.aantal - 1)));
+  return (p: number) => teken(frameUit(p, reeks.aantal));
 }
 
 function hero(sectie: HTMLElement) {
