@@ -1,18 +1,31 @@
 ---
 /**
  * Eén raamwerk voor de vier ledendiensten: de vestigingen, de regionale
- * verenigingen, de gebedstijden en het preekarchief.
+ * verenigingen, de gebedstijden en het preekarchief (STORYBOARD E4 tot E7).
  *
  * De vereniging levert alleen tekst en beeld: elk onderdeel is een eigen
- * collectie Markdown-bestanden die dhr. Omer in het bewerkscherm op /admin/
- * vult. Dit onderdeel toont wat er staat en verder niets: geen verzonnen
- * inhoud, geen voorbeeldregels. Zolang er geen enkel bestand in een collectie
- * staat, levert dit onderdeel niets op en blijft de pagina dicht.
+ * collectie Markdown-bestanden die in het bewerkscherm op /admin/ gevuld wordt.
+ * Dit onderdeel toont wat er staat en verder niets: geen verzonnen inhoud, geen
+ * voorbeeldregels, geen aantal in een kop.
  *
- * De vier pagina's staan in `src/lib/actief.ts` op `active: false`; die
+ * Vormtaal (DESIGNSYSTEEM 7.4, 7.6, 7.7): dezelfde als `CmsBlokOfNiets`. Geen eigen
+ * sectiekop (de h1 van de pagina is de kop; de naam van elke regel is een h2,
+ * de sectie heeft een aria-label), een `ul` van regels tussen haarlijnen, geen kaartvak, geen
+ * achtergrondvlak, geen pictogram. Leeg levert dit onderdeel geen enkel element
+ * op: geen sectie, geen kop, geen marge.
+ *
+ * Geen kaartbeeld, geen tegels en geen coördinaten in beeld (BIJSTURING 1b). Een
+ * vestiging met een straat krijgt één gewone routelink naar de zoekpagina van
+ * OpenStreetMap; zonder straat is er geen link. `lat` en `lng` uit het CMS
+ * worden hier bewust niet gelezen.
+ *
+ * De vier pagina's staan in `src/content/paginas/tr/*.md` op `active: false`; die
  * schakelaar is en blijft de enige knop. Dit onderdeel zet niets aan.
  */
+import { existsSync, statSync } from 'node:fs';
+import { join } from 'node:path';
 import { getCollection, render } from 'astro:content';
+import { f3 } from '../i18n/f3';
 
 interface Props {
   slug: 'subelerimiz' | 'bolge-derneklerimiz' | 'namaz-vakitleri' | 'cuma-hutbesi';
@@ -20,216 +33,537 @@ interface Props {
 }
 
 const { slug, locale } = Astro.props;
+const teksten = f3(locale);
 
-/**
- * De kop boven de lijst, in de taal van de pagina. De velden zelf (naam,
- * adres, telefoon) zijn eigennamen en staan maar in één taal in de repo; ze
- * worden dus niet vertaald.
- */
-const KOPPEN: Record<Props['locale'], Record<Props['slug'], string>> = {
+/** Kop boven de lijst en de labels die f3 niet heeft, in de taal van de pagina. */
+const TAAL = {
   tr: {
-    subelerimiz: 'Şubelerimiz',
-    'bolge-derneklerimiz': 'Bölge derneklerimiz',
-    'namaz-vakitleri': 'Namaz vakitleri',
-    'cuma-hutbesi': 'Cuma hutbeleri',
+    kop: {
+      subelerimiz: 'Şubelerimiz',
+      'bolge-derneklerimiz': 'Bölge derneklerimiz',
+      'namaz-vakitleri': 'Namaz vakitleri',
+      'cuma-hutbesi': 'Cuma hutbeleri',
+    },
+    contact: 'İlgili kişi',
+    website: 'Web sitesi',
+    bron: 'Kaynak',
+    eerder: 'Önceki hutbeler',
+    eerdereMaanden: 'Önceki aylar',
+    pdf: 'Hutbeyi PDF olarak indir',
+    intl: 'tr-TR',
   },
   nl: {
-    subelerimiz: 'Onze vestigingen',
-    'bolge-derneklerimiz': 'Regionale verenigingen',
-    'namaz-vakitleri': 'Gebedstijden',
-    'cuma-hutbesi': 'Preekarchief',
+    kop: {
+      subelerimiz: 'Onze vestigingen',
+      'bolge-derneklerimiz': 'Regionale verenigingen',
+      'namaz-vakitleri': 'Gebedstijden',
+      'cuma-hutbesi': 'Preekarchief',
+    },
+    contact: 'Contactpersoon',
+    website: 'Website',
+    bron: 'Bron',
+    eerder: 'Eerdere preken',
+    eerdereMaanden: 'Eerdere maanden',
+    pdf: 'Download de preek als pdf',
+    intl: 'nl-BE',
   },
   fr: {
-    subelerimiz: 'Nos antennes',
-    'bolge-derneklerimiz': 'Associations régionales',
-    'namaz-vakitleri': 'Heures de prière',
-    'cuma-hutbesi': 'Archive des sermons',
+    kop: {
+      subelerimiz: 'Nos antennes',
+      'bolge-derneklerimiz': 'Associations régionales',
+      'namaz-vakitleri': 'Heures de prière',
+      'cuma-hutbesi': 'Archive des sermons',
+    },
+    contact: 'Personne de contact',
+    website: 'Site web',
+    bron: 'Source',
+    eerder: 'Sermons précédents',
+    eerdereMaanden: 'Mois précédents',
+    pdf: 'Télécharger le sermon en pdf',
+    intl: 'fr-BE',
   },
-};
+} as const;
 
+const taal = TAAL[locale];
+const kop = taal.kop[slug];
+const id = `leden-${slug}`;
+
+const opNaam = new Intl.Collator(taal.intl);
 const zichtbaar = <T extends { data: { active: boolean; order: number } }>(rijen: T[]): T[] =>
   rijen.filter((rij) => rij.data.active).sort((a, b) => a.data.order - b.data.order);
 
-const subeler = slug === 'subelerimiz' ? zichtbaar(await getCollection('subeler')) : [];
+/** Groepeert op een veld (stad of regio); een leeg veld vormt een groep zonder label. */
+function groepeer<T>(rijen: T[], sleutel: (rij: T) => string): { label: string; rijen: T[] }[] {
+  const groepen = new Map<string, T[]>();
+  for (const rij of rijen) {
+    const label = sleutel(rij).trim();
+    groepen.set(label, [...(groepen.get(label) ?? []), rij]);
+  }
+  return [...groepen.entries()].map(([label, rijen]) => ({ label, rijen }));
+}
 
-const dernekler = slug === 'bolge-derneklerimiz' ? zichtbaar(await getCollection('dernekler')) : [];
+const telHref = (nummer: string) => `tel:${nummer.replace(/[^\d+]/g, '')}`;
+const osmHref = (delen: string[]) =>
+  `https://www.openstreetmap.org/search?query=${encodeURIComponent(delen.filter(Boolean).join(', '))}`;
+const zonderSchema = (adres: string) => adres.replace(/^https?:\/\//, '').replace(/\/$/, '');
 
+/** Grootte van een pdf onder public/, gemeten bij de bouw; onbekend = niet tonen. */
+function pdfGrootte(pad: string): string {
+  if (!pad.startsWith('/')) return '';
+  const bestand = join(process.cwd(), 'public', decodeURIComponent(pad));
+  if (!existsSync(bestand)) return '';
+  const kb = statSync(bestand).size / 1024;
+  return kb >= 1024
+    ? `${new Intl.NumberFormat(taal.intl, { maximumFractionDigits: 1 }).format(kb / 1024)} MB`
+    : `${Math.max(1, Math.round(kb))} KB`;
+}
+
+const datum = new Intl.DateTimeFormat(taal.intl, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+const maand = new Intl.DateTimeFormat(taal.intl, { month: 'long', year: 'numeric', timeZone: 'UTC' });
+const maandTekst = (jjjjmm: string) => maand.format(new Date(`${jjjjmm}-01T00:00:00Z`));
+
+const subeler =
+  slug === 'subelerimiz'
+    ? groepeer(
+        zichtbaar(await getCollection('subeler')).sort(
+          (a, b) => a.data.order - b.data.order || opNaam.compare(a.data.name, b.data.name),
+        ),
+        (rij) => rij.data.city,
+      )
+    : [];
+
+const dernekler =
+  slug === 'bolge-derneklerimiz'
+    ? groepeer(
+        zichtbaar(await getCollection('dernekler')).sort(
+          (a, b) => a.data.order - b.data.order || opNaam.compare(a.data.name, b.data.name),
+        ),
+        (rij) => rij.data.region,
+      )
+    : [];
+
+/** Gebedstijden: de nieuwste maand eerst, oudere maanden ingeklapt (E6). */
 const vakitler =
   slug === 'namaz-vakitleri'
     ? await Promise.all(
-        zichtbaar(await getCollection('vakitler')).map(async (rij) => ({
-          ...rij,
-          inhoud: await render(rij),
-        })),
+        zichtbaar(await getCollection('vakitler'))
+          .sort((a, b) => b.data.month.localeCompare(a.data.month) || a.data.order - b.data.order)
+          .map(async (rij) => ({ ...rij, inhoud: await render(rij) })),
       )
     : [];
 
+/** Preken: de nieuwste voluit, de oudere als lijst van datum en titel om open te klappen (E7). */
 const hutbeler =
   slug === 'cuma-hutbesi'
     ? await Promise.all(
-        zichtbaar(await getCollection('hutbeler')).map(async (rij) => ({
-          ...rij,
-          inhoud: await render(rij),
-        })),
+        zichtbaar(await getCollection('hutbeler'))
+          .sort((a, b) => b.data.date.getTime() - a.data.date.getTime() || a.data.order - b.data.order)
+          .map(async (rij) => ({ ...rij, inhoud: await render(rij), grootte: pdfGrootte(rij.data.file) })),
       )
     : [];
 
-const leeg =
-  subeler.length + dernekler.length + vakitler.length + hutbeler.length === 0;
-const kop = KOPPEN[locale][slug];
+const leeg = subeler.length + dernekler.length + vakitler.length + hutbeler.length === 0;
+const [nieuwsteVakit, ...oudereVakitler] = vakitler;
+const [nieuwsteHutbe, ...oudereHutbeler] = hutbeler;
 ---
 
 {
   !leeg && (
-    <section class="mb-10">
-      <h2>{kop}</h2>
-
+    <section id={id} class="leden" aria-label={kop}>
       {subeler.length > 0 && (
-        <ul class="mt-6 grid list-none gap-4 p-0 sm:grid-cols-2">
-          {subeler.map((rij) => (
-            <li class="rounded-2xl border border-line bg-surface-alt p-5">
-              {rij.data.photo ? (
-                <img
-                  src={rij.data.photo}
-                  alt={rij.data.name}
-                  width="640"
-                  height="360"
-                  loading="lazy"
-                  class="mb-4 aspect-video w-full rounded-xl object-cover"
-                />
-              ) : null}
-              <h3 class="text-lead">{rij.data.name}</h3>
-              <address class="mt-2 not-italic text-ink-muted">
-                {rij.data.street && <>{rij.data.street}<br /></>}
-                {[rij.data.postalCode, rij.data.city].filter(Boolean).join(' ')}
-              </address>
-              <dl class="mt-3 grid gap-1 text-small">
-                {rij.data.phone && (
-                  <>
-                    <dt class="sr-only">Telefon</dt>
-                    <dd>
-                      <a href={`tel:${rij.data.phone.replace(/\s+/g, '')}`}>{rij.data.phone}</a>
-                    </dd>
-                  </>
-                )}
-                {rij.data.email && (
-                  <>
-                    <dt class="sr-only">E-posta</dt>
-                    <dd>
-                      <a href={`mailto:${rij.data.email}`}>{rij.data.email}</a>
-                    </dd>
-                  </>
-                )}
-                {rij.data.openingHours && (
-                  <>
-                    <dt class="sr-only">Açılış saatleri</dt>
-                    <dd>{rij.data.openingHours}</dd>
-                  </>
-                )}
-              </dl>
-            </li>
+        <div class="leden-groepen">
+          {subeler.map((groep) => (
+            <div class="leden-groep">
+              {groep.label && <p class="leden-label">{groep.label}</p>}
+              <ul class="leden-lijst leden-lijst--twee" role="list">
+                {groep.rijen.map(({ data }) => (
+                  <li class="leden-regel">
+                    <h2 class="leden-naam">{data.name}</h2>
+                    {(data.street || data.postalCode || data.city) && (
+                      <address class="leden-adres">
+                        {data.street && <span>{data.street}</span>}
+                        {(data.postalCode || data.city) && (
+                          <span>{[data.postalCode, data.city].filter(Boolean).join(' ')}</span>
+                        )}
+                      </address>
+                    )}
+                    {(data.phone || data.email || data.openingHours || data.street) && (
+                    <dl class="leden-velden">
+                      {data.phone && (
+                        <div>
+                          <dt>{teksten.labelTelefoon}</dt>
+                          <dd>
+                            <a class="leden-link leden-telefoon" href={telHref(data.phone)}>{data.phone}</a>
+                          </dd>
+                        </div>
+                      )}
+                      {data.email && (
+                        <div>
+                          <dt>{teksten.labelEmail}</dt>
+                          <dd>
+                            <a class="leden-link" href={`mailto:${data.email}`}>{data.email}</a>
+                          </dd>
+                        </div>
+                      )}
+                      {data.openingHours && (
+                        <div>
+                          <dt>{teksten.labelUren}</dt>
+                          <dd>{data.openingHours}</dd>
+                        </div>
+                      )}
+                      {data.street && (
+                        <div>
+                          <dt>{teksten.labelRoute}</dt>
+                          <dd>
+                            <a
+                              class="leden-link"
+                              href={osmHref([data.street, [data.postalCode, data.city].filter(Boolean).join(' ')])}
+                              rel="noopener"
+                            >
+                              {teksten.routeTekst}
+                            </a>
+                          </dd>
+                        </div>
+                      )}
+                    </dl>
+                    )}
+                    {data.photo && (
+                      <img class="leden-foto" src={data.photo} alt="" width="320" height="240" loading="lazy" decoding="async" />
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
 
       {dernekler.length > 0 && (
-        <ul class="mt-6 grid list-none gap-4 p-0 sm:grid-cols-2">
-          {dernekler.map((rij) => (
-            <li class="rounded-2xl border border-line bg-surface-alt p-5">
-              {rij.data.photo ? (
-                <img
-                  src={rij.data.photo}
-                  alt={rij.data.name}
-                  width="640"
-                  height="360"
-                  loading="lazy"
-                  class="mb-4 aspect-video w-full rounded-xl object-cover"
-                />
-              ) : null}
-              <h3 class="text-lead">{rij.data.name}</h3>
-              {rij.data.region && <p class="mt-1 text-small text-ink-muted">{rij.data.region}</p>}
-              {rij.data.description && <p class="mt-3 text-ink-muted">{rij.data.description}</p>}
-              <dl class="mt-3 grid gap-1 text-small">
-                {rij.data.contact && (
-                  <>
-                    <dt class="sr-only">İlgili kişi</dt>
-                    <dd>{rij.data.contact}</dd>
-                  </>
-                )}
-                {rij.data.phone && (
-                  <>
-                    <dt class="sr-only">Telefon</dt>
-                    <dd>
-                      <a href={`tel:${rij.data.phone.replace(/\s+/g, '')}`}>{rij.data.phone}</a>
-                    </dd>
-                  </>
-                )}
-                {rij.data.email && (
-                  <>
-                    <dt class="sr-only">E-posta</dt>
-                    <dd>
-                      <a href={`mailto:${rij.data.email}`}>{rij.data.email}</a>
-                    </dd>
-                  </>
-                )}
-                {rij.data.website && (
-                  <>
-                    <dt class="sr-only">Web sitesi</dt>
-                    <dd>
-                      <a href={rij.data.website} rel="noopener">
-                        {rij.data.website.replace(/^https?:\/\//, '')}
-                      </a>
-                    </dd>
-                  </>
-                )}
-              </dl>
-            </li>
+        <div class="leden-groepen">
+          {dernekler.map((groep) => (
+            <div class="leden-groep">
+              {groep.label && <p class="leden-label">{groep.label}</p>}
+              <ul class="leden-lijst leden-lijst--twee" role="list">
+                {groep.rijen.map(({ data }) => (
+                  <li class="leden-regel">
+                    <h2 class="leden-naam">{data.name}</h2>
+                    {data.description && <p class="leden-tekst">{data.description}</p>}
+                    {(data.contact || data.phone || data.email || data.website) && (
+                    <dl class="leden-velden">
+                      {data.contact && (
+                        <div>
+                          <dt>{taal.contact}</dt>
+                          <dd>{data.contact}</dd>
+                        </div>
+                      )}
+                      {data.phone && (
+                        <div>
+                          <dt>{teksten.labelTelefoon}</dt>
+                          <dd>
+                            <a class="leden-link leden-telefoon" href={telHref(data.phone)}>{data.phone}</a>
+                          </dd>
+                        </div>
+                      )}
+                      {data.email && (
+                        <div>
+                          <dt>{teksten.labelEmail}</dt>
+                          <dd>
+                            <a class="leden-link" href={`mailto:${data.email}`}>{data.email}</a>
+                          </dd>
+                        </div>
+                      )}
+                      {data.website && (
+                        <div>
+                          <dt>{taal.website}</dt>
+                          <dd>
+                            <a class="leden-link" href={data.website} target="_blank" rel="noopener">
+                              {zonderSchema(data.website)}
+                            </a>
+                          </dd>
+                        </div>
+                      )}
+                    </dl>
+                    )}
+                    {data.photo && (
+                      <img class="leden-foto" src={data.photo} alt="" width="320" height="240" loading="lazy" decoding="async" />
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
 
-      {vakitler.map((rij) => (
-        <article class="mt-6 rounded-2xl border border-line bg-surface-alt p-5">
-          <h3 class="text-lead">
-            {rij.data.month} · {rij.data.place}
-          </h3>
-          <div class="tekst mt-3 overflow-x-auto">
-            <rij.inhoud.Content />
-          </div>
-          {rij.data.source && (
-            <p class="mt-3 text-small text-ink-muted">
-              <a href={rij.data.source} rel="noopener">
-                {rij.data.source.replace(/^https?:\/\//, '')}
-              </a>
-            </p>
-          )}
-        </article>
-      ))}
-
-      {hutbeler.length > 0 && (
-        <ul class="mt-6 list-none space-y-4 p-0">
-          {hutbeler.map((rij) => (
-            <li class="rounded-2xl border border-line bg-surface-alt p-5">
-              <h3 class="text-lead">{rij.data.title}</h3>
-              <p class="mt-1 text-small text-ink-muted">
-                {rij.data.date.toISOString().slice(0, 10)}
-                {rij.data.imam && ` · ${rij.data.imam}`}
-                {rij.data.language && ` · ${rij.data.language}`}
-              </p>
-              <div class="tekst mt-3">
-                <rij.inhoud.Content />
-              </div>
-              {rij.data.file && (
-                <p class="mt-3">
-                  <a href={rij.data.file} class="inline-flex min-h-11 items-center">
-                    PDF
+      {nieuwsteVakit && (
+        <div class="leden-groepen">
+          <article class="leden-regel">
+            <h2 class="leden-naam">{maandTekst(nieuwsteVakit.data.month)}</h2>
+            <p class="leden-klein">
+              {nieuwsteVakit.data.place}
+              {nieuwsteVakit.data.source && (
+                <>
+                  {' · '}
+                  {taal.bron}:{' '}
+                  <a class="leden-link" href={nieuwsteVakit.data.source} rel="noopener">
+                    {zonderSchema(nieuwsteVakit.data.source)}
                   </a>
-                </p>
+                </>
               )}
-            </li>
-          ))}
-        </ul>
+            </p>
+            <div class="leden-tabel tekst" tabindex="0" role="region" aria-label={`${kop}: ${maandTekst(nieuwsteVakit.data.month)}`}>
+              <nieuwsteVakit.inhoud.Content />
+            </div>
+          </article>
+          {oudereVakitler.length > 0 && (
+            <div class="leden-groep">
+              <p class="leden-label">{taal.eerdereMaanden}</p>
+              <ul class="leden-lijst" role="list">
+                {oudereVakitler.map((rij) => (
+                  <li class="leden-regel">
+                    <details>
+                      <summary class="leden-summary">
+                        {maandTekst(rij.data.month)} · {rij.data.place}
+                      </summary>
+                      {rij.data.source && (
+                        <p class="leden-klein">
+                          {taal.bron}:{' '}
+                          <a class="leden-link" href={rij.data.source} rel="noopener">
+                            {zonderSchema(rij.data.source)}
+                          </a>
+                        </p>
+                      )}
+                      <div class="leden-tabel tekst" tabindex="0" role="region" aria-label={`${kop}: ${maandTekst(rij.data.month)}`}>
+                        <rij.inhoud.Content />
+                      </div>
+                    </details>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
+      {nieuwsteHutbe && (
+        <div class="leden-groepen">
+          <article class="leden-regel">
+            <p class="leden-klein">
+              <time datetime={nieuwsteHutbe.data.date.toISOString().slice(0, 10)}>{datum.format(nieuwsteHutbe.data.date)}</time>
+            </p>
+            <h2 class="leden-naam">{nieuwsteHutbe.data.title}</h2>
+            {(nieuwsteHutbe.data.imam || nieuwsteHutbe.data.language) && (
+              <p class="leden-klein">
+                {[nieuwsteHutbe.data.imam, nieuwsteHutbe.data.language].filter(Boolean).join(' · ')}
+              </p>
+            )}
+            <div class="tekst">
+              <nieuwsteHutbe.inhoud.Content />
+            </div>
+            {nieuwsteHutbe.data.file && (
+              <p>
+                <a class="leden-knop" href={nieuwsteHutbe.data.file} download>
+                  {taal.pdf}
+                  {nieuwsteHutbe.grootte && <span class="leden-klein"> ({nieuwsteHutbe.grootte})</span>}
+                </a>
+              </p>
+            )}
+          </article>
+          {oudereHutbeler.length > 0 && (
+            <div class="leden-groep">
+              <p class="leden-label">{taal.eerder}</p>
+              <ul class="leden-lijst" role="list">
+                {oudereHutbeler.map((rij) => (
+                  <li class="leden-regel">
+                    <details>
+                      <summary class="leden-summary">
+                        <time datetime={rij.data.date.toISOString().slice(0, 10)}>{datum.format(rij.data.date)}</time>
+                        {' · '}
+                        {rij.data.title}
+                      </summary>
+                      {(rij.data.imam || rij.data.language) && (
+                        <p class="leden-klein">{[rij.data.imam, rij.data.language].filter(Boolean).join(' · ')}</p>
+                      )}
+                      <div class="tekst">
+                        <rij.inhoud.Content />
+                      </div>
+                      {rij.data.file && (
+                        <p>
+                          <a class="leden-knop" href={rij.data.file} download>
+                            {taal.pdf}
+                            {rij.grootte && <span class="leden-klein"> ({rij.grootte})</span>}
+                          </a>
+                        </p>
+                      )}
+                    </details>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
       )}
     </section>
   )
 }
+
+<style>
+  .leden {
+    margin: 0 0 3rem;
+    color: var(--color-inkt);
+  }
+  .leden-groepen {
+    display: grid;
+    gap: 2.5rem;
+  }
+  .leden-label {
+    margin: 0 0 0.75rem;
+    font-size: var(--text-label);
+    line-height: var(--text-label--line-height);
+    letter-spacing: var(--text-label--letter-spacing);
+    font-weight: var(--text-label--font-weight);
+    color: var(--inkt-zacht);
+  }
+  .leden-lijst {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--lijn);
+  }
+  .leden-regel {
+    display: grid;
+    gap: 0.75rem;
+    align-content: start;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--lijn);
+  }
+  article.leden-regel {
+    border-top: 1px solid var(--lijn);
+  }
+  @media (min-width: 64rem) {
+    .leden-lijst--twee {
+      grid-template-columns: 1fr 1fr;
+      column-gap: 3rem;
+    }
+  }
+  .leden-naam {
+    margin: 0;
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+    font-weight: 600;
+  }
+  .leden-adres {
+    display: grid;
+    font-style: normal;
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+  }
+  .leden-tekst {
+    margin: 0;
+    max-width: 66ch;
+  }
+  .leden-velden {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+  }
+  .leden-velden dt,
+  .leden-klein {
+    margin: 0;
+    font-size: var(--text-label);
+    line-height: var(--text-label--line-height);
+    color: var(--inkt-zacht);
+  }
+  .leden-velden dd {
+    margin: 0;
+  }
+  .leden-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--color-inkt);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+    overflow-wrap: anywhere;
+  }
+  .leden-telefoon {
+    font-size: var(--text-telefoon);
+    line-height: var(--text-telefoon--line-height);
+    font-weight: var(--text-telefoon--font-weight);
+    font-variant-numeric: tabular-nums;
+  }
+  .leden-foto {
+    display: block;
+    width: 100%;
+    max-width: 20rem;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+  .leden-tabel {
+    max-width: 100%;
+    overflow-x: auto;
+    font-variant-numeric: tabular-nums;
+  }
+  .leden-tabel :global(table) {
+    border-collapse: collapse;
+  }
+  .leden-tabel :global(th:first-child),
+  .leden-tabel :global(td:first-child) {
+    position: sticky;
+    left: 0;
+    background: var(--color-papier);
+  }
+  .leden-summary {
+    display: list-item;
+    min-height: 44px;
+    padding-block: 0.5rem;
+    cursor: pointer;
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+    font-weight: 600;
+  }
+  .leden-knop {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-height: 44px;
+    padding: 0.5rem 1.25rem;
+    border: 1px solid var(--color-petrol-diep);
+    border-radius: 2px;
+    color: var(--color-petrol-diep);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .leden-link:focus-visible,
+  .leden-knop:focus-visible,
+  .leden-summary:focus-visible,
+  .leden-tabel:focus-visible {
+    outline: 3px solid var(--color-petrol-diep);
+    outline-offset: 3px;
+  }
+  @media (hover: hover) {
+    .leden-link:hover {
+      color: var(--color-petrol-diep);
+      text-decoration-thickness: 2px;
+    }
+    .leden-knop:hover {
+      background: var(--color-petrol-diep);
+      color: var(--color-papier);
+    }
+  }
+  .leden-knop .leden-klein {
+    color: inherit;
+  }
+  .leden-knop:active {
+    transform: translateY(1px);
+  }
+  @media (max-width: 47.99rem) {
+    .leden-knop {
+      display: flex;
+      justify-content: center;
+    }
+  }
+</style>

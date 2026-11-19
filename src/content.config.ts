@@ -77,6 +77,13 @@ const dienstBasis = {
   active: z.boolean().default(true),
 };
 
+/**
+ * Een coördinaat is optioneel: leeg (of een leeg CMS-veld, dat als '' binnenkomt)
+ * wordt null. Ze dienen alleen om later een route te kunnen berekenen; de site
+ * toont nooit een kaart, tegel of coördinaat (DESIGNSYSTEEM 7.6).
+ */
+const coordinaat = z.preprocess((v) => (v === '' ? null : v), z.number().nullable().default(null));
+
 const subeler = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/subeler' }),
   schema: z.object({
@@ -92,6 +99,8 @@ const subeler = defineCollection({
     openingHours: z.string().default(''),
     /** Pad onder /beeld/ of een volledig adres; leeg betekent geen foto. */
     photo: z.string().default(''),
+    lat: coordinaat,
+    lng: coordinaat,
   }),
 });
 
@@ -111,6 +120,8 @@ const dernekler = defineCollection({
     /** Volledig adres met https://; leeg betekent geen knop. */
     website: z.string().default(''),
     photo: z.string().default(''),
+    lat: coordinaat,
+    lng: coordinaat,
   }),
 });
 
@@ -151,8 +162,6 @@ const hutbeler = defineCollection({
  * dit schema laat de bouw falen als het bestand een ongeldig veld krijgt. De
  * pagina's lezen het JSON-bestand zelf; de collectie is de controle.
  */
-/* Sveltia schrijft een leeg getalveld als "", niet als null. */
-const coordinaat = z.preprocess((v) => (v === '' ? null : v), z.number().nullable().default(null));
 const kerngegevens = defineCollection({
   loader: async () => [{ id: 'kerngegevens', ...kerngegevensBron }],
   schema: z.object({

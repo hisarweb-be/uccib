@@ -9,6 +9,9 @@
  * Deze toets heeft twee soorten gevallen nodig: één dat MOET afkeuren en één dat
  * schoon moet blijven. Zonder het eerste geval bewijst de toets niets.
  *
+ * Daarnaast (geval 5): elke lege pagina geeft in elke taal 200 met haar eigen
+ * mededeling als titel, zodat een oud adres nooit op een 404 uitkomt.
+ *
  * Draait met `npm run verify:server`. Exitcode 1 bij elke afwijking.
  */
 import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
@@ -16,6 +19,8 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 import { startStaticServer } from './lib/keuring.mjs';
+import { conceptSlugs } from '../src/lib/actief.ts';
+import { f3, LEEG_SLUGS } from '../src/i18n/f3.ts';
 
 const DIST = resolve('dist');
 const BACKSLASH = String.fromCharCode(92);
@@ -98,6 +103,47 @@ await moetServeren(DIST, 'backslashes');
     await moetAfkeuren(half, 'map zonder wortelindex');
   } finally {
     await rm(half, { recursive: true, force: true });
+  }
+}
+
+// 5. De ledendiensten en de andere lege pagina's (STORYBOARD E4 tot E8): zolang
+//    een pagina in de CMS uit staat, moet haar adres in elke taal een gewone
+//    200 geven met haar eigen, eerlijke mededeling als titel en met noindex.
+//    Een 404 of de algemene "wordt vernieuwd"-tekst op zo'n adres zou een
+//    bezoeker van de oude site laten vallen. Een pagina die aan staat, valt
+//    hier vanzelf buiten: dan keurt verify-een-voor-een haar als echte pagina.
+{
+  const ontcijfer = (s) =>
+    s.replace(/&#39;|&#x27;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+  const concepten = conceptSlugs().filter((slug) => LEEG_SLUGS.includes(slug));
+  let server;
+  try {
+    server = await startStaticServer(DIST);
+  } catch (fout) {
+    oordeel(false, 'lege pagina\'s: de server weigerde (' + String(fout.message ?? fout) + ')');
+  }
+  if (server) {
+    let adressen = 0;
+    try {
+      for (const slug of concepten) {
+        for (const locale of ['tr', 'nl', 'fr']) {
+          const route = locale === 'tr' ? '/' + slug + '/' : '/' + locale + '/' + slug + '/';
+          const antwoord = await fetch(server.baseUrl + route);
+          const html = antwoord.status === 200 ? await antwoord.text() : '';
+          const titel = ontcijfer((html.match(/<title>([^<]*)<\/title>/) ?? [])[1] ?? '');
+          const verwacht = f3(locale).leeg[slug].titel;
+          oordeel(
+            antwoord.status === 200 && titel.startsWith(verwacht + ' ') && /<meta name="robots" content="noindex/.test(html),
+            'lege pagina ' + route + ': status ' + antwoord.status + ', titel "' + titel + '" (verwacht 200, "' + verwacht + ' …", noindex)',
+          );
+          adressen += 1;
+        }
+      }
+    } finally {
+      await server.close();
+    }
+    oordeel(adressen > 0, "lege pagina's: minstens 1 adres gekeurd (nu " + adressen + '), nul concepten mag niet stil slagen');
+    console.log('     lege pagina\'s: ' + adressen + ' adressen gekeurd (' + concepten.length + ' slugs x 3 talen)');
   }
 }
 
