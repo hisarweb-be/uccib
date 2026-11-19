@@ -119,9 +119,11 @@ const tekst = f3(locale).bedankt;
     color: var(--color-wit);
   }
 
-  .knop-eerst:hover {
-    background: var(--color-inkt);
-    border-color: var(--color-inkt);
+  @media (hover: hover) {
+    .knop-eerst:hover {
+      background: var(--color-inkt);
+      border-color: var(--color-inkt);
+    }
   }
 
   .knop-tweede {
@@ -129,9 +131,11 @@ const tekst = f3(locale).bedankt;
     color: var(--color-petrol-diep);
   }
 
-  .knop-tweede:hover {
-    border-color: var(--color-inkt);
-    color: var(--color-inkt);
+  @media (hover: hover) {
+    .knop-tweede:hover {
+      border-color: var(--color-inkt);
+      color: var(--color-inkt);
+    }
   }
 
   .knop:focus-visible,

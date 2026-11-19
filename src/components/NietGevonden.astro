@@ -166,9 +166,11 @@ const bestemmingen = BESTEMMINGEN.filter((slug) => isActiveSlug(slug)).map((slug
     color: var(--color-wit);
   }
 
-  .knop-eerst:hover {
-    background: var(--color-inkt);
-    border-color: var(--color-inkt);
+  @media (hover: hover) {
+    .knop-eerst:hover {
+      background: var(--color-inkt);
+      border-color: var(--color-inkt);
+    }
   }
 
   .knop-tweede {
@@ -176,9 +178,11 @@ const bestemmingen = BESTEMMINGEN.filter((slug) => isActiveSlug(slug)).map((slug
     color: var(--color-petrol-diep);
   }
 
-  .knop-tweede:hover {
-    border-color: var(--color-inkt);
-    color: var(--color-inkt);
+  @media (hover: hover) {
+    .knop-tweede:hover {
+      border-color: var(--color-inkt);
+      color: var(--color-inkt);
+    }
   }
 
   .knop:active {
@@ -217,9 +221,11 @@ const bestemmingen = BESTEMMINGEN.filter((slug) => isActiveSlug(slug)).map((slug
     text-decoration: none;
   }
 
-  .bestemmingen a:hover {
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
+  @media (hover: hover) {
+    .bestemmingen a:hover {
+      text-decoration: underline;
+      text-underline-offset: 0.2em;
+    }
   }
 
   @media (min-width: 640px) {
