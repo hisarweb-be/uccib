@@ -180,3 +180,25 @@ collections:
       - { name: body, label: Hutbe metni, widget: markdown, required: false }
       - { name: order, label: Sıra numarası, widget: number, default: 0 }
       - { name: active, label: Yayında, widget: boolean, default: true }
+
+  # Eén bestand met de wettelijke gegevens van de vereniging. Een leeg veld
+  # verschijnt nergens op de site; vul alleen wat de raad van bestuur bevestigt.
+  - name: kerngegevens
+    label: Kerngegevens
+    i18n: false
+    files:
+      - name: kerngegevens
+        label: "Kerngegevens (KBO, hukuki şekil, merkez, saatler)"
+        file: src/data/kerngegevens.json
+        format: json
+        fields:
+          - { name: openingsuren, label: Açılış saatleri, widget: text, required: false }
+          - { name: kbo, label: "KBO numarası (örnek 0123.456.789)", widget: string, required: false }
+          - { name: naam, label: Resmî ad, widget: string, required: false }
+          - { name: afkorting, label: Kısaltma, widget: string, required: false }
+          - { name: rechtsvorm, label: Hukuki şekil (Felemenkçe), widget: string, required: false }
+          - { name: rechtsvormFr, label: Hukuki şekil (Fransızca), widget: string, required: false }
+          - { name: zetel, label: Merkez adresi (Felemenkçe), widget: string, required: false }
+          - { name: zetelFr, label: Merkez adresi (Fransızca), widget: string, required: false }
+          - { name: lat, label: Enlem, widget: number, value_type: float, required: false }
+          - { name: lng, label: Boylam, widget: number, value_type: float, required: false }

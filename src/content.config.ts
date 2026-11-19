@@ -4,7 +4,7 @@
  * bevatten; Astro controleert elk Markdown-bestand er tegen bij de bouw, en
  * Sveltia CMS leest dezelfde velden uit `public/admin/config.yml`.
  *
- * Zes collecties:
+ * Zeven collecties (de zevende, `kerngegevens`, staat onderaan):
  *   - `paginas`: één bestand per pagina per taal, `src/content/paginas/<taal>/<slug>.md`.
  *     Het bestand voor de startpagina heet `index.md` (dus `tr/index`), alle andere
  *     heten naar hun slug (`tr/hakkimizda`).
@@ -21,6 +21,7 @@
  */
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
+import kerngegevensBron from './data/kerngegevens.json';
 
 const paginas = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/paginas' }),
@@ -143,6 +144,31 @@ const hutbeler = defineCollection({
   }),
 });
 
+/**
+ * `kerngegevens`: één bestand, `src/data/kerngegevens.json`, met de wettelijke
+ * gegevens van de vereniging (openingsuren, KBO, rechtsvorm, zetel, coördinaten).
+ * Leeg betekent: niet tonen. Het CMS bewerkt het als files-collectie "Kerngegevens";
+ * dit schema laat de bouw falen als het bestand een ongeldig veld krijgt. De
+ * pagina's lezen het JSON-bestand zelf; de collectie is de controle.
+ */
+/* Sveltia schrijft een leeg getalveld als "", niet als null. */
+const coordinaat = z.preprocess((v) => (v === '' ? null : v), z.number().nullable().default(null));
+const kerngegevens = defineCollection({
+  loader: async () => [{ id: 'kerngegevens', ...kerngegevensBron }],
+  schema: z.object({
+    openingsuren: z.string().default(''),
+    kbo: z.string().default(''),
+    naam: z.string().default(''),
+    afkorting: z.string().default(''),
+    rechtsvorm: z.string().default(''),
+    rechtsvormFr: z.string().default(''),
+    zetel: z.string().default(''),
+    zetelFr: z.string().default(''),
+    lat: coordinaat,
+    lng: coordinaat,
+  }),
+});
+
 export const collections = {
   paginas,
   sponsorblokken,
@@ -150,4 +176,5 @@ export const collections = {
   dernekler,
   vakitler,
   hutbeler,
+  kerngegevens,
 };
