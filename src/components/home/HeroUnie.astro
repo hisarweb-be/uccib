@@ -154,10 +154,31 @@ const FASEN = [
       <div class="hero-beeld">
         <figure class="hero-venster" data-hero-venster aria-hidden="true">
           <svg class="hero-rozet" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+            <defs>
+              {/* Het venster is de ster zelf: dezelfde vorm als de lijnen, zodat de foto
+                  precies tot de rand loopt en er geen kader omheen ontstaat. */}
+              <clipPath id="hero-ster-venster">
+                <path d={lijnen.buitenster}></path>
+              </clipPath>
+            </defs>
             <g class="hero-vlakken">
               <path class="vlak-buiten" d={lijnen.buitenster}></path>
               <path class="vlak-ring" d={lijnen.binnen}></path>
               <path class="vlak-kern" d={lijnen.kern}></path>
+            </g>
+            {/* De ster draagt het beeld: zodra de film wegvloeit neemt de foto het venster
+                over, met een korte kruisvervaging. Zonder dit bleef er twee schermhoogten
+                lang een lege ster op papier staan (klacht eigenaar 19 nov: "een wit ster
+                wat de afbeelding er niet erin toont"). */}
+            <g class="hero-kernbeeld" clip-path="url(#hero-ster-venster)">
+              <image
+                href={posterD.pad}
+                x="0"
+                y="0"
+                width="100"
+                height="100"
+                preserveAspectRatio="xMidYMid slice"
+              />
             </g>
             {
               ['hero-lijnen lijnen-diep', 'hero-lijnen lijnen-wit'].map((klasse) => (

@@ -116,6 +116,25 @@
   gap: 0.75rem;
 }
 
+/* De twee knoppen van het eerste scherm staan op een smal scherm in twee gelijke
+   kolommen, niet in een rij die vanzelf omklapt. Zonder deze regel bepaalde de
+   tekstbreedte of de rij één of twee regels hoog was, en omdat de afbeelding
+   erboven het veerelement is, sprong die 64 px op het moment dat de webletter
+   binnenkwam en meteen weer terug (klacht eigenaar 19 nov: "bibberende hero
+   afbeelding bij het start"). Een vaste twee-kolomsrij maakt de hoogte
+   onafhankelijk van de letter. */
+@media (max-width: 63.9375rem) {
+  .hero-eerste .hero-knoppen {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+  .hero-eerste .hero-knoppen .knop {
+    min-width: 0;
+    padding: 0 0.5rem;
+  }
+}
+
 /* ── Hero: het eerste scherm ── */
 
 .hero-eerste {
@@ -420,6 +439,10 @@
       /* Het slot: de rozet parkeert 0,90-0,95, pas daarna komt de belofte (vanaf 0,955). */
       --t2: clamp(0, (var(--hero-p) - 0.9) / 0.05, 1);
       --hero-k: clamp(0, (var(--hero-p) - 0.81) / 0.09, 1);
+      /* De foto staat in de ster op het moment dat de film wegvloeit: geen scherm zonder beeld. */
+      --hero-foto: clamp(0, (var(--hero-p) - 0.07) / 0.05, 1);
+      /* De lijnen zijn wit zodra er een foto achter staat, en ook in het slot op de volle rozet. */
+      --hero-lijnen: max(var(--hero-foto), var(--hero-k));
       --weg: clamp(0, 1 - (var(--hero-p) - 0.09) / 0.05, 1);
       --fig-s: calc(1 + (var(--fs, 1) - 1) * var(--t1) + (var(--gs, 1) - var(--fs, 1)) * var(--t2));
       position: sticky;
@@ -486,10 +509,10 @@
       stroke: var(--color-wit);
     }
     .lijnen-diep {
-      opacity: clamp(0, 2 - 2 * var(--hero-k), 1);
+      opacity: clamp(0, 2 - 2 * var(--hero-lijnen), 1);
     }
     .lijnen-wit {
-      opacity: var(--hero-k);
+      opacity: var(--hero-lijnen);
     }
     .lijn-cirkel {
       stroke-dashoffset: clamp(0, 1 - (var(--hero-p) - 0.12) / 0.14, 1);
@@ -516,6 +539,14 @@
     }
     .hero-vlakken {
       opacity: var(--hero-k);
+    }
+    /* De foto in de kern van de ster: hetzelfde venster als bij de piek. Zodra de film
+       wegvloeit neemt de ster het beeld over, met een korte kruisvervaging. Zonder dit
+       stond er twee schermhoogten lang een lege ster op papier (klacht eigenaar 19 nov:
+       "een wit ster wat de afbeelding er niet erin toont"). */
+    .hero-kernbeeld {
+      /* De foto draagt de ster tijdens de fasen; in het slot neemt de volle rozet het over. */
+      opacity: calc(var(--hero-foto, 0) * (1 - var(--hero-k, 0)));
     }
     .vlak-buiten {
       fill: var(--color-petrol);
