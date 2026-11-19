@@ -48,6 +48,22 @@ const fouten = [];
 const nummer = { n: 0 };
 const paginas = (ACTIVE_SLUGS.length + CONCEPT_SLUGS.length) * LOCALES.length;
 
+/**
+ * De sitemap hoort precies de pagina's te noemen die er zijn. Tot 19-11 waren dat
+ * alleen de slugs uit de menustructuur; sinds de stadspagina's van de gebedstijden
+ * (33 steden x 3 talen, Brussel woont op de hoofdpagina) staan die er ook in. Ze
+ * komen uit dezelfde bron als de pagina's zelf, dus deze lijst kan niet verouderen.
+ */
+const { STEDEN } = await import(new URL('../functions/_lib/vakitler.js', import.meta.url).href);
+/** Het adres van een stadspagina, gelijk aan `stadPath` in src/i18n/config.ts. */
+const stadPad = (locale, stad) => `${locale === 'tr' ? '' : `/${locale}`}/namaz-vakitleri/${stad}/`;
+const VERWACHTE_ADRESSEN = [
+  ...ACTIVE_SLUGS.flatMap((slug) => LOCALES.map((l) => new URL(pagePath(l, slug), SITE_URL).href)),
+  ...STEDEN.filter((stad) => stad.slug !== 'brussel').flatMap((stad) =>
+    LOCALES.map((l) => new URL(stadPad(l, stad.slug), SITE_URL).href),
+  ),
+];
+
 function meld(ok, regel, detail = '') {
   nummer.n += 1;
   if (ok) goed += 1;
@@ -300,7 +316,7 @@ async function main() {
       const xml = await (await fetch(`${siteBasis}/sitemap-0.xml`)).text();
       const adressen = [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map((m) => m[1]);
       sitemapAdressen = adressen.length;
-      const verwacht = ACTIVE_SLUGS.flatMap((slug) => LOCALES.map((l) => new URL(pagePath(l, slug), SITE_URL).href));
+      const verwacht = [...VERWACHTE_ADRESSEN];
       const ontbreekt = verwacht.filter((u) => !adressen.includes(u));
       const teveel = adressen.filter((u) => !verwacht.includes(u));
       if (ontbreekt.length) sitemapFouten.push(`mist ${ontbreekt.length}: ${ontbreekt.slice(0, 2).join(', ')}`);
@@ -323,9 +339,9 @@ async function main() {
       }
     }
     meld(
-      sitemapFouten.length === 0 && sitemapAdressen === ACTIVE_SLUGS.length * LOCALES.length,
+      sitemapFouten.length === 0 && sitemapAdressen === VERWACHTE_ADRESSEN.length,
       'sitemap',
-      `${sitemapAdressen} adressen, verwacht ${ACTIVE_SLUGS.length * LOCALES.length}${sitemapFouten.length ? ` | ${sitemapFouten.slice(0, 2).join(' | ')}` : ''}`,
+      `${sitemapAdressen} adressen, verwacht ${VERWACHTE_ADRESSEN.length}${sitemapFouten.length ? ` | ${sitemapFouten.slice(0, 2).join(' | ')}` : ''}`,
     );
 
     // Een onbekend pad moet een echte 404 zijn, geen homepage met status 200.
