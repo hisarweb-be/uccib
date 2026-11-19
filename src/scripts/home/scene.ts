@@ -332,10 +332,10 @@ function piek(sectie: HTMLElement) {
     const q = naarTijdlijn(u, sprongen);
     sectie.style.setProperty('--piek-p', q.toFixed(4));
 
-    /* De kern gaat open en knijpt bij elke wissel helemaal dicht terwijl ze een slag
-       draait: de rozet draagt de overgang naar de volgende ruimte. */
-    const dicht = wissels.reduce((som, m) => som + klem(1 - Math.abs(q - m) / 0.04), 0);
-    const e = klem(klem((q - 0.07) / 0.11) - dicht);
+    /* Het kijkgat groeit één keer van rust naar beeldvullend en nooit terug (bijsturing eigenaar
+       19 nov: het heen en weer krimpen bij elke wissel las als amateuristisch). De wissel tussen
+       twee ruimtes draagt de foto zelf, met haar eigen opacity, en de rozet draait mee. */
+    const e = klem((q - 0.07) / 0.11);
     const nu = kamers.findLast((k) => q >= k.a) ?? kamers[0];
     const s = nu ? Math.pow(nu.sMax, e) : 1;
     const stijl = podium!.style;
@@ -347,7 +347,10 @@ function piek(sectie: HTMLElement) {
       const t = klem((q - k.a) / (k.b - k.a));
       const x = k.x[0] + (k.x[1] - k.x[0]) * t;
       const y = k.y[0] + (k.y[1] - k.y[0]) * t;
-      k.raam.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
+      /* Een lichte zoom over haar eigen stuk (1 naar 1,08): de foto beweegt mee met de scroll
+         in plaats van stil te staan. Alleen transform, dus binnen de bestaande regel. */
+      const zoom = 1 + 0.08 * t;
+      k.raam.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) scale(${zoom.toFixed(4)})`;
     }
 
     const klaar = q >= 0.86;
