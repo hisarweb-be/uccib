@@ -6,4 +6,4 @@ intro: ""
 order: 9
 ---
 
-Les heures de prière pour Bruxelles et les villes de Belgique figureront bientôt ici.
+Les heures suivent le calendrier Fazilet. Choisissez une ville pour les heures dans toute la Belgique.

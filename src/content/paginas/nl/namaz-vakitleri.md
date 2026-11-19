@@ -6,4 +6,4 @@ intro: ""
 order: 9
 ---
 
-De gebedstijden voor Brussel en de Belgische steden verschijnen binnenkort hier.
+De tijden worden bijgehouden volgens de Fazilet-kalender. Kies een stad voor de tijden in heel België.

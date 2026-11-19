@@ -15,6 +15,7 @@ import Layout from '../../layouts/Layout.astro';
 import CmsBlokOfNiets, { type CmsRegel } from '../CmsBlokOfNiets.astro';
 import HeroUnie from './HeroUnie.astro';
 import DienstenIndex from './DienstenIndex.astro';
+import Vakitler from '../Vakitler.astro';
 import OpenDeur from './OpenDeur.astro';
 import PiekRuimtes from './PiekRuimtes.astro';
 import SteunKeuze from './SteunKeuze.astro';
@@ -82,6 +83,7 @@ const ngo = {
 >
   <HeroUnie locale={locale} h1={h1} intro={entry.data.intro} />
   <DienstenIndex locale={locale} />
+  <Vakitler locale={locale} vorm="band" />
   <CmsBlokOfNiets id="haberler" kop={t.pages.haberler.h1} items={nieuws} />
   <OpenDeur locale={locale} />
   <PiekRuimtes locale={locale} />

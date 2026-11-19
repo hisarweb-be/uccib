@@ -9,9 +9,10 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && node scripts/lib/taal-404.mjs",
+    "build": "node scripts/lever-vakitler.mjs && astro build && node scripts/lib/taal-404.mjs",
     "preview": "astro preview",
     "check": "astro check",
+    "vakitler": "node scripts/lever-vakitler.mjs",
     "verify": "node scripts/verify-alle.mjs",
     "verify:page": "node scripts/verify-pagina.mjs",
     "verify:server": "node scripts/verify-server.mjs",

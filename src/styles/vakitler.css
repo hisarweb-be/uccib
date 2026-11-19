@@ -1,0 +1,391 @@
+/**
+ * De gebedstijden, in de vormtaal van de site (DESIGNSYSTEEM 7.4): geen kaartvak,
+ * geen pictogram, geen schaduw. Een kop, één groot cijfer met de klok ernaast, de
+ * zeven tijden op een rij tussen haarlijnen, en op de eigen pagina de weektabel.
+ *
+ * De klok telt af; de daglijn eronder laat zien hoe ver de dag is. Alles wat
+ * beweegt is `transform` en `opacity`, zodat het op de compositor blijft.
+ *
+ * Vormgeving boven inhoud: de maten komen uit `tokens.css`, zodat een wijziging
+ * in de vormtaal hier vanzelf doorkomt. De sectie staat op het papier en houdt
+ * zich aan dezelfde marge als de rest van de pagina.
+ */
+
+.vakitler {
+  --blad: max(var(--spacing-marge), calc((100% - var(--container-blad)) / 2));
+  position: relative;
+  padding: clamp(3rem, 8vw, 6rem) var(--blad);
+  background: var(--color-papier);
+  color: var(--color-inkt);
+  border-top: 1px solid var(--lijn);
+}
+
+.vakitler--blad {
+  padding-top: clamp(2rem, 4vw, 3rem);
+  border-top: 0;
+}
+
+.vakit-kop {
+  max-width: 68rem;
+}
+
+.vakit-titel {
+  font-family: var(--font-kop);
+  font-size: var(--text-h2);
+  line-height: var(--text-h2--line-height);
+  letter-spacing: var(--text-h2--letter-spacing);
+  font-weight: var(--text-h2--font-weight);
+  margin: 0;
+}
+
+.vakit-lead {
+  margin: 0.75rem 0 0;
+  max-width: 60ch;
+  font-size: var(--text-lead);
+  line-height: var(--text-lead--line-height);
+  color: var(--color-ink-muted);
+}
+
+/* ── Het volgend gebed: het enige grote cijfer op de pagina ── */
+
+.vakit-nu {
+  margin-top: clamp(1.5rem, 4vw, 2.5rem);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.25rem;
+}
+
+.vakit-datum {
+  margin: 0;
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: var(--text-label--font-weight);
+  color: var(--color-petrol-diep);
+  text-transform: capitalize;
+}
+
+.vakit-volgend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1rem;
+}
+
+.vakit-volgend-label {
+  margin: 0;
+  flex-basis: 100%;
+  font-size: var(--text-voet);
+  line-height: var(--text-voet--line-height);
+  color: var(--color-ink-muted);
+}
+
+.vakit-volgend-naam {
+  margin: 0;
+  font-family: var(--font-kop);
+  font-size: var(--text-dienst);
+  line-height: 1;
+  font-weight: var(--text-dienst--font-weight);
+  letter-spacing: var(--text-dienst--letter-spacing);
+}
+
+.vakit-volgend-tijd {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  font-size: var(--text-lead);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.vakit-volgend-tijd > [data-vakit-tijd] {
+  font-weight: 600;
+}
+
+/* De klok: klein, petrol, en met vaste cijferbreedte zodat hij niet danst. */
+.vakit-klok {
+  font-size: var(--text-klok);
+  line-height: var(--text-klok--line-height);
+  letter-spacing: var(--text-klok--letter-spacing);
+  font-weight: var(--text-klok--font-weight);
+  color: var(--color-petrol-diep);
+  font-variant-numeric: tabular-nums;
+}
+
+/* De daglijn: een haarlijn met een petrol deel dat de dag vordert. */
+.vakit-daglijn {
+  position: relative;
+  margin-top: 0.75rem;
+  height: 1px;
+  background: var(--lijn);
+  overflow: hidden;
+}
+
+.vakit-daglijn-vul {
+  position: absolute;
+  inset: 0;
+  background: var(--color-petrol);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  will-change: transform;
+}
+
+/* ── De zeven tijden op een rij ── */
+
+.vakit-rij {
+  margin: clamp(1.5rem, 3vw, 2.25rem) 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border-top: 1px solid var(--lijn);
+  border-bottom: 1px solid var(--lijn);
+}
+
+.vakit-cel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.875rem 0.25rem 0.875rem 0;
+  min-width: 0;
+}
+
+.vakit-cel + .vakit-cel {
+  padding-left: 0.5rem;
+  border-left: 1px solid var(--lijn);
+}
+
+.vakit-cel-naam {
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  color: var(--color-ink-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vakit-cel-tijd {
+  font-family: var(--font-kop);
+  font-size: clamp(1.125rem, 0.9rem + 0.9vw, 1.625rem);
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Het merkje onder een cel is de daglijn van die tijd: petrol als het gebed is
+   geweest, de haarlijn als het nog moet komen. Het script zet de klasse. */
+.vakit-cel-merk {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: transparent;
+  transform-origin: 0 50%;
+}
+
+.vakit-cel.is-geweest .vakit-cel-merk {
+  background: var(--color-petrol-diep);
+  opacity: 0.35;
+}
+
+.vakit-cel.is-nu .vakit-cel-merk {
+  background: var(--color-petrol-diep);
+}
+
+/* ── De eigen pagina: stad, weektabel en bron ── */
+
+.vakit-kiezer {
+  margin-top: clamp(1.5rem, 3vw, 2rem);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.vakit-kiezer-label {
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: var(--text-label--font-weight);
+  color: var(--color-ink-muted);
+}
+
+.vakit-kiezer-veld {
+  position: relative;
+  display: inline-flex;
+}
+
+.vakit-kiezer-veld select {
+  appearance: none;
+  min-height: 2.75rem;
+  padding: 0 2.5rem 0 0.875rem;
+  border: 1.5px solid var(--color-petrol-diep);
+  border-radius: var(--radius-vak);
+  background: var(--color-wit);
+  color: var(--color-inkt);
+  font-family: var(--font-tekst);
+  font-size: var(--text-knop);
+  line-height: var(--text-knop--line-height);
+  font-weight: var(--text-knop--font-weight);
+}
+
+/* Het pijltje van de keuzelijst zelf tekenen: de systeemversie verschilt per
+   browser en valt buiten de vormtaal. */
+.vakit-kiezer-veld::after {
+  content: '';
+  position: absolute;
+  right: 0.875rem;
+  top: 50%;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-top: -0.375rem;
+  border-right: 1.5px solid var(--color-petrol-diep);
+  border-bottom: 1.5px solid var(--color-petrol-diep);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.vakit-kiezer-status {
+  margin: 0;
+  flex-basis: 100%;
+  font-size: var(--text-voet);
+  line-height: var(--text-voet--line-height);
+  color: var(--color-ink-muted);
+}
+
+.vakit-kiezer-status:empty {
+  display: none;
+}
+
+.vakit-tabel-wrap {
+  margin-top: clamp(1.25rem, 3vw, 2rem);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.vakit-tabel {
+  width: 100%;
+  min-width: 34rem;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.vakit-tabel-caption {
+  caption-side: top;
+  text-align: left;
+  padding-bottom: 0.5rem;
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: var(--text-label--font-weight);
+  color: var(--color-ink-muted);
+}
+
+.vakit-tabel th,
+.vakit-tabel td {
+  padding: 0.625rem 0.5rem;
+  text-align: right;
+  border-bottom: 1px solid var(--lijn);
+  white-space: nowrap;
+}
+
+.vakit-tabel thead th {
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: var(--text-label--font-weight);
+  color: var(--color-ink-muted);
+  border-bottom-color: var(--color-inkt);
+}
+
+.vakit-tabel thead th.is-vandaag {
+  color: var(--color-petrol-diep);
+}
+
+.vakit-tabel tbody th[scope='row'] {
+  text-align: left;
+  font-weight: 400;
+  color: var(--color-ink-muted);
+  font-size: var(--text-voet);
+}
+
+.vakit-tabel td {
+  font-family: var(--font-kop);
+  font-size: var(--text-voet);
+}
+
+.vakit-tabel thead th.is-vandaag,
+.vakit-tabel td.is-vandaag {
+  background: color-mix(in srgb, var(--color-mint) 22%, transparent);
+}
+
+.vakit-bron {
+  margin: 1rem 0 0;
+  font-size: var(--text-voet);
+  line-height: var(--text-voet--line-height);
+  color: var(--color-ink-muted);
+}
+
+/* Onderstreept, niet alleen gekleurd: een link die zich van zijn regel alleen
+   door kleur onderscheidt zakt bij elke kleurenblindheidstoets (axe
+   link-in-text-block). De onderstreping hoort bij de vormtaal. */
+.vakit-bron a {
+  color: var(--color-petrol-diep);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.vakit-meer {
+  margin: 1.25rem 0 0;
+}
+
+.vakit-meer-link {
+  font-size: var(--text-knop);
+  line-height: var(--text-knop--line-height);
+  font-weight: var(--text-knop--font-weight);
+  color: var(--color-petrol-diep);
+  text-underline-offset: 0.25em;
+}
+
+.vakit-leeg {
+  margin: 1.5rem 0 0;
+  max-width: 60ch;
+  font-size: var(--text-voet);
+  line-height: var(--text-voet--line-height);
+  color: var(--color-ink-muted);
+}
+
+/* ── Telefoon: twee rijen van drie plus één, geen horizontaal scrollen ── */
+
+@media (max-width: 47.9375rem) {
+  .vakit-rij {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .vakit-cel,
+  .vakit-cel + .vakit-cel {
+    padding: 0.75rem 0.5rem;
+  }
+  .vakit-cel:nth-child(odd) {
+    border-left: 0;
+    padding-left: 0;
+  }
+  .vakit-cel:nth-child(even) {
+    border-left: 1px solid var(--lijn);
+  }
+  .vakit-cel:nth-child(n + 3) {
+    border-top: 1px solid var(--lijn);
+  }
+  .vakit-cel-naam {
+    white-space: normal;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vakit-daglijn-vul {
+    will-change: auto;
+  }
+}

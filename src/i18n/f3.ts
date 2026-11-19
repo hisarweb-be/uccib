@@ -49,6 +49,21 @@ export interface F3Teksten {
   /** De link onder een dienst op /hizmetlerimiz/: niet de titel nog eens. */
   dienstenMeer: string;
   diensten: Dienst[];
+  /** De gebedstijden: kop, labels en de korte teksten op de strook en het blad. */
+  vakitler: {
+    kop: string;
+    lead: string;
+    volgend: string;
+    nogNiet: string;
+    stad: string;
+    tijd: string;
+    week: string;
+    bron: string;
+    opgehaald: string;
+    meer: string;
+    geen: string;
+    fout: string;
+  };
   steunKop: string;
   steunTekst: string;
   steunHint: string;
@@ -123,6 +138,20 @@ const TR: F3Teksten = {
     'Elinizdeki her hizmetin arkasında bir şube, bir gönüllü ve bir kapı var.',
   dienstenAlle: 'Tüm hizmetler',
   dienstenMeer: 'Daha fazla',
+  vakitler: {
+    kop: 'Namaz vakitleri',
+    lead: 'Brüksel ve Belçika şehirleri için Fazilet takvimine göre günlük vakitler.',
+    volgend: 'Sıradaki vakit',
+    nogNiet: 'Henüz vakit yok',
+    stad: 'Şehir',
+    tijd: 'Vakit',
+    week: 'Yedi gün',
+    bron: 'Kaynak: Fazilet Takvimi',
+    opgehaald: 'alındı',
+    meer: 'Tüm şehirler ve hafta',
+    geen: 'Vakitlere şu anda ulaşılamıyor. Lütfen daha sonra tekrar deneyin.',
+    fout: 'Canlı vakitler alınamadı; son derlemedeki vakitler gösteriliyor.',
+  },
   diensten: [
     {
       titel: 'Namaz Vakitleri',
@@ -287,6 +316,20 @@ const NL: F3Teksten = {
     'Achter elke dienst staat een afdeling, een vrijwilliger en een deur die openstaat.',
   dienstenAlle: 'Alle diensten',
   dienstenMeer: 'Meer info',
+  vakitler: {
+    kop: 'Gebedstijden',
+    lead: 'De gebedstijden voor Brussel en de Belgische steden, volgens de Fazilet-kalender.',
+    volgend: 'Volgend gebed',
+    nogNiet: 'Nog geen tijd bekend',
+    stad: 'Stad',
+    tijd: 'Tijd',
+    week: 'Zeven dagen',
+    bron: 'Bron: Fazilet Takvimi',
+    opgehaald: 'opgehaald',
+    meer: 'Alle steden en de week',
+    geen: 'De gebedstijden zijn nu niet bereikbaar. Probeer het later opnieuw.',
+    fout: 'De verse tijden zijn niet opgehaald; de tijden van de laatste bouw staan er.',
+  },
   diensten: [
     {
       titel: 'Gebedstijden',
@@ -455,6 +498,20 @@ const FR: F3Teksten = {
     'Derrière chaque service, il y a une section, un bénévole et une porte ouverte.',
   dienstenAlle: 'Tous les services',
   dienstenMeer: 'En savoir plus',
+  vakitler: {
+    kop: 'Heures de prière',
+    lead: 'Les heures de prière pour Bruxelles et les villes belges, selon le calendrier Fazilet.',
+    volgend: 'Prochaine prière',
+    nogNiet: 'Aucune heure connue',
+    stad: 'Ville',
+    tijd: 'Heure',
+    week: 'Sept jours',
+    bron: 'Source : Fazilet Takvimi',
+    opgehaald: 'relevé',
+    meer: 'Toutes les villes et la semaine',
+    geen: 'Les heures de prière sont momentanément indisponibles. Réessayez plus tard.',
+    fout: "Les heures à jour n'ont pas pu être chargées ; celles du dernier build restent affichées.",
+  },
   diensten: [
     {
       titel: 'Heures de prière',
