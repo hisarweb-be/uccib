@@ -13,8 +13,11 @@
  */
 import Layout from '../layouts/Layout.astro';
 import { SITE } from '../data/site';
-import { getDictionary, type Locale } from '../i18n';
-import { f3 } from '../i18n/f3';
+import { getEntry } from 'astro:content';
+import KopBand from './KopBand.astro';
+import Rozet from './Rozet.astro';
+import { getDictionary, pagePath, type Locale } from '../i18n';
+import { f3, LEEG_SLUGS, type LeegSlug } from '../i18n/f3';
 import type { Slug } from '../data/site';
 
 interface Props {
@@ -52,30 +55,31 @@ const TEKST: Record<Locale, { title: string; description: string; h1: string; bo
 };
 
 const tekst = TEKST[locale];
+const teksten = f3(locale);
 
 /**
- * De zes pagina's die leeg zijn, hebben elk hun eigen, eerlijke mededeling in
- * `src/i18n/f3.ts`: wat er nog niet is en waar de bezoeker het wel vindt. Die
- * tekst is concreter dan de algemene hierboven, dus hij gaat voor. Zet dhr. Omer
- * in de CMS een pagina aan, dan komt de echte pagina terug en valt deze route weg.
+ * Elke lege pagina met een eigen, eerlijke mededeling in `src/i18n/f3.ts` (wat
+ * er nog niet is en waar de bezoeker het wel vindt) toont die; die tekst is
+ * concreter dan de algemene hierboven. Zet de vereniging in de CMS een pagina
+ * aan, dan komt de echte pagina terug op dit adres (STORYBOARD E4 tot E8).
  */
-const LEEG_SLUGS = [
-  'subelerimiz',
-  'bolge-derneklerimiz',
-  'namaz-vakitleri',
-  'cuma-hutbesi',
-  'haberler',
-  'baharkermesi-menu',
-] as const;
-
 const eigen = (LEEG_SLUGS as readonly string[]).includes(slug)
-  ? f3(locale).leeg[slug as (typeof LEEG_SLUGS)[number]]
+  ? teksten.leeg[slug as LeegSlug]
   : null;
 
 const titel = eigen?.titel ?? tekst.h1;
 const body = eigen?.tekst ?? tekst.body;
 const homeHref = locale === 'tr' ? '/' : `/${locale}/`;
 
+/**
+ * De h1 is de naam van de pagina zelf (uit `paginas`, dezelfde als wanneer zij
+ * aan staat), zodat de bezoeker ziet waar hij is; de h2 zegt wat er nog niet is.
+ * Zonder paginabestand valt de h1 terug op de algemene mededeling, en dan is er
+ * geen aparte h2.
+ */
+const pagina = await getEntry('paginas', `${locale}/${slug}`);
+const h1 = pagina?.data.h1 || titel;
+const h2 = h1 === titel ? null : titel;
 ---
 <Layout
   locale={locale}
@@ -85,66 +89,149 @@ const homeHref = locale === 'tr' ? '/' : `/${locale}/`;
   description={tekst.description}
   noindex
 >
-  <div class="concept" data-concept={slug}>
-    <h1>{titel}</h1>
-    <p class="concept-body">{body}</p>
+  <KopBand h1={h1} />
+  <div class="binnenkort" data-concept={slug}>
+    <Rozet stand="open-kern" maat={240} class="binnenkort-rozet" />
+    <section class="binnenkort-tekst" aria-labelledby={h2 ? 'binnenkort-kop' : undefined}>
+      {h2 ? <h2 id="binnenkort-kop" class="binnenkort-kop">{h2}</h2> : null}
+      <p class="binnenkort-lead">{body}</p>
 
-    <dl class="concept-contact">
-      <div>
-        <dt>{t.footer.phone}</dt>
-        <dd><a href={`tel:${SITE.phoneHref}`}>{SITE.phone}</a></dd>
-      </div>
-      <div>
-        <dt>{t.footer.email}</dt>
-        <dd><a href={`mailto:${SITE.email}`}>{SITE.email}</a></dd>
-      </div>
-    </dl>
+      <dl class="binnenkort-contact">
+        <div>
+          <dt>{teksten.labelTelefoon}</dt>
+          <dd><a class="binnenkort-link binnenkort-telefoon" href={`tel:${SITE.phoneHref}`}>{SITE.phone}</a></dd>
+        </div>
+        <div>
+          <dt>{teksten.labelEmail}</dt>
+          <dd><a class="binnenkort-link" href={`mailto:${SITE.email}`}>{SITE.email}</a></dd>
+        </div>
+        <div>
+          <dt>{teksten.contactKop}</dt>
+          <dd><a class="binnenkort-link" href={pagePath(locale, 'iletisim')}>{t.nav.iletisim}</a></dd>
+        </div>
+      </dl>
 
-    <p class="concept-home"><a href={homeHref}>{tekst.home}</a></p>
+      <p class="binnenkort-terug"><a class="binnenkort-knop" href={homeHref}>{tekst.home}</a></p>
+    </section>
   </div>
 </Layout>
 
 <style>
-  .concept {
-    max-width: 34rem;
-    padding: 2rem 0 4rem;
-  }
-
-  .concept-body {
-    margin-top: 1rem;
-    color: var(--color-ink-muted);
-  }
-
-  .concept-contact {
+  .binnenkort {
     display: grid;
-    gap: 0.75rem;
-    margin-top: 2rem;
+    gap: 2.5rem;
+    padding-block: 3rem 5rem;
+    color: var(--color-inkt);
+  }
+
+  @media (min-width: 64rem) {
+    .binnenkort {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+      align-items: start;
+      gap: 2rem;
+      padding-block: 4rem 6rem;
+    }
+  }
+
+  .binnenkort :global(.binnenkort-rozet) {
+    width: clamp(96px, 28vw, 240px);
+    height: auto;
+  }
+
+  .binnenkort-tekst {
+    display: grid;
+    gap: 1.5rem;
+    max-width: 44rem;
+  }
+
+  .binnenkort-kop {
+    margin: 0;
+    font-family: var(--font-kop);
+    font-size: var(--text-h2);
+    line-height: var(--text-h2--line-height);
+    font-weight: var(--text-h2--font-weight);
+  }
+
+  .binnenkort-lead {
+    margin: 0;
+    max-width: 60ch;
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+  }
+
+  .binnenkort-contact {
+    display: grid;
+    gap: 1.5rem;
+    margin: 0;
     padding-top: 1.5rem;
-    border-top: 1px solid var(--color-line);
-    font-size: var(--text-small);
+    border-top: 1px solid var(--lijn);
   }
 
-  .concept-contact dt {
-    font-weight: 600;
-    color: var(--color-ink-muted);
+  .binnenkort-contact dt {
+    font-size: var(--text-label);
+    line-height: var(--text-label--line-height);
+    color: var(--inkt-zacht);
   }
 
-  .concept-home {
-    margin-top: 2rem;
+  .binnenkort-contact dd {
+    margin: 0;
   }
 
-  .concept-home a {
-    display: inline-block;
-    padding: 12px 28px;
-    border-radius: var(--radius-pill);
-    background: var(--color-brand-dark);
-    color: #fff;
+  .binnenkort-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--color-inkt);
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+    overflow-wrap: anywhere;
+  }
+
+  .binnenkort-telefoon {
+    font-size: var(--text-telefoon);
+    line-height: var(--text-telefoon--line-height);
+    font-weight: var(--text-telefoon--font-weight);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .binnenkort-terug {
+    margin: 0;
+  }
+
+  .binnenkort-knop {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.5rem 1.5rem;
+    border: 1px solid var(--color-petrol-diep);
+    border-radius: 2px;
+    color: var(--color-petrol-diep);
     font-weight: 600;
     text-decoration: none;
   }
 
-  .concept-home a:hover,
-  .concept-home a:focus-visible {
-    background: var(--color-ink);
+  .binnenkort-link:focus-visible,
+  .binnenkort-knop:focus-visible {
+    outline: 3px solid var(--color-petrol-diep);
+    outline-offset: 3px;
+  }
+
+  .binnenkort-knop:active {
+    transform: translateY(1px);
+  }
+
+  @media (hover: hover) {
+    .binnenkort-link:hover {
+      color: var(--color-petrol-diep);
+      text-decoration-thickness: 2px;
+    }
+
+    .binnenkort-knop:hover {
+      background: var(--color-petrol-diep);
+      color: var(--color-papier);
+    }
   }
 </style>
