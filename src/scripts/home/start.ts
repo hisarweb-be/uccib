@@ -2,8 +2,9 @@
  * Startpagina: het kleine stuk dat in de eerste bundel zit.
  *
  * Het meet de echte hoogte van de kop (het podium plakt eronder) en haalt de
- * scène pas op als de bezoeker iets doet (scrollen, aanraken, een toets), als de
- * bezoeker beweging wil en het venster hoog genoeg is. Het eerste scherm is bij
+ * scène pas op als de bezoeker iets doet (scrollen, aanraken, een toets) of
+ * uiterlijk 3 s na `load`, als de bezoeker beweging wil en het venster hoog
+ * genoeg is. Het eerste scherm is bij
  * p 0 af zonder script; de scène opstarten (GSAP, maten, de frame-reeks) kostte
  * meteen na `load` tot 1,8 s rekentijd op een trage telefoon (keuring F2b,
  * herstelpunt 1). Staat de pagina bij `load` al voorbij de top (herladen
@@ -58,6 +59,7 @@ function laadScene() {
 }
 
 const INTENTIE = ['scroll', 'wheel', 'touchstart', 'pointerdown', 'keydown'] as const;
+const NA_RUST_MS = 3000;
 let gestart = false;
 function bijIntentie() {
   if (gestart) return;
@@ -67,8 +69,14 @@ function bijIntentie() {
 }
 
 function naLoad() {
-  if (window.scrollY > 0 || location.hash) return bijIntentie();
   for (const soort of INTENTIE) window.addEventListener(soort, bijIntentie, { passive: true });
+  if (location.hash) return bijIntentie();
+  // scrollY pas lezen na het volgende beeld: meteen in `load` dwingt het een
+  // volledige opmaak af (trace herstel F2b-1: 48 ms, x4 op een trage telefoon).
+  requestAnimationFrame(() => setTimeout(() => window.scrollY > 0 && bijIntentie(), 0));
+  // Wie niets doet, krijgt de scène toch klaar voor de eerste scroll: na de rust
+  // die op het eerste scherm volgt, niet erin.
+  setTimeout(bijIntentie, NA_RUST_MS);
 }
 
 if (document.readyState === 'complete') naLoad();
