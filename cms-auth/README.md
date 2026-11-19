@@ -69,7 +69,7 @@ regel bijwerken en opnieuw uitrollen.
 Na het uitrollen:
 
 ```bash
-curl -s -o /dev/null -w "%{http_code}\n" https://uccib-cms-auth.hisarweb.workers.dev/auth
+curl -s -o /dev/null -w "%{http_code}\n" https://uccib-cms-auth.hisarweb-be.workers.dev/auth
 ```
 
 Verwacht: `200` met een leesbare foutmelding ("client ID or secret is not
@@ -81,7 +81,7 @@ GitHub zodra ze er zijn.
 In `public/admin/config.yml` staat onder `backend` één regel:
 
 ```yaml
-base_url: https://uccib-cms-auth.hisarweb.workers.dev
+base_url: https://uccib-cms-auth.hisarweb-be.workers.dev
 ```
 
 Meer is het niet. Sveltia ziet die regel en toont de knop "Sign In with GitHub"
@@ -92,5 +92,5 @@ tokenveld, wat precies is wat we willen vermijden.
 
 Zodra `cms-auth.uccib.com` bestaat (een CNAME naar de Worker, `uccib.com` moet
 dan wel bij Cloudflare staan), verhuist de `base_url` mee en gaat het oude adres
-uit. Tot die tijd is `uccib-cms-auth.hisarweb.workers.dev` het adres; dat staat
+uit. Tot die tijd is `uccib-cms-auth.hisarweb-be.workers.dev` het adres; dat staat
 in de briefing voor dhr. Omer eerlijk vermeld.
