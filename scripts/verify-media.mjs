@@ -1,11 +1,12 @@
 // Toets public/media/wow/ tegen src/data/media-manifest.json (CONTRACT.md 2.1, 2.3, 3, 9.2).
-// Gebruik: node scripts/verify-media.mjs [--map <pad>] [--manifest <pad>] [--leeg-toegestaan]
+// Gebruik: node scripts/verify-media.mjs [--map <pad>] [--manifest <pad>] [--dist <pad>] [--leeg-toegestaan]
+// --dist: de bouw bij dit manifest (standaard dist/ als het manifest het standaardmanifest is).
 // Eén regel per toets (OK of FOUT), eindtelling, exitcode 0 alleen als alles OK is.
 // Niet gedekt (heeft de bronbeelden nodig): SSIM van frame 0 (9.2) en de visuele keuring.
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import sharp from 'sharp';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -17,6 +18,7 @@ const optie = (naam, standaard) => {
 const mapDir = optie('--map', join(root, 'public/media/wow'));
 const manifestPad = optie('--manifest', join(root, 'src/data/media-manifest.json'));
 const leegToegestaan = args.includes('--leeg-toegestaan');
+const distDir = optie('--dist', manifestPad === join(root, 'src/data/media-manifest.json') ? join(root, 'dist') : null);
 const f3Pad = join(root, 'src/i18n/f3.ts');
 
 const KB = 1000;
@@ -329,6 +331,95 @@ await toets('gewichtsgrenzen (poster/frame0/eind 120 kB, reeks d 1800 kB en m 90
     const film = (naam) => shots.find((s) => s.shot === naam)?.bestanden?.[bp]?.film?.gewicht ?? 0;
     const som = (film('p1') || film('r2')) + film('p2') + (film('p3') || film('r1')) + film('p4');
     if (som > MAX.piek) f.push(`piek ${bp}: ${som} bytes boven ${MAX.piek}`);
+  }
+  return f;
+});
+
+// 11. Ontbrekende shots in de piek (keuring F2b, herstelpunt 2): een shot dat het manifest
+// niet levert, valt weg zoals p4 (geen laag, geen zin, geen sleutelrij, geen plaatshouder)
+// en de scrollweg slaat zijn stuk over. Eerst het draaiboek voor elke manifestvorm, dan de bouw.
+const { piekPlan, naarTijdlijn, PIEK_PIN } = await import(pathToFileURL(join(root, 'src/lib/piekplan.ts')).href);
+const plaatshouder = JSON.parse(readFileSync(join(root, 'src/data/media-manifest.plaatshouder.json'), 'utf8'));
+const PIEK = ['p1', 'p2', 'p3', 'p4'];
+const faseVan = (naam) => (shots.find((s) => s.shot === naam) ?? plaatshouder.shots.find((s) => s.shot === naam)).fase;
+const slotsVoor = (er) => PIEK.map((naam) => ({ naam, van: faseVan(naam).van, tot: faseVan(naam).tot, aanwezig: er.includes(naam) }));
+const ZINNEN = 3;
+const stijgend = (rij) => rij.every((x, i) => i === 0 || x > rij[i - 1]);
+const toetsPlan = (er) => {
+  const f = [];
+  const label = er.join('+');
+  const plan = piekPlan(slotsVoor(er), ZINNEN);
+  const namen = plan.lagen.map((l) => l.naam);
+  if (namen.join() !== er.join()) f.push(`${label}: lagen ${namen.join()} tegen aanwezig ${er.join()}`);
+  if (plan.zinnen.map((z) => z.naam).join() !== er.filter((n) => n !== 'p4').join()) f.push(`${label}: zinnen ${plan.zinnen.map((z) => z.naam).join()}`);
+  if (!stijgend(plan.lagen.map((l) => l.in))) f.push(`${label}: laagdrempels niet oplopend`);
+  if (!stijgend(plan.zinnen.map((z) => z.in))) f.push(`${label}: zindrempels niet oplopend`);
+  for (const z of plan.zinnen) if (z.uit <= z.in) f.push(`${label}: zin ${z.naam} gaat weg voor ze komt`);
+  for (const l of plan.lagen) if (!(l.b > l.a) || l.plekUit <= l.plekIn) f.push(`${label}: laag ${l.naam} zonder eigen stuk`);
+  if (!stijgend(plan.sprongen.flat())) f.push(`${label}: sprongen overlappen of staan niet op volgorde`);
+  // Het stuk van elk ontbrekend shot ligt in een sprong; geen sprong snijdt in het stuk van een aanwezige laag.
+  const inSprong = (x) => plan.sprongen.some(([van, tot]) => x > van - 1e-9 && x < tot + 1e-9);
+  for (const naam of PIEK.filter((n) => !er.includes(n))) {
+    const { van, tot } = faseVan(naam);
+    if (!inSprong(van) || !inSprong(Math.min(tot, 0.86))) f.push(`${label}: stuk van ontbrekend ${naam} (${van}-${tot}) niet overgeslagen`);
+  }
+  for (const l of plan.lagen) {
+    // De eerste laag staat al in de kern vóór haar eigen stuk; alleen haar eigen stuk telt.
+    for (const [van, tot] of plan.sprongen) if (van < l.b - 1e-9 && tot > l.a + 1e-9) f.push(`${label}: sprong ${van}-${tot} snijdt in laag ${l.naam} (${l.a}-${l.b})`);
+  }
+  const gat = plan.sprongen.reduce((som, [van, tot]) => som + tot - van, 0);
+  if (Math.abs(plan.lengte - PIEK_PIN * (1 - gat)) > 0.001 || plan.lengte <= 0) f.push(`${label}: pin ${plan.lengte} tegen ${PIEK_PIN * (1 - gat)}`);
+  // De scrollweg: van 0 tot 1, nooit terug, nooit landen in een sprong.
+  let vorige = -1;
+  for (let i = 0; i <= 1000; i++) {
+    const q = naarTijdlijn(i / 1000, plan.sprongen);
+    if (q < vorige - 1e-9) { f.push(`${label}: tijdlijn loopt terug bij ${i / 1000}`); break; }
+    if (plan.sprongen.some(([van, tot]) => q > van + 1e-6 && q < tot - 1e-6)) { f.push(`${label}: tijdlijn landt in een sprong (${q.toFixed(3)})`); break; }
+    vorige = q;
+  }
+  if (Math.abs(naarTijdlijn(1, plan.sprongen) - 1) > 1e-6) f.push(`${label}: einde van de scrollweg is niet 1`);
+  return { f, plan };
+};
+await toets('piek: elk ontbrekend shot valt weg zoals p4 (alle 15 vormen, o.a. zonder p2, p1, p3, p2+p4, alleen p1)', () => {
+  const f = [];
+  for (let m = 1; m < 16; m++) f.push(...toetsPlan(PIEK.filter((_, i) => m & (1 << i))).f);
+  // Zonder p2 (verplichte variant): p1 en p3 blijven, het stuk 0,44 tot 0,6 valt weg.
+  const zonderP2 = toetsPlan(['p1', 'p3']).plan;
+  if (JSON.stringify(zonderP2.sprongen) !== '[[0.44,0.6],[0.78,0.86]]' || zonderP2.lagen.map((l) => l.naam).join() !== 'p1,p3' || zonderP2.zinnen.map((z) => z.tekst).join() !== '0,2') f.push(`zonder p2: ${JSON.stringify(zonderP2)}`);
+  // Het huidige draaiboek (p1 tot p3, geen p4) houdt de drempels van F2b.
+  const nu = toetsPlan(['p1', 'p2', 'p3']).plan;
+  if (nu.lagen.map((l) => l.in).join() !== '-1,0.435,0.595' || nu.zinnen.map((z) => z.uit).join() !== '0.42,0.58,2' || JSON.stringify(nu.sprongen) !== '[[0.78,0.86]]' || nu.lengte !== 4.6) f.push(`p1-p3: drempels wijken af van F2b (${JSON.stringify(nu)})`);
+  return f;
+});
+
+// De bouw: alleen wat dit manifest levert staat in de piek, en nooit een plaatshouderbeeld.
+const piekGeleverd = shots.some((s) => s.sectie === 'piek-ruimtes');
+const erNu = PIEK.filter((n) => shots.some((s) => s.shot === n) || !piekGeleverd);
+const bouwPaginas = distDir ? ['index.html', 'nl/index.html', 'fr/index.html'].map((p) => join(distDir, p)).filter(existsSync) : [];
+if (distDir && args.includes('--dist') && bouwPaginas.length === 0) await toets('bouw voor --dist aanwezig', () => [`geen pagina's in ${distDir}`]);
+if (bouwPaginas.length) await toets(`piek in de bouw volgt het manifest (aanwezig: ${erNu.join(', ')})`, () => {
+  const f = [];
+  const { plan } = toetsPlan(erNu);
+  const echtePaden = new Set(shots.flatMap((s) => ['d', 'm'].flatMap((bp) => [s.bestanden?.[bp]?.poster?.pad, s.bestanden?.[bp]?.poster?.avif])));
+  const plaatshouderPaden = piekGeleverd
+    ? plaatshouder.shots.flatMap((s) => ['d', 'm'].map((bp) => s.bestanden[bp].poster?.pad)).filter((p) => p && !echtePaden.has(p))
+    : [];
+  for (const pagina of bouwPaginas) {
+    const html = readFileSync(pagina, 'utf8');
+    const begin = html.indexOf('id="piek-ruimtes"');
+    const w = pagina.slice(distDir.length + 1).replaceAll('\\', '/');
+    if (begin < 0) { f.push(`${w}: geen piek`); continue; }
+    const sectie = html.slice(html.lastIndexOf('<section', begin), html.indexOf('</section>', begin));
+    const lagen = [...sectie.matchAll(/class="piek-laag"[^>]*?data-laag="(\d)"/g)].map((m) => `p${m[1]}`);
+    if (lagen.join() !== erNu.join()) f.push(`${w}: lagen ${lagen.join()} tegen ${erNu.join()}`);
+    const plekken = [...sectie.matchAll(/class="piek-plek"[^>]*?data-laag="(\d)"/g)].map((m) => `p${m[1]}`);
+    if (plekken.join() !== erNu.join()) f.push(`${w}: vermeldingen ${plekken.join()}`);
+    const rijen = (sectie.match(/class="sleutelrij"/g) ?? []).length;
+    if (rijen !== plan.zinnen.length) f.push(`${w}: ${rijen} sleutelrijen tegen ${plan.zinnen.length}`);
+    const sprongen = (/data-sprongen="([^"]*)"/.exec(sectie)?.[1] ?? '[]').replaceAll('&quot;', '"');
+    if (sprongen !== JSON.stringify(plan.sprongen)) f.push(`${w}: data-sprongen ${sprongen} tegen ${JSON.stringify(plan.sprongen)}`);
+    if (!sectie.includes(`data-lengte="${plan.lengte}"`)) f.push(`${w}: pin is niet ${plan.lengte}`);
+    for (const pad of plaatshouderPaden) if (sectie.includes(pad)) f.push(`${w}: plaatshouderbeeld ${pad} in de piek`);
   }
   return f;
 });

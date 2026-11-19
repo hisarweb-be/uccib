@@ -13,6 +13,7 @@
  */
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { naarTijdlijn } from '../../lib/piekplan';
 
 const klem = (x: number, min = 0, max = 1) => Math.min(max, Math.max(min, x));
 const breed = window.matchMedia('(min-width: 768px)');
@@ -105,20 +106,40 @@ function heroReeks(canvas: HTMLCanvasElement) {
     }
   };
 
-  for (let i = 0; i < reeks.aantal; i += 1) {
-    const beeld = new Image();
-    beeld.decoding = 'async';
-    beeld.onload = () => {
-      beelden[i] = beeld;
-      geladen += 1;
-      if (geladen === 1 || i === gevraagd) teken(gevraagd);
-      if (geladen === reeks.aantal) {
-        canvas.classList.add('is-klaar');
-        filmKlaar('h1');
-      }
-    };
-    beeld.src = `${reeks.map.replace(/\/$/, '')}/${reeks.patroon.replace('%04d', String(i + 1).padStart(4, '0'))}`;
-  }
+  /* De beelden komen in porties van zes binnen, in de volgorde van de tijdlijn, en
+     elk wordt buiten de hoofdthread gedecodeerd (`decode()`) voor het getekend
+     wordt: zo geen 52 decodes en tekenbeurten tegelijk op de hoofdthread
+     (keuring F2b, herstelpunt 1). Tot een beeld er is, tekent `teken` het
+     dichtstbijzijnde beeld dat er al wel is. */
+  const bron = (i: number) =>
+    `${reeks.map.replace(/\/$/, '')}/${reeks.patroon.replace('%04d', String(i + 1).padStart(4, '0'))}`;
+  const laadEen = (i: number) =>
+    new Promise<void>((klaar) => {
+      const beeld = new Image();
+      beeld.decoding = 'async';
+      beeld.src = bron(i);
+      beeld
+        .decode()
+        .then(() => {
+          beelden[i] = beeld;
+          geladen += 1;
+          if (geladen === 1 || Math.abs(i - gevraagd) <= Math.abs(getekend - gevraagd)) teken(gevraagd);
+        })
+        .catch(() => undefined)
+        .finally(klaar);
+    });
+  const PORTIE = 6;
+  (async () => {
+    for (let van = 0; van < reeks.aantal; van += PORTIE) {
+      const portie: Promise<void>[] = [];
+      for (let i = van; i < Math.min(reeks.aantal, van + PORTIE); i += 1) portie.push(laadEen(i));
+      await Promise.all(portie);
+    }
+    if (geladen === reeks.aantal) {
+      canvas.classList.add('is-klaar');
+      filmKlaar('h1');
+    }
+  })();
 
   /* Frame uit p: de reeks loopt over het stuk van `h1` in het manifest (0,09 tot 0,92). */
   return (p: number) => teken(Math.round(klem((p - 0.09) / 0.83) * (reeks.aantal - 1)));
@@ -242,14 +263,14 @@ function piek(sectie: HTMLElement) {
 
   const knoppen = sectie.querySelector<HTMLElement>('[data-piek-knoppen="scene"]');
   const lengte = Number(sectie.dataset.lengte) || 5;
-  /* Ontbreekt een shot, dan slaat de scrollweg zijn stuk over; p blijft de tijdlijn van het draaiboek. */
-  const [sprongVan = NaN, sprongTot = NaN] = (sectie.dataset.sprong ?? '').split(',').map(Number);
-  const gat = Number.isFinite(sprongVan) && Number.isFinite(sprongTot) ? sprongTot - sprongVan : 0;
-  const naarTijdlijn = (u: number) => {
-    if (!gat) return u;
-    const t = u * (1 - gat);
-    return t <= sprongVan ? t : t + gat;
-  };
+  /* Ontbreken er shots, dan slaat de scrollweg hun stukken over (`piekPlan`); p blijft de tijdlijn van het draaiboek. */
+  let sprongen: [number, number][] = [];
+  try {
+    const gelezen: unknown = JSON.parse(sectie.dataset.sprongen ?? '[]');
+    if (Array.isArray(gelezen)) sprongen = gelezen.filter((x): x is [number, number] => Array.isArray(x) && x.length === 2 && x[1] > x[0]);
+  } catch {
+    sprongen = [];
+  }
 
   /* De ruimtes: elk een eigen stuk van de tijdlijn [a, b], met haar foto in een raam. */
   const kamers = [...sectie.querySelectorAll<HTMLElement>('.piek-laag')].flatMap((el, i) => {
@@ -274,8 +295,10 @@ function piek(sectie: HTMLElement) {
       },
     ];
   });
-  /* De wissels: daar knijpt de kern dicht en draait ze een slag. */
-  const wissels = kamers.slice(0, -1).map((k) => k.b);
+  /* De wissels: daar knijpt de kern dicht en draait ze een slag. Valt er een ruimte weg, dan
+     knijpt ze aan beide kanten van de sprong dicht: de sprong zelf valt zo in de dichte kern
+     (en een slag van 45 graden is in de achtvoudige rozet onzichtbaar). */
+  const wissels = [...new Set([...kamers.slice(1).map((k) => k.a), ...kamers.slice(0, -1).map((k) => k.b)])];
 
   const tekst = sectie.querySelector<HTMLElement>('.piek-tekst');
   let r0 = 1;
@@ -423,7 +446,7 @@ function piek(sectie: HTMLElement) {
   let open = false;
   function zet(u: number) {
     laatste = u;
-    const q = naarTijdlijn(u);
+    const q = naarTijdlijn(u, sprongen);
     sectie.style.setProperty('--piek-p', q.toFixed(4));
 
     /* De kern gaat open en knijpt bij elke wissel helemaal dicht terwijl ze een slag

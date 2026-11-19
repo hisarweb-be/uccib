@@ -11,7 +11,7 @@
 import Rozet, { type RozetStand } from './Rozet.astro';
 import type { Locale } from '../i18n';
 import { f3 } from '../i18n/f3';
-import { alt, anker, poster, shot, type ShotNaam } from '../lib/media';
+import { alt, anker, poster, shot, vormVan, type ShotNaam } from '../lib/media';
 
 export interface Sleutelrij {
   /** De rozet in één stand, of de poster van een shot. */
@@ -30,7 +30,9 @@ interface Props {
   class?: string;
 }
 
-const { rijen, locale, soort, class: klasse } = Astro.props;
+const { rijen: alleRijen, locale, soort, class: klasse } = Astro.props;
+/* Een shot dat niet in het manifest staat, krijgt geen rij: nooit een plaatshouder in beeld. */
+const rijen = alleRijen.filter((rij) => !('shot' in rij.beeld) || vormVan(rij.beeld.shot) !== 'weg');
 const teksten = f3(locale);
 ---
 

@@ -24,9 +24,11 @@
  * (`eigenBreedte`): een foto wordt nooit groter dan 110 % getoond. Is ze te klein
  * voor het hele scherm, dan blijft ze in het venster; een grotere poster gaat
  * vanzelf schermvullend;
- * - `weg`: ontbreekt `p4`, dan valt zijn stuk (0,78 tot 0,86) uit de scrollweg: de pin
- *   is dan 4,6 schermhoogten en de standen in CSS blijven dezelfde, omdat het
- *   script de sprong overslaat.
+ * - `weg`: het shot ontbreekt in het manifest. Dan is er geen laag, geen zin, geen
+ *   vermelding en geen sleutelrij voor, en valt zijn stuk uit de scrollweg (`piekPlan`
+ *   in `lib/piekplan.ts`): de pin wordt korter en de drempels per element (inline
+ *   `--in`/`--uit`) volgen. Zonder `p4` is de pin zo 4,6 schermhoogten. Een
+ *   plaatshouderbeeld komt nooit in beeld (keuring F2b, herstelpunt 2).
  */
 import MediaVermelding from '../MediaVermelding.astro';
 import Sleutelbeelden, { type Sleutelrij } from '../Sleutelbeelden.astro';
@@ -34,6 +36,7 @@ import { getDictionary, type Locale } from '../../i18n';
 import { f3 } from '../../i18n/f3';
 import { alt, anker, eigenBreedte, film, poster, shot, vormVan, type ShotNaam } from '../../lib/media';
 import { lijnen } from './rozetpad';
+import { piekPlan } from '../../lib/piekplan';
 
 interface Props {
   locale: Locale;
@@ -44,25 +47,24 @@ const t = getDictionary(locale);
 const teksten = f3(locale);
 const [opening, ...slagen] = teksten.piekSlagen;
 
-/** De pin in schermhoogten met alle shots, en het stuk van `p4` daarin. */
-const PIN = 5;
-const P4 = [0.78, 0.86] as const;
-
-const heeftP4 = vormVan('p4') !== 'weg';
-const namen: ShotNaam[] = heeftP4 ? ['p1', 'p2', 'p3', 'p4'] : ['p1', 'p2', 'p3'];
-/* Elke ruimte heeft haar stuk van de tijdlijn: van de wissel ervoor (midden tussen
-   de twee fasen) tot de wissel erna; de eerste begint als de kern opengaat. */
-const wissels = namen.slice(1).map((naam, i) => Number(((shot(namen[i]!).fase.tot + shot(naam).fase.van) / 2).toFixed(3)));
-const lagen = namen.map((naam, i) => {
+const plan = piekPlan(
+  (['p1', 'p2', 'p3', 'p4'] as const).map((naam) => ({
+    naam,
+    van: shot(naam).fase.van,
+    tot: shot(naam).fase.tot,
+    aanwezig: vormVan(naam) !== 'weg',
+  })),
+  slagen.length,
+);
+const lagen = plan.lagen.map((laag) => {
+  const naam = laag.naam as ShotNaam;
   const vorm = vormVan(naam);
   const d = film(naam, 'd');
   const m = film(naam, 'm');
   return {
+    ...laag,
     naam,
-    laag: i + 1,
     fase: shot(naam).fase,
-    a: i === 0 ? 0.06 : wissels[i - 1]!,
-    b: wissels[i] ?? 1,
     vorm,
     eigen: `${eigenBreedte(naam, 'd')},${eigenBreedte(naam, 'm')}`,
     aspect: `${poster(naam, 'd').breedte / poster(naam, 'd').hoogte},${poster(naam, 'm').breedte / poster(naam, 'm').hoogte}`,
@@ -70,11 +72,12 @@ const lagen = namen.map((naam, i) => {
     film: vorm === 'film' && (d || m) ? JSON.stringify({ d, m }) : null,
   };
 });
-const lengte = heeftP4 ? PIN : Number((PIN * (1 - (P4[1] - P4[0]))).toFixed(2));
+const { lengte } = plan;
 
-const rijen: Sleutelrij[] = (['p1', 'p2', 'p3'] as const).map((naam, i) => ({
-  beeld: { shot: naam },
-  tekst: slagen[i] ?? '',
+/* Zonder beweging: per ruimte met een zin haar poster en die zin. */
+const rijen: Sleutelrij[] = plan.zinnen.map((zin) => ({
+  beeld: { shot: zin.naam as ShotNaam },
+  tekst: slagen[zin.tekst] ?? '',
 }));
 ---
 
@@ -83,7 +86,7 @@ const rijen: Sleutelrij[] = (['p1', 'p2', 'p3'] as const).map((naam, i) => ({
   class="piek-ruimtes"
   data-sectie="piek-ruimtes"
   data-lengte={lengte}
-  data-sprong={heeftP4 ? undefined : P4.join(',')}
+  data-sprongen={plan.sprongen.length ? JSON.stringify(plan.sprongen) : undefined}
   style={`--piek-lengte:${lengte}`}
 >
   <div class="sh-maat" aria-hidden="true"></div>
@@ -92,16 +95,16 @@ const rijen: Sleutelrij[] = (['p1', 'p2', 'p3'] as const).map((naam, i) => ({
       <div class="piek-kern">
         <div class="piek-fotos">
           {
-            lagen.map(({ naam, laag, fase, a, b, vorm, eigen, aspect, film: filmData }) => (
+            lagen.map(({ naam, slot, fase, a, b, in: laagIn, vorm, eigen, aspect, film: filmData }) => (
               <div
                 class="piek-laag"
-                data-laag={laag}
+                data-laag={slot}
                 data-vorm={vorm}
                 data-a={a}
                 data-b={b}
                 data-eigen={eigen}
                 data-aspect={aspect}
-                style={`--a:${a};--b:${b}`}
+                style={`--a:${a};--b:${b};--in:${laagIn}`}
               >
                 <div class="piek-raam">
                   <picture>
@@ -161,8 +164,8 @@ const rijen: Sleutelrij[] = (['p1', 'p2', 'p3'] as const).map((naam, i) => ({
       </svg>
       {/* De vermeldingen boven het venster: nooit door het papier afgeknipt, ook niet bij een wissel. */}
       {
-        lagen.map(({ naam, laag }) => (
-          <div class="piek-plek" data-laag={laag}>
+        lagen.map(({ naam, slot, plekIn, plekUit }) => (
+          <div class="piek-plek" data-laag={slot} style={`--in:${plekIn};--uit:${plekUit}`}>
             <MediaVermelding shot={naam} locale={locale} class="piek-vermelding" />
           </div>
         ))
@@ -174,14 +177,17 @@ const rijen: Sleutelrij[] = (['p1', 'p2', 'p3'] as const).map((naam, i) => ({
     <div class="piek-tekst alleen-beweging">
       <p class="piek-klein" aria-hidden="true">
         <span>{opening}</span>
-        {slagen[0] ? <span data-na="2"> {slagen[0]}</span> : null}
-        {slagen[1] ? <span data-na="3"> {slagen[1]}</span> : null}
+        {
+          plan.klein.map(({ tekst, in: kleinIn }) =>
+            slagen[tekst] ? <span data-klein style={`--in:${kleinIn}`}> {slagen[tekst]}</span> : null,
+          )
+        }
       </p>
       <div class="piek-slagen">
         {
-          slagen.slice(0, 3).map((slag, i) => (
-            <p class="piek-slag" data-slag={i + 1}>
-              {slag}
+          plan.zinnen.map(({ tekst, in: zinIn, uit }) => (
+            <p class="piek-slag" data-slag={tekst + 1} style={`--in:${zinIn};--uit:${uit}`}>
+              {slagen[tekst]}
             </p>
           ))
         }
