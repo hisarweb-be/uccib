@@ -24,6 +24,8 @@
 import '../styles/vakitler.css';
 import { f3 } from '../i18n/f3';
 import type { Locale } from '../i18n';
+import { pagePath, stadPath } from '../i18n/config';
+import StedenLijst from './StedenLijst.astro';
 import {
   TIJDEN,
   NAMEN,
@@ -41,12 +43,18 @@ interface Props {
   locale: Locale;
   /** `band` op de startpagina, `blad` op de eigen pagina. */
   vorm?: 'band' | 'blad';
+  /**
+   * De stad waarvan de tijden komen. Zonder stad is dat Brussel, zoals de
+   * startpagina en `/namaz-vakitleri/` zelf. De stadspagina geeft haar eigen slug
+   * mee, zodat de tijden, de plaatsregel en de kiezer alle drie die stad noemen.
+   */
+  stad?: string;
 }
 
-const { locale, vorm = 'band' } = Astro.props;
+const { locale, vorm = 'band', stad = 'brussel' } = Astro.props;
 const teksten = f3(locale).vakitler;
-const gegevens = vakitGegevens();
-const dagen: readonly Dag[] = heeftVakitler() ? gegevens.dagen : [];
+const gegevens = vakitGegevens(stad);
+const dagen: readonly Dag[] = heeftVakitler(gegevens.stad) ? gegevens.dagen : [];
 
 const vandaag = kiesDag(dagen);
 const volgende = volgendeTijd(dagen);
@@ -103,6 +111,7 @@ const opgehaaldTekst = opgehaald && !Number.isNaN(opgehaald.getTime())
   data-sectie="vakitler"
   data-vakitler
   data-taal={locale}
+  data-vorm={vorm}
   data-stad={gegevens.stad}
   data-melding-fout={teksten.fout}
   aria-labelledby="vakitler-kop"
@@ -231,7 +240,12 @@ const opgehaaldTekst = opgehaald && !Number.isNaN(opgehaald.getTime())
           </>
         ) : (
           <p class="vakit-meer">
-            <a class="vakit-meer-link" href={`${locale === 'tr' ? '' : '/' + locale}/namaz-vakitleri/`}>
+            <a
+              class="vakit-meer-link"
+              href={gegevens.stad === 'brussel'
+                ? pagePath(locale, 'namaz-vakitleri')
+                : stadPath(locale, gegevens.stad)}
+            >
               {teksten.meer}
             </a>
           </p>
@@ -239,6 +253,11 @@ const opgehaaldTekst = opgehaald && !Number.isNaN(opgehaald.getTime())
       </>
     )
   }
+
+  {/* Alle andere steden, in de vormtaal van de site: een rij namen tussen twee
+      haarlijnen. Zonder deze lijst bestaat een stadspagina voor een zoekmachine
+      niet, en moet een lezer zoeken in plaats van één keer tikken. */}
+  {vorm === 'blad' && <StedenLijst locale={locale} huidige={gegevens.stad} />}
 </section>
 
 <script>

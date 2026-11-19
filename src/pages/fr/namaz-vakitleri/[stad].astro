@@ -1,0 +1,18 @@
+---
+/**
+ * `/fr/namaz-vakitleri/<stad>/`: de gebedstijden van één stad, in het Frans.
+ * Zie `src/components/StadBlad.astro`.
+ */
+import StadBlad from '../../../components/StadBlad.astro';
+import { STEDEN } from '../../../lib/vakitler';
+
+export function getStaticPaths() {
+  return STEDEN.filter((stad) => stad.slug !== 'brussel').map((stad) => ({
+    params: { stad: stad.slug },
+  }));
+}
+
+const { stad } = Astro.params;
+---
+
+<StadBlad locale="fr" stad={stad} />

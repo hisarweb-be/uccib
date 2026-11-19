@@ -1,0 +1,43 @@
+---
+/**
+ * De lijst met alle steden onder de gebedstijden.
+ *
+ * Waarom deze lijst er staat: een stadspagina die nergens vandaan gelinkt wordt,
+ * bestaat voor een zoekmachine niet. Bovendien kan een lezer hier met één tik naar
+ * zijn eigen stad in plaats van te moeten zoeken in de keuzelijst.
+ *
+ * Brussel staat op het adres van de hoofdpagina (`/namaz-vakitleri/`); elke andere
+ * stad heeft een eigen adres. De stad waar je al bent slaat de lijst over.
+ */
+import { pagePath, stadPath, type Locale } from '../i18n/config';
+import { f3 } from '../i18n/f3';
+import { STEDEN } from '../lib/vakitler';
+
+interface Props {
+  locale: Locale;
+  /** De stad van de pagina waar deze lijst staat; die slaan we over. */
+  huidige?: string;
+}
+
+const { locale, huidige } = Astro.props;
+const teksten = f3(locale).vakitler;
+
+const steden = STEDEN.filter((stad) => stad.slug !== huidige).map((stad) => ({
+  slug: stad.slug,
+  naam: stad.naam[locale],
+  href: stad.slug === 'brussel' ? pagePath(locale, 'namaz-vakitleri') : stadPath(locale, stad.slug),
+}));
+---
+
+<nav class="vakit-steden-nav" aria-labelledby="vakit-steden-kop">
+  <h2 id="vakit-steden-kop" class="vakit-steden-kop">{teksten.stedenKop}</h2>
+  <ul class="vakit-steden">
+    {
+      steden.map((stad) => (
+        <li>
+          <a href={stad.href}>{stad.naam}</a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>

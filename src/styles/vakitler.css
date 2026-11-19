@@ -417,3 +417,60 @@
     will-change: auto;
   }
 }
+
+/* ── De lijst met alle steden ──
+   Een rij namen tussen twee haarlijnen, in dezelfde vormtaal als de rest: geen
+   knoppen, geen vakken. Op een telefoon twee kolommen, breder vier; de namen
+   staan op één regel en breken niet middenin. */
+.vakit-steden-nav {
+  margin-top: clamp(2rem, 5vw, 3rem);
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--lijn);
+}
+
+.vakit-steden-kop {
+  font-family: var(--font-kop);
+  font-size: var(--text-h4);
+  line-height: var(--text-h4--line-height);
+  letter-spacing: var(--text-h4--letter-spacing);
+  font-weight: var(--text-h4--font-weight);
+  margin: 0 0 0.75rem;
+}
+
+.vakit-steden {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.25rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 40rem) {
+  .vakit-steden {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 64rem) {
+  .vakit-steden {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.vakit-steden a {
+  display: inline-block;
+  min-height: 44px;
+  padding: 0.5rem 0;
+  color: var(--color-inkt);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+@media (hover: hover) {
+  .vakit-steden a:hover {
+    color: var(--color-petrol-diep);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+}

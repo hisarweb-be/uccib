@@ -53,6 +53,9 @@ jobs:
       - name: Linkcontrole
         run: npm run verify:links
 
+      - name: Stadspagina's gebedstijden
+        run: npm run verify:steden
+
       - name: Server en paden
         run: npm run verify:server
 

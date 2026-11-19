@@ -20,6 +20,14 @@ interface Props {
   slug: Slug | null;
   /** Pad van deze route. Nodig zodra `slug` null is, want dan valt er niets af te leiden. */
   path?: string;
+  /**
+   * Het pad van deze pagina in elke taal, als dat niet uit `slug` volgt.
+   * Dat geldt voor de stadspagina's van de gebedstijden: hun adres draagt de stad
+   * (`/namaz-vakitleri/gent/`), en de vertaling daarvan is dezelfde slug in een
+   * andere taal, niet een andere pagina. Zonder deze prop leidt de layout de
+   * hreflang-wissels af uit `slug` en die kent geen stad.
+   */
+  taalPaden?: Record<Locale, string>;
   title: string;
   description: string;
   /** Houd deze pagina buiten de zoekmachines. Geldt voor 404 en conceptpagina's. */
@@ -36,6 +44,7 @@ const {
   locale,
   slug,
   path,
+  taalPaden,
   title,
   description,
   noindex = false,
@@ -59,14 +68,20 @@ const ogImage = new URL(`/beeld/og/og-1200x630-${locale}.png`, SITE.url).href;
  * Zelfde pagina in elke taal, voor de hreflang-verwijzingen. Alleen als er een
  * slug is: een conceptpagina heeft geen eigen inhoud en staat op noindex, dus
  * drie talen naar elkaar verwijzen zou drie lege pagina's aan elkaar knopen.
+ * `taalPaden` gaat voor: een stadspagina heeft een eigen adres per taal.
  */
 const alternates: ReadonlyArray<{ hreflang: string; href: string }> =
-  slug === null
-    ? []
-    : LOCALES.map((other) => ({
+  taalPaden
+    ? LOCALES.map((other) => ({
         hreflang: LOCALE_TAGS[other].html,
-        href: new URL(pagePath(other, slug), SITE.url).href,
-      }));
+        href: new URL(taalPaden[other], SITE.url).href,
+      }))
+    : slug === null
+      ? []
+      : LOCALES.map((other) => ({
+          hreflang: LOCALE_TAGS[other].html,
+          href: new URL(pagePath(other, slug), SITE.url).href,
+        }));
 const xDefault = alternates[0]?.href;
 ---
 

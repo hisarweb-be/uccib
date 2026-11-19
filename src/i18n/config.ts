@@ -38,3 +38,17 @@ export function pagePath(locale: Locale, slug: Slug): string {
   const prefix = locale === DEFAULT_LOCALE ? '' : `/${locale}`;
   return slug === '' ? `${prefix}/` : `${prefix}/${slug}/`;
 }
+
+/**
+ * Pad van de gebedstijden van één stad. De stad staat in het pad en niet in een
+ * queryparameter, zodat een gedeelde link de juiste plaats meeneemt, de pagina
+ * een eigen titel en canonical heeft en een zoekmachine hem kan vinden:
+ *   tr  /namaz-vakitleri/gent/   nl  /nl/namaz-vakitleri/gent/   fr  /fr/...
+ * Brussel houdt bewust géén eigen adres: dat is de stad van de hoofdpagina
+ * `/namaz-vakitleri/` zelf, en twee adressen voor dezelfde inhoud is precies de
+ * dubbele inhoud die we nergens willen.
+ */
+export function stadPath(locale: Locale, stad: string): string {
+  const prefix = locale === DEFAULT_LOCALE ? '' : `/${locale}`;
+  return `${prefix}/namaz-vakitleri/${stad}/`;
+}

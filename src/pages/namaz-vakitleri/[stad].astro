@@ -1,0 +1,20 @@
+---
+/**
+ * `/namaz-vakitleri/<stad>/` in het Turks: de gebedstijden van één stad.
+ *
+ * Brussel staat hier niet bij; dat is `/namaz-vakitleri/` zelf. Zie
+ * `src/components/StadBlad.astro` voor de opbouw en de reden.
+ */
+import StadBlad from '../../components/StadBlad.astro';
+import { STEDEN } from '../../lib/vakitler';
+
+export function getStaticPaths() {
+  return STEDEN.filter((stad) => stad.slug !== 'brussel').map((stad) => ({
+    params: { stad: stad.slug },
+  }));
+}
+
+const { stad } = Astro.params;
+---
+
+<StadBlad locale="tr" stad={stad} />
