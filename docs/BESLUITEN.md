@@ -133,3 +133,14 @@ Wat elk nummer verving:
 - De Deploy Hook uit `README-DEPLOY.md` is niet meer nodig: een commit van het
   bewerkscherm is een push naar `main`, en die push is de trigger voor
   Cloudflare.
+
+## Inloggen zonder token (19 nov 2026)
+
+| # | Besluit | Reden |
+|---|---|---|
+| 60 | Het bewerkscherm logt in met de knop "Sign In with GitHub", via een eigen authenticator in `cms-auth/` | Een persoonlijk GitHub-token is voor dhr. Omer een muur: hij moet het aanmaken, bewaren en na verloop vervangen, en elke keer als het misgaat belt hij HisarWeb. Eén klik met zijn eigen GitHub-account haalt die muur weg zonder dat HisarWeb iets hoeft te doen. Gratis: Cloudflare Workers Free (100.000 verzoeken per dag) en GitHub. |
+| 61 | De authenticator is de bovenstroomse `sveltia-cms-auth`, één op één overgenomen op commit `26b168a`, niet zelf geschreven | Dit is beveiligingscode met CSRF-controle, een lijst toegestane domeinen en foutcodes waar Sveltia op rekent. Een eigen variant zou die toetsen opnieuw moeten verdienen voor een scherm met één gebruiker. De MIT-licentie staat ernaast, de versie ligt vast in de repo, en bijwerken is bewust handwerk. |
+| 62 | De Worker gebruikt geen KV, D1 of cron | Er valt niets te bewaren: de sessie leeft in de browser van dhr. Omer en de Worker is stateloos. Elke opslag erbij is een dienst die kan uitvallen of geld kan kosten, voor niets. |
+| 63 | `ALLOWED_DOMAINS` staat als gewone variabele in `wrangler.toml`, niet als geheim | Het zijn de adressen van de site zelf; die staan al openbaar in de repo. Leesbaar in de repo betekent dat niemand hoeft te raden waar een weigering vandaan komt. Zonder die lijst zou elke website de Worker van UCCIB kunnen gebruiken om tokens te laten uitgeven. |
+| 64 | Sveltia wordt geladen op een vaste versie (`0.269.2`) met een `integrity`-hash | "latest" betekent dat een release van een derde partij het scherm van dhr. Omer kan breken op een moment dat niemand kijkt. De hash betekent dat de browser een gewijzigd bestand weigert in plaats van het uit te voeren. Bijwerken is één regel plus een nieuwe hash, en `npm run verify:cms:levend` meet of ze nog bij de cdn passen. |
+| 65 | Er is een eigen poort: `npm run verify:cms`, als stap in CI | Zonder die stap kan iemand de `base_url` of de integrity-hash breken en blijft alles groen, want `npm run verify` kijkt naar de site en niet naar het bewerkscherm. De poort is omgekeerd getest: geen `dist/admin/`, geen `base_url` en een verkeerde hash geven alle drie exit 1. |

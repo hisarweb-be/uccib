@@ -54,23 +54,17 @@ Eenmalig, vanaf deze map:
 npx wrangler@4.97.0 deploy
 ```
 
-Daarna de twee waarden van de GitHub-app als geheim zetten. Die twee staan nooit
-in een bestand, nooit in een commit en nooit in een verslag:
+En de twee waarden van de GitHub-app als geheim. Die twee staan nooit in een
+bestand, nooit in een commit en nooit in een verslag:
 
 ```bash
 npx wrangler@4.97.0 secret put GITHUB_CLIENT_ID
 npx wrangler@4.97.0 secret put GITHUB_CLIENT_SECRET
 ```
 
-En het domein dat de Worker mag bedienen (geen geheim, gewone variabele):
-
-```bash
-npx wrangler@4.97.0 secret put ALLOWED_DOMAINS
-# invoeren: uccib.pages.dev, uccib.com, www.uccib.com, *.uccib.pages.dev, localhost
-```
-
-`localhost` staat erbij zodat het bewerkscherm ook lokaal werkt; Sveltia stuurt
-dan `cms.netlify.com` als domein mee, dat hoeft niet in de lijst.
+`ALLOWED_DOMAINS` is géén geheim en staat gewoon in `wrangler.toml`, zodat je
+meteen ziet welk domein de Worker mag bedienen. Iets toevoegen betekent daar één
+regel bijwerken en opnieuw uitrollen.
 
 Na het uitrollen:
 
