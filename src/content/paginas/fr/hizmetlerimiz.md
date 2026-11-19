@@ -8,11 +8,11 @@ order: 2
 
 ## Enseignement et jeunesse
 
-Dans nos centres, nous offrons aux enfants et aux jeunes, outre une formation religieuse et morale, un soutien pour les cours scolaires ainsi que des activités sociales et culturelles.
+Dans nos sections, nous offrons aux enfants et aux jeunes, outre une formation religieuse et morale, un soutien pour les cours scolaires ainsi que des activités sociales et culturelles.
 
 ## Visites de la mosquée
 
-Nous organisons des visites de la mosquée pour les écoles, les institutions et toute personne intéressée. Pour une visite, contactez le centre le plus proche.
+Nous organisons des visites de la mosquée pour les écoles, les institutions et toute personne intéressée. Pour une visite, contactez la section la plus proche.
 
 ## Journée portes ouvertes
 
