@@ -115,6 +115,8 @@ collections:
       - { name: email, label: E-posta, widget: string, required: false }
       - { name: openingHours, label: "Açılış saatleri (serbest metin)", widget: string, required: false }
       - { name: photo, label: Fotoğraf, widget: image, required: false, media_folder: public/beeld, public_folder: /beeld }
+      - { name: lat, label: "Enlem (isteğe bağlı, örnek 50.85)", widget: number, value_type: float, min: -90, max: 90, required: false }
+      - { name: lng, label: "Boylam (isteğe bağlı, örnek 4.35)", widget: number, value_type: float, min: -180, max: 180, required: false }
       - { name: order, label: Sıra numarası, widget: number, default: 0 }
       - { name: active, label: Yayında, widget: boolean, default: true }
 
@@ -138,6 +140,8 @@ collections:
       - { name: email, label: E-posta, widget: string, required: false }
       - { name: website, label: "Web sitesi (https:// ile)", widget: string, required: false }
       - { name: photo, label: Fotoğraf, widget: image, required: false, media_folder: public/beeld, public_folder: /beeld }
+      - { name: lat, label: "Enlem (isteğe bağlı, örnek 50.85)", widget: number, value_type: float, min: -90, max: 90, required: false }
+      - { name: lng, label: "Boylam (isteğe bağlı, örnek 4.35)", widget: number, value_type: float, min: -180, max: 180, required: false }
       - { name: order, label: Sıra numarası, widget: number, default: 0 }
       - { name: active, label: Yayında, widget: boolean, default: true }
 
