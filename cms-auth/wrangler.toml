@@ -14,9 +14,13 @@ compatibility_date = "2026-11-11"
 # de weigering vandaan komt. Zonder deze lijst zou iedere website de Worker van
 # UCCIB kunnen gebruiken om tokens te laten uitgeven.
 #
-# uccib.pages.dev is waar het bewerkscherm vandaag staat. uccib.com en
-# www.uccib.com staan er alvast bij voor de dag dat het domein omgaat; ze doen
-# niets zolang daar de oude site staat. localhost is voor het bewerken op de
-# laptop van HisarWeb; Sveltia stuurt daar cms.netlify.com als domein, dat
+# uccib.pages.dev is waar het bewerkscherm vandaag staat. De ster-varianten
+# (*.uccib.pages.dev, *.uccib.com) dekken elke voorbeeld-uitrol van Cloudflare
+# Pages (bijv. herontwerp-wow.uccib.pages.dev) en elke toekomstige subdomein,
+# zodat dhr. Omer en HisarWeb overal met dezelfde knop kunnen inloggen. Het
+# sterretje is een voorvoegsel-joker: het dekt alleen subdomeinen, niet het
+# hoofddomein zelf, daarom staan die er los bij. uccib.com en www.uccib.com
+# doen nog niets zolang daar de oude site staat. localhost is voor het bewerken
+# op de laptop van HisarWeb; Sveltia stuurt daar cms.netlify.com als domein, dat
 # staat er los bij.
-ALLOWED_DOMAINS = "uccib.pages.dev, uccib.com, www.uccib.com, localhost, cms.netlify.com"
+ALLOWED_DOMAINS = "uccib.pages.dev, *.uccib.pages.dev, uccib.com, *.uccib.com, localhost, cms.netlify.com"
