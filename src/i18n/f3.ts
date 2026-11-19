@@ -58,8 +58,9 @@ export interface F3Teksten {
   mijlpalen: Mijlpaal[];
   contactKop: string;
   contactIntro: string;
-  /** Label van het bezoekadres (site.ts); het zeteladres uit de KBO heeft labelZetel. */
   labelAdres: string;
+  /** Label van het bezoekadres (site.ts) in voet en contactpagina; het zeteladres uit de KBO heeft labelZetel. */
+  labelBezoekadres: string;
   labelTelefoon: string;
   labelEmail: string;
   labelUren: string;
@@ -204,7 +205,8 @@ const TR: F3Teksten = {
   contactKop: 'Bize ulaşın',
   contactIntro:
     'Sorularınız, ziyaret talepleriniz ve bağış bilgileri için sekretaryamızı arayabilir veya yazabilirsiniz.',
-  labelAdres: 'Ziyaret adresi',
+  labelAdres: 'Adres',
+  labelBezoekadres: 'Ziyaret adresi',
   labelTelefoon: 'Telefon',
   labelEmail: 'E-posta',
   labelUren: 'Açık olduğumuz saatler',
@@ -374,7 +376,8 @@ const NL: F3Teksten = {
   contactKop: 'Bereik ons',
   contactIntro:
     'Voor vragen, een bezoekaanvraag of informatie over schenken kunt u ons secretariaat bellen of schrijven.',
-  labelAdres: 'Bezoekadres',
+  labelAdres: 'Adres',
+  labelBezoekadres: 'Bezoekadres',
   labelTelefoon: 'Telefoon',
   labelEmail: 'E-mail',
   labelUren: 'Wanneer wij open zijn',
@@ -543,7 +546,8 @@ const FR: F3Teksten = {
   contactKop: 'Nous joindre',
   contactIntro:
     'Pour vos questions, une demande de visite ou des informations sur les dons, vous pouvez appeler ou écrire à notre secrétariat.',
-  labelAdres: 'Adresse de visite',
+  labelAdres: 'Adresse',
+  labelBezoekadres: 'Adresse de visite',
   labelTelefoon: 'Téléphone',
   labelEmail: 'E-mail',
   labelUren: 'Nos heures d’ouverture',

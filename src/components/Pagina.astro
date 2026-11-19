@@ -27,7 +27,8 @@ import { isActiveSlug } from '../lib/actief';
 import { isConceptHref } from '../lib/concepten';
 import { f3 } from '../i18n/f3';
 import kern from '../data/kerngegevens.json';
-import AdresBlad from './home/AdresBlad.astro';
+import ContactBlad from './ContactBlad.astro';
+import { rechtspersoon } from '../lib/rechtspersoon';
 
 interface Props {
   locale: Locale;
@@ -129,7 +130,7 @@ const ngo =
         '@context': 'https://schema.org',
         '@type': 'NGO',
         name: 'Union des Centres Culturels Islamiques Belgium',
-        legalName: kern.naam,
+        legalName: rechtspersoon(locale).naam ?? undefined,
         alternateName: 'UCCIB',
         url: SITE.url,
         logo: new URL(SITE.logo, SITE.url).href,
@@ -280,7 +281,7 @@ const ngo =
     ) : slug === 'iletisim' ? (
       /* Contact: het adresblad van DESIGNSYSTEEM 7.6 is de hele pagina, met de h1
          als kop; geen formulier, geen kaart, telefoon in lead-maat (F3-PLAN D2). */
-      <AdresBlad locale={locale} h1={h1} />
+      <ContactBlad locale={locale} h1={h1} />
     ) : (
       <>
         <KopBand

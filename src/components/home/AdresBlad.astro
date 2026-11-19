@@ -4,38 +4,29 @@
  * startpagina en het doel van elke knop "Bize ulaşın".
  *
  * Volgorde: adres, telefoon, e-mail, en alleen als het veld gevuld is: uren,
- * routelink, WhatsApp (gewone tekstlink, F2B-STAND punt 4) en de rechtspersoon.
- * Bezoekadres, telefoon en e-mail komen uit `site.ts`; uren en de coördinaten
- * voor de route alleen uit `src/data/kerngegevens.json`; naam, rechtsvorm, zetel
- * en ondernemingsnummer zoals de KBO ze toont (src/lib/rechtspersoon.ts). Het
- * zeteladres verschilt van het bezoekadres, dus elk heeft een eigen label.
- * `SITE.openingHours` en `SITE.geo` worden bewust niet gelezen (BIJSTURING
- * ronde 1b): geen gegeven tonen dat UCCIB niet zelf bevestigde.
- *
- * Gebruikt op de startpagina (#contact, kop h2 contactKop) en als hele
- * contactpagina: met `h1` wordt de kop de paginakop en staat het telefoonnummer
- * in lead-maat (F3-PLAN D2: geen groot telefoonnummer).
+ * routelink, WhatsApp (gewone tekstlink, F2B-STAND punt 4) en ondernemingsnummer.
+ * Adres, telefoon en e-mail komen uit `site.ts`; uren, KBO, rechtsvorm en de
+ * coördinaten voor de route alleen uit `src/data/kerngegevens.json`, dat leeg
+ * begint. `SITE.openingHours` en `SITE.geo` worden bewust niet gelezen
+ * (BIJSTURING ronde 1b): geen gegeven tonen dat de vzw niet zelf bevestigde.
  */
 import Rozet from '../Rozet.astro';
 import { type Locale } from '../../i18n';
 import { f3 } from '../../i18n/f3';
 import { SITE } from '../../data/site';
 import kern from '../../data/kerngegevens.json';
-import { rechtspersoon } from '../../lib/rechtspersoon';
 
 interface Props {
   locale: Locale;
-  /** Alleen op de contactpagina: de paginakop. */
-  h1?: string;
 }
 
-const { locale, h1 } = Astro.props;
-const telefoonInLead = Boolean(h1);
+const { locale } = Astro.props;
 const teksten = f3(locale);
 
 const gevuld = (w: unknown): w is string => typeof w === 'string' && w.trim() !== '';
 const uren = gevuld(kern.openingsuren) ? kern.openingsuren.trim() : null;
-const rp = rechtspersoon(locale);
+const kbo = gevuld(kern.kbo) ? kern.kbo.trim() : null;
+const rechtsvorm = gevuld(kern.rechtsvorm) ? kern.rechtsvorm.trim() : null;
 const route =
   typeof kern.lat === 'number' && typeof kern.lng === 'number'
     ? `https://www.openstreetmap.org/?mlat=${kern.lat}&mlon=${kern.lng}#map=17/${kern.lat}/${kern.lng}`
@@ -48,36 +39,25 @@ const whatsapp = gevuld(SITE.whatsapp) ? `https://wa.me/${SITE.whatsapp.replace(
     <Rozet stand="vol" maat={32} />
     <span class="blad-woordmerk">uccib</span>
   </div>
-  {h1 ? <h1 class="blad-kop">{h1}</h1> : <h2 class="blad-kop">{teksten.contactKop}</h2>}
+  <h2 class="blad-kop">{teksten.contactKop}</h2>
   <p class="blad-intro">{teksten.contactIntro}</p>
   <address class="blad-adres">
     <div class="blad-groep">
       <p class="blad-regel">
         <span class="blad-label">{teksten.labelAdres}</span>
         <span class="blad-waarde blad-lead">
-          {rp.afkorting ? (
-            <>
-              {rp.afkorting}
-              <br />
-            </>
-          ) : null}
+          Union des Centres Culturels Islamiques Belgium{rechtsvorm ? ` ${rechtsvorm}` : ''}
+          <br />
           {SITE.street}
           <br />
           {SITE.postalCode} {SITE.city}
-          <br />
-          {teksten.land}
         </span>
       </p>
     </div>
     <div class="blad-groep">
       <p class="blad-regel">
         <span class="blad-label">{teksten.labelTelefoon}</span>
-        <a
-          class:list={['blad-waarde', telefoonInLead ? 'blad-lead blad-cijfers' : 'blad-telefoon']}
-          href={`tel:${SITE.phoneHref}`}
-        >
-          {SITE.phone}
-        </a>
+        <a class="blad-waarde blad-telefoon" href={`tel:${SITE.phoneHref}`}>{SITE.phone}</a>
       </p>
       <p class="blad-regel">
         <span class="blad-label">{teksten.labelEmail}</span>
@@ -114,33 +94,12 @@ const whatsapp = gevuld(SITE.whatsapp) ? `https://wa.me/${SITE.whatsapp.replace(
       ) : null
     }
     {
-      rp.naam ? (
+      kbo ? (
         <div class="blad-groep">
           <p class="blad-regel">
-            <span class="blad-label">{teksten.labelRechtspersoon}</span>
-            <span class="blad-waarde blad-voet">
-              {rp.naam}
-              {rp.afkorting ? ` (${rp.afkorting})` : null}
-              {rp.rechtsvorm ? (
-                <>
-                  <br />
-                  {rp.rechtsvorm}
-                </>
-              ) : null}
-            </span>
+            <span class="blad-label">{teksten.labelKbo}</span>
+            <span class="blad-waarde blad-voet">{kbo}</span>
           </p>
-          {rp.zetel ? (
-            <p class="blad-regel">
-              <span class="blad-label">{teksten.labelZetel}</span>
-              <span class="blad-waarde blad-voet">{rp.zetel}</span>
-            </p>
-          ) : null}
-          {rp.kbo ? (
-            <p class="blad-regel">
-              <span class="blad-label">{teksten.labelKbo}</span>
-              <span class="blad-waarde blad-voet">{rp.kbo}</span>
-            </p>
-          ) : null}
         </div>
       ) : null
     }
@@ -223,9 +182,6 @@ const whatsapp = gevuld(SITE.whatsapp) ? `https://wa.me/${SITE.whatsapp.replace(
     font-weight: var(--text-telefoon--font-weight);
     font-variant-numeric: tabular-nums;
   }
-  .blad-cijfers {
-    font-variant-numeric: tabular-nums;
-  }
   .blad-voet {
     font-size: var(--text-voet);
     line-height: var(--text-voet--line-height);
@@ -244,7 +200,7 @@ const whatsapp = gevuld(SITE.whatsapp) ? `https://wa.me/${SITE.whatsapp.replace(
     color: var(--color-inkt);
   }
   a.blad-waarde:focus-visible {
-    outline: 3px solid var(--color-petrol-diep);
+    outline: 3px solid var(--color-petrol);
     outline-offset: 3px;
   }
   .blad-tekstlink {

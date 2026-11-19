@@ -3,7 +3,9 @@
  * (bewijs: herontwerp/bewijs-f3/kbo.txt, register op 17/11/2026):
  * naam, afkorting, rechtsvorm, zetel en ondernemingsnummer.
  *
- * Bron is src/data/kerngegevens.json. Het register geeft de rechtsvorm en het
+ * Bron is src/data/rechtspersoon.json, los van src/data/kerngegevens.json: dat
+ * laatste is het CMS-blad voor uren en coördinaten en begint leeg (F3-PLAN A6),
+ * en de startpagina leest er nog de oude velden kbo en rechtsvorm uit. Het register geeft de rechtsvorm en het
  * zeteladres in het Nederlands en het Frans; het Turks krijgt de Nederlandse
  * term met een vertaling tussen haakjes (f3.ts `rechtsvormUitleg`), want een
  * Turkse rechtsvorm bestaat in het register niet.
@@ -11,7 +13,7 @@
  * Het zeteladres (KBO) en het bezoekadres (site.ts) verschillen; wie ze toont,
  * labelt ze apart. Een leeg veld geeft null: dan toont niemand het.
  */
-import kern from '../data/kerngegevens.json';
+import kern from '../data/rechtspersoon.json';
 import { f3 } from '../i18n/f3';
 import type { Locale } from '../i18n';
 

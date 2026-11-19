@@ -43,7 +43,7 @@ const h1 = entry.data.h1 || pagina.h1;
    (DESIGNSYSTEEM 7.7). Komt de collectie er, dan vult zij deze lijst (hooguit drie). */
 const nieuws: CmsRegel[] = [];
 
-/* Coördinaten en uren alleen uit de kerngegevens, nooit uit site.ts. */
+/* Coördinaten en uren alleen uit de kerngegevens van de vzw, nooit uit site.ts. */
 const geo =
   typeof kern.lat === 'number' && typeof kern.lng === 'number'
     ? { geo: { '@type': 'GeoCoordinates', latitude: kern.lat, longitude: kern.lng } }
@@ -54,7 +54,6 @@ const ngo = {
   '@context': 'https://schema.org',
   '@type': 'NGO',
   name: 'Union des Centres Culturels Islamiques Belgium',
-  legalName: kern.naam,
   alternateName: 'UCCIB',
   url: SITE.url,
   logo: new URL(SITE.logo, SITE.url).href,
