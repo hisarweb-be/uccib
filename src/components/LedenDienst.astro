@@ -8,8 +8,9 @@
  * Dit onderdeel toont wat er staat en verder niets: geen verzonnen inhoud, geen
  * voorbeeldregels, geen aantal in een kop.
  *
- * Vormtaal (DESIGNSYSTEEM 7.4, 7.6, 7.7): dezelfde als `CmsBlokOfNiets`. Een h2
- * uit de taallaag, een `ul` van regels tussen haarlijnen, geen kaartvak, geen
+ * Vormtaal (DESIGNSYSTEEM 7.4, 7.6, 7.7): dezelfde als `CmsBlokOfNiets`. Geen eigen
+ * sectiekop (de h1 van de pagina is de kop; de naam van elke regel is een h2,
+ * de sectie heeft een aria-label), een `ul` van regels tussen haarlijnen, geen kaartvak, geen
  * achtergrondvlak, geen pictogram. Leeg levert dit onderdeel geen enkel element
  * op: geen sectie, geen kop, geen marge.
  *
@@ -168,9 +169,7 @@ const [nieuwsteHutbe, ...oudereHutbeler] = hutbeler;
 
 {
   !leeg && (
-    <section id={id} class="leden" aria-labelledby={`${id}-kop`}>
-      <h2 id={`${id}-kop`} class="leden-kop">{kop}</h2>
-
+    <section id={id} class="leden" aria-label={kop}>
       {subeler.length > 0 && (
         <div class="leden-groepen">
           {subeler.map((groep) => (
@@ -179,7 +178,7 @@ const [nieuwsteHutbe, ...oudereHutbeler] = hutbeler;
               <ul class="leden-lijst leden-lijst--twee" role="list">
                 {groep.rijen.map(({ data }) => (
                   <li class="leden-regel">
-                    <h3 class="leden-naam">{data.name}</h3>
+                    <h2 class="leden-naam">{data.name}</h2>
                     {(data.street || data.postalCode || data.city) && (
                       <address class="leden-adres">
                         {data.street && <span>{data.street}</span>}
@@ -247,7 +246,7 @@ const [nieuwsteHutbe, ...oudereHutbeler] = hutbeler;
               <ul class="leden-lijst leden-lijst--twee" role="list">
                 {groep.rijen.map(({ data }) => (
                   <li class="leden-regel">
-                    <h3 class="leden-naam">{data.name}</h3>
+                    <h2 class="leden-naam">{data.name}</h2>
                     {data.description && <p class="leden-tekst">{data.description}</p>}
                     {(data.contact || data.phone || data.email || data.website) && (
                     <dl class="leden-velden">
@@ -299,7 +298,7 @@ const [nieuwsteHutbe, ...oudereHutbeler] = hutbeler;
       {nieuwsteVakit && (
         <div class="leden-groepen">
           <article class="leden-regel">
-            <h3 class="leden-naam">{maandTekst(nieuwsteVakit.data.month)}</h3>
+            <h2 class="leden-naam">{maandTekst(nieuwsteVakit.data.month)}</h2>
             <p class="leden-klein">
               {nieuwsteVakit.data.place}
               {nieuwsteVakit.data.source && (
@@ -352,7 +351,7 @@ const [nieuwsteHutbe, ...oudereHutbeler] = hutbeler;
             <p class="leden-klein">
               <time datetime={nieuwsteHutbe.data.date.toISOString().slice(0, 10)}>{datum.format(nieuwsteHutbe.data.date)}</time>
             </p>
-            <h3 class="leden-naam">{nieuwsteHutbe.data.title}</h3>
+            <h2 class="leden-naam">{nieuwsteHutbe.data.title}</h2>
             {(nieuwsteHutbe.data.imam || nieuwsteHutbe.data.language) && (
               <p class="leden-klein">
                 {[nieuwsteHutbe.data.imam, nieuwsteHutbe.data.language].filter(Boolean).join(' · ')}
@@ -412,13 +411,6 @@ const [nieuwsteHutbe, ...oudereHutbeler] = hutbeler;
   .leden {
     margin: 0 0 3rem;
     color: var(--color-inkt);
-  }
-  .leden-kop {
-    margin: 0 0 1.5rem;
-    font-family: var(--font-kop);
-    font-size: var(--text-h2);
-    line-height: var(--text-h2--line-height);
-    font-weight: var(--text-h2--font-weight);
   }
   .leden-groepen {
     display: grid;
@@ -522,7 +514,7 @@ const [nieuwsteHutbe, ...oudereHutbeler] = hutbeler;
   .leden-tabel :global(td:first-child) {
     position: sticky;
     left: 0;
-    background: var(--color-surface);
+    background: var(--color-papier);
   }
   .leden-summary {
     display: list-item;

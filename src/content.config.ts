@@ -162,7 +162,6 @@ const hutbeler = defineCollection({
  * dit schema laat de bouw falen als het bestand een ongeldig veld krijgt. De
  * pagina's lezen het JSON-bestand zelf; de collectie is de controle.
  */
-/* Sveltia schrijft een leeg getalveld als "", niet als null. */
 const kerngegevens = defineCollection({
   loader: async () => [{ id: 'kerngegevens', ...kerngegevensBron }],
   schema: z.object({

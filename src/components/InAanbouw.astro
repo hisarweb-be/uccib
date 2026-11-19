@@ -2,13 +2,13 @@
 /**
  * De pagina die een concept toont zolang het nog geen eigen inhoud heeft.
  *
- * Bewust geen "binnenkort"-belofte en geen lege opmaak: één rustige mededeling,
+ * Bewust geen lege opmaak: één rustige mededeling,
  * de organisatiegegevens die wel kloppen, en de weg terug.
  *
  * Over de statuscode, eerlijk: een statische bouw levert altijd 200. Cloudflare
  * Pages kan met `_redirects` alleen 301, 302, 303, 307, 308 en 200, en 410 dus
  * niet, en voor een echte 410 zou het project Cloudflare Functions nodig hebben.
- * Daarom is de route niet gelinkt, draagt hij `noindex` en staat hij niet in de
+ * Daarom draagt de route `noindex` en staat hij niet in de
  * sitemap; hij blijft buiten elke index zonder extra machinerie.
  */
 import Layout from '../layouts/Layout.astro';

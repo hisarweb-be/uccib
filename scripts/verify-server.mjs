@@ -142,6 +142,7 @@ await moetServeren(DIST, 'backslashes');
     } finally {
       await server.close();
     }
+    oordeel(adressen > 0, "lege pagina's: minstens 1 adres gekeurd (nu " + adressen + '), nul concepten mag niet stil slagen');
     console.log('     lege pagina\'s: ' + adressen + ' adressen gekeurd (' + concepten.length + ' slugs x 3 talen)');
   }
 }
