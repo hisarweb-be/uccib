@@ -26,6 +26,7 @@ import {
   SLUGS as ALL_SLUGS,
 } from './lib/keuring.mjs';
 import { keurRedirects, leesTabel, vindTabel } from './lib/verhuistabel.mjs';
+import { keurHover } from './lib/hoverwacht.mjs';
 
 const distDir = resolve('dist');
 const errors = [];
@@ -35,6 +36,9 @@ errors.push(...actief.errors);
 
 const concept = await checkConcepten({ distDir, slugs: CONCEPT_SLUGS });
 errors.push(...concept.errors);
+
+// Hover alleen achter @media (hover: hover) (scripts/lib/hoverwacht.mjs).
+errors.push(...(await keurHover(resolve('src'))));
 
 // De 404 moet echt bestaan en één h1 hebben.
 const viernullvier = resolve(distDir, '404.html');
