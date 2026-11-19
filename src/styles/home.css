@@ -234,6 +234,20 @@
   right: 1.5rem;
   max-width: calc(100% - 3rem);
 }
+/* De filmregel staat er vanaf het begin in de lay-out, onzichtbaar. Bij de scènestart gaat alleen
+   de dekking aan; het label springt dan niet van één naar twee regels (herkeuring F2b-2). */
+@media (min-height: 35rem) {
+  html.beweging-aan:not(.home-stil) .hero-vermelding .vermelding-film:not(.is-getoond) {
+    display: inline;
+    opacity: 0;
+    visibility: hidden;
+  }
+  html.beweging-aan:not(.home-stil) .hero-vermelding.vermelding-film:not(.is-getoond) {
+    display: flex;
+    opacity: 0;
+    visibility: hidden;
+  }
+}
 
 .hero-intro {
   order: 4;
