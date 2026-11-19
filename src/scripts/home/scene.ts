@@ -210,6 +210,9 @@ function piek(sectie: HTMLElement) {
 
   const tekst = sectie.querySelector<HTMLElement>('.piek-tekst');
   let r0 = 1;
+  /* De schaal waarin het venster in rust staat, uit `sMax` en het aandeel hieronder: zo is het
+     eerste beeld de foto en niet het papier (bijsturing eigenaar 19 nov). */
+  let sRust = 1;
   function meet() {
     const doos = rozet!.getBoundingClientRect().width;
     const B = beeld!.clientWidth;
@@ -264,6 +267,11 @@ function piek(sectie: HTMLElement) {
       const zak = Math.min((boven[1] - boven[0]) / 2, 0.03 * Hf);
       k.y = [midden + zak, midden - zak];
     }
+    /* De opening in rust staat op 68 % van de volle groei: de foto vult het beeld dan al bij de
+       eerste stand (bijsturing eigenaar 19 nov: 83 % papier, een witte ster met een klein
+       fotovlek erin) en de laatste 32 % naar beeldvullend draagt de scroll. De maat volgt
+       `sMax`, dus op elk scherm klopt de verhouding. */
+    sRust = 0.68 * Math.max(1, ...kamers.map((k) => k.sMax));
     podium!.style.setProperty('--piek-eenheid', String(doos / 100));
     podium!.style.setProperty('--piek-dx', `${dx}px`);
     if (knoppen) {
@@ -337,7 +345,11 @@ function piek(sectie: HTMLElement) {
        twee ruimtes draagt de foto zelf, met haar eigen opacity, en de rozet draait mee. */
     const e = klem((q - 0.07) / 0.11);
     const nu = kamers.findLast((k) => q >= k.a) ?? kamers[0];
-    const s = nu ? Math.pow(nu.sMax, e) : 1;
+    /* Het venster opent in rust al bijna over de volle hoogte van het beeld en groeit van daar
+       naar beeldvullend (bijsturing eigenaar 19 nov: het eerste beeld was 83 % papier, een witte
+       ster met een klein fotovlek erin). Zie `sRust` in `meet`: de maat volgt het venster, dus
+       de foto draagt vanaf de eerste stand het beeld op elk scherm. */
+    const s = nu ? sRust + (nu.sMax - sRust) * e : 1;
     const stijl = podium!.style;
     stijl.setProperty('--piek-s', s.toFixed(4));
     stijl.setProperty('--piek-phi', `${wissels.reduce((som, m) => som + 45 * klem((q - m + 0.02) / 0.04), 0).toFixed(2)}deg`);
