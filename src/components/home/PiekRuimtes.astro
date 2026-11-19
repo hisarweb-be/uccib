@@ -11,26 +11,25 @@
  * Wat er per shot te zien is, bepaalt `vormVan` in `lib/media.ts`, alleen uit wat
  * er in het manifest ligt (nooit uit het veld `status`):
  * - `film`: de film loopt mee met de scrub (video, geladen als de sectie nadert)
- *   en de vermelding staat erbij als het een AI-film is;
+ *   zonder bijschrift (bijsturing 19 nov, B3: de openheid staat op de disclaimerpagina);
  * - `poster`: de echte foto beweegt in code. Ze schuift door het venster van de
  *   rozet en er trekt één warme lichtvlek door de ruimte: bij `p1` over de wand
  *   van de gebedsruimte, bij `p2` over tafels en vloer (het raam blijft
  *   ongemoeid), bij `p3` over de loper de zaal in (de deur en de trap blijven
- *   ongemoeid). Geen vermelding, want er is geen AI in beeld.
+ *   ongemoeid).
  *
  * De rozet draagt het beeld: haar kern is het venster waardoor je de ruimte ziet.
- * Bij elke wissel knijpt ze helemaal dicht, draait een slag en gaat open op de
- * volgende ruimte. Hoe ver ze opengaat, volgt uit de eigen pixels van de foto
- * (`eigenBreedte`): een foto wordt nooit groter dan 110 % getoond. Is ze te klein
- * voor het hele scherm, dan blijft ze in het venster; een grotere poster gaat
- * vanzelf schermvullend;
- * - `weg`: het shot ontbreekt in het manifest. Dan is er geen laag, geen zin, geen
- *   vermelding en geen sleutelrij voor, en valt zijn stuk uit de scrollweg (`piekPlan`
+ * In rust is het kijkgat 56 % van de kortste vensterzijde; bij elke wissel knijpt
+ * het tot die maat, draait een slag en gaat open op de volgende ruimte, tot
+ * schermvullend aan het eind (bijsturing eigenaar 19 nov, B2: de foto is het
+ * onderwerp, dat gaat voor op de oude grens van 110 % van de eigen pixels). Het
+ * schuiven blijft binnen 110 % (`eigenBreedte`);
+ * - `weg`: het shot ontbreekt in het manifest. Dan is er geen laag, geen zin en
+ *   geen sleutelrij voor, en valt zijn stuk uit de scrollweg (`piekPlan`
  *   in `lib/piekplan.ts`): de pin wordt korter en de drempels per element (inline
  *   `--in`/`--uit`) volgen. Zonder `p4` is de pin zo 4,6 schermhoogten. Een
  *   plaatshouderbeeld komt nooit in beeld (keuring F2b, herstelpunt 2).
  */
-import MediaVermelding from '../MediaVermelding.astro';
 import Sleutelbeelden, { type Sleutelrij } from '../Sleutelbeelden.astro';
 import { getDictionary, type Locale } from '../../i18n';
 import { f3 } from '../../i18n/f3';
@@ -155,21 +154,9 @@ const rijen: Sleutelrij[] = plan.zinnen.map((zin) => ({
       </svg>
       <svg class="piek-rozet" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
         <g>
-          <path d={lijnen.cirkel}></path>
-          <path d={lijnen.a}></path>
-          <path d={lijnen.b}></path>
-          <path d={lijnen.binnen}></path>
           <path d={lijnen.kern}></path>
         </g>
       </svg>
-      {/* De vermeldingen boven het venster: nooit door het papier afgeknipt, ook niet bij een wissel. */}
-      {
-        lagen.map(({ naam, slot, plekIn, plekUit }) => (
-          <div class="piek-plek" data-laag={slot} style={`--in:${plekIn};--uit:${plekUit}`}>
-            <MediaVermelding shot={naam} locale={locale} class="piek-vermelding" />
-          </div>
-        ))
-      }
     </div>
 
     <h2 class="piek-kop">{opening}</h2>

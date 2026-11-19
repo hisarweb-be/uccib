@@ -26,6 +26,8 @@ Rien sur ce site ne constitue une offre, un contrat ou un conseil juridique. Pou
 
 Les textes, les photos, le logo et le design de ce site appartiennent à l'UCCIB. Vous pouvez les utiliser en mentionnant la source et sans les modifier. Pour un usage commercial ou une reprise complète, une autorisation écrite préalable est nécessaire. Demandez-la via info@uccib.com.
 
+Certaines photos de ce site sont retouchées, et les films de la page d'accueil sont générés par IA à partir de vraies photos de nos espaces.
+
 ## (4) Liens
 
 Notre site peut renvoyer vers d'autres sites. Nous ne les gérons pas et ne sommes pas responsables de leur contenu. Dès que vous cliquez, les règles propres à ce site en matière de vie privée et de cookies s'appliquent.
@@ -38,4 +40,4 @@ Ces mentions relèvent du droit belge. En cas de litige, les tribunaux de Bruxel
 
 La version la plus récente de cette page se trouve toujours à cette adresse. Si le texte change, nous adaptons la date.
 
-Dernière mise à jour : 17 novembre 2026. Une question ? Écrivez à info@uccib.com.
+Dernière mise à jour : 19 novembre 2026. Une question ? Écrivez à info@uccib.com.

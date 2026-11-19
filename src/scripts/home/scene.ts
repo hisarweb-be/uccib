@@ -8,8 +8,9 @@
  * `home.css`. Wat CSS niet kan meten (waar het venster heen verhuist, hoe ver de
  * kern open moet) meet dit script en zet het als maat op het podium.
  *
- * Films en de frame-reeks komen uit het manifest, via `data-`attributen die de
+ * De films van de piek komen uit het manifest, via `data-`attributen die de
  * componenten bij de bouw zetten. Zonder film gebeurt hier niets voor dat shot.
+ * De film van de hero speelt los van de scène (`start.ts`, bijsturing 19 nov B1).
  */
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -27,14 +28,8 @@ const verbinding = (navigator as Navigator & { connection?: Verbinding }).connec
 /** Zuinige of trage verbinding: alleen de posters (CONTRACT 3). */
 const zuinig = Boolean(verbinding?.saveData) || /(^|-)(2g|3g)$/.test(verbinding?.effectiveType ?? '');
 
-/** Meldt dat de film van een shot echt in beeld staat; pas dan mag de AI-vermelding erbij. */
+/** Meldt dat de film van een shot echt in beeld staat (CONTRACT 3, `uccib:film-klaar`). */
 function filmKlaar(shot: string) {
-  document
-    .querySelectorAll(`[data-vermelding-film="${CSS.escape(shot)}"]`)
-    .forEach((regel) => {
-      regel.classList.add('is-getoond');
-      regel.closest('.media-vermelding.vermelding-film')?.classList.add('is-getoond');
-    });
   document.dispatchEvent(new CustomEvent('uccib:film-klaar', { detail: { shot } }));
 }
 
@@ -64,105 +59,6 @@ function scrub(sectie: HTMLElement, podium: HTMLElement, lengte: number, zet: (p
 
 /* ── Hero-unie ── */
 
-interface ReeksData {
-  map: string;
-  patroon: string;
-  aantal: number;
-  breedte: number;
-  hoogte: number;
-}
-
-/** Frame uit p: de reeks loopt over het stuk van `h1` in het manifest (0,09 tot 0,92). */
-const frameUit = (p: number, aantal: number) => Math.round(klem((p - 0.09) / 0.83) * (aantal - 1));
-
-function heroReeks(canvas: HTMLCanvasElement) {
-  const ruw = (breed.matches ? canvas.dataset.reeksD : canvas.dataset.reeksM) ?? canvas.dataset.reeksD ?? canvas.dataset.reeksM;
-  const ctx = canvas.getContext('2d');
-  if (!ruw || !ctx || zuinig) return null;
-  const reeks = JSON.parse(ruw) as ReeksData;
-  if (!(reeks.aantal > 0)) return null;
-
-  const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-  const doel = Math.max(canvas.clientWidth, canvas.clientHeight, 320) * 2 * dpr;
-  const schaal = Math.min(1, doel / Math.min(reeks.breedte, reeks.hoogte));
-  canvas.width = Math.round(reeks.breedte * schaal);
-  canvas.height = Math.round(reeks.hoogte * schaal);
-
-  const beelden: Array<HTMLImageElement | undefined> = new Array(reeks.aantal);
-  let geladen = 0;
-  let getekend = -1;
-  let gevraagd = 0;
-
-  const teken = (index: number) => {
-    gevraagd = index;
-    /* Het dichtstbijzijnde beeld dat er al is. */
-    for (let d = 0; d < reeks.aantal; d += 1) {
-      const kandidaat = beelden[index - d] ?? beelden[index + d];
-      if (kandidaat) {
-        const nummer = beelden[index - d] ? index - d : index + d;
-        if (nummer !== getekend) {
-          ctx.drawImage(kandidaat, 0, 0, canvas.width, canvas.height);
-          getekend = nummer;
-        }
-        return;
-      }
-    }
-  };
-
-  /* De beelden komen in porties van zes binnen, in de volgorde van de tijdlijn, en
-     elk wordt buiten de hoofdthread gedecodeerd (`decode()`) voor het getekend
-     wordt: zo geen 52 decodes en tekenbeurten tegelijk op de hoofdthread
-     (keuring F2b, herstelpunt 1). Tot een beeld er is, tekent `teken` het
-     dichtstbijzijnde beeld dat er al wel is.
-     Dit bestand laadt pas na de eerste intentie (`start.ts`); ook dan gaan eerst
-     alleen de beelden tot p 0,2 met lage voorrang de deur uit, en de rest pas
-     als de hoofdthread rust heeft (`requestIdleCallback`), zodat de eerste veeg
-     vloeiend blijft (herkeuring F2b, herstelpunt 2). */
-  const bron = (i: number) =>
-    `${reeks.map.replace(/\/$/, '')}/${reeks.patroon.replace('%04d', String(i + 1).padStart(4, '0'))}`;
-  const laadEen = (i: number) =>
-    new Promise<void>((klaar) => {
-      const beeld = new Image();
-      beeld.decoding = 'async';
-      beeld.fetchPriority = 'low';
-      beeld.src = bron(i);
-      beeld
-        .decode()
-        .then(() => {
-          beelden[i] = beeld;
-          geladen += 1;
-          if (geladen === 1 || Math.abs(i - gevraagd) <= Math.abs(getekend - gevraagd)) teken(gevraagd);
-        })
-        .catch(() => undefined)
-        .finally(klaar);
-    });
-  const PORTIE = 6;
-  /* Laatste beeld van het eerste stuk: p 0,2 op de tijdlijn van de reeks (zie `frameUit`). */
-  const eersteStuk = frameUit(0.2, reeks.aantal);
-  /* Wachten op rust. Zonder `requestIdleCallback` (Safari) een lege taak, zodat het
-     laden tenminste niet in dezelfde taak als het tekenen valt. Dit start niets:
-     het draait pas binnen de scène, na de intentie. */
-  const rust = () =>
-    new Promise<void>((verder) => {
-      if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(() => verder(), { timeout: 2000 });
-      else setTimeout(verder, 50);
-    });
-  (async () => {
-    for (let van = 0; van < reeks.aantal; van += PORTIE) {
-      if (van > eersteStuk) await rust();
-      const portie: Promise<void>[] = [];
-      for (let i = van; i < Math.min(reeks.aantal, van + PORTIE); i += 1) portie.push(laadEen(i));
-      await Promise.all(portie);
-    }
-    if (geladen === reeks.aantal) {
-      canvas.classList.add('is-klaar');
-      filmKlaar('h1');
-    }
-  })();
-
-  return (p: number) => teken(frameUit(p, reeks.aantal));
-}
-
 function hero(sectie: HTMLElement) {
   const podium = sectie.querySelector<HTMLElement>('.hero-podium');
   const eerste = sectie.querySelector<HTMLElement>('.hero-eerste');
@@ -175,8 +71,6 @@ function hero(sectie: HTMLElement) {
   const knoppenEerste = sectie.querySelector<HTMLElement>('[data-hero-knoppen="eerste"]');
   const knoppenSlot = sectie.querySelector<HTMLElement>('[data-hero-knoppen="slot"]');
   const grenzen = (sectie.dataset.fasen ?? '').split(',').map(Number).filter(Number.isFinite);
-  const canvas = sectie.querySelector<HTMLCanvasElement>('canvas.hero-reeks');
-  const tekenReeks = canvas ? heroReeks(canvas) : null;
 
   function meet() {
     const W = podium!.clientWidth;
@@ -254,8 +148,6 @@ function hero(sectie: HTMLElement) {
         else li.removeAttribute('aria-current');
       });
     }
-
-    tekenReeks?.(p);
   }
 
   meet();
@@ -301,13 +193,11 @@ function piek(sectie: HTMLElement) {
         raam,
         a,
         b,
-        /* Elk raam schuift, ook onder een film (herkeuring PR3: nooit stil). Om en om naar links en naar rechts. */
-        film: el.dataset.vorm === 'film',
+        /* Elk raam schuift (herkeuring PR3: nooit stil), om en om naar links en naar rechts. */
         richting: i % 2 === 0 ? 1 : -1,
         eigen: (el.dataset.eigen ?? '').split(',').map(Number),
         aspect: (el.dataset.aspect ?? '').split(',').map(Number),
         sMax: 1,
-        venster: false,
         x: [0, 0] as [number, number],
         y: [0, 0] as [number, number],
       },
@@ -325,27 +215,14 @@ function piek(sectie: HTMLElement) {
     const B = beeld!.clientWidth;
     const H = beeld!.clientHeight;
     if (!doos || !B || !H) return;
+    /* De kern in rust: zo groot als de punten van de ster. De doos is in CSS 1,5 keer de kortste
+       vensterzijde, dus het kijkgat is in rust al ruim de helft daarvan (bijsturing eigenaar
+       19 nov, B2: de foto is het onderwerp, nooit een klein kijkgat in een grote rozet). */
     r0 = 0.188 * doos;
     const bp = breed.matches ? 0 : 1;
-    /* Hoe groot een venster wil worden: wat de foto zelf toelaat (zie hieronder). */
-    const wens = (W: number, D: number, aspect: number) => Math.max(r0, Math.min((W * (1 - D)) / 2, (0.94 * W) / aspect / 2));
-    /* Zoveel van haar breedte schuift de foto over haar hele stuk: per tiende van de tijdlijn een tiende.
-       Een film die schermvullend past, schuift hooguit zover dat ze schermvullend blijft. */
-    const schuif = (k: (typeof kamers)[number], eigen: number, aspect: number) => {
-      const D = Math.min(0.5, k.b - k.a);
-      const ruim = 1 - B / (1.1 * eigen);
-      return k.film && H * aspect <= 1.1 * eigen && ruim > 0 ? Math.min(D, ruim) : D;
-    };
-    const nodig = kamers.reduce((m, k) => {
-      const eigen = k.eigen[bp] || k.eigen[0] || B;
-      const aspect = k.aspect[bp] || k.aspect[0] || B / H;
-      const D = schuif(k, eigen, aspect);
-      const W = Math.max(B / (1 - D), H * aspect);
-      return W > 1.1 * eigen ? Math.max(m, wens(1.1 * eigen, D, aspect)) : m;
-    }, r0);
-    /* De tekstplaat bedekt het venster nooit (herkeuring PR3): het midden schuift naar rechts
-       tot het venster vrij van de plaat blijft (de rozet blijft heel in beeld), en wat dan nog
-       niet past, maakt het venster kleiner. Plaat in de eindstand, met de knoppenrij erbij. */
+    /* De tekstplaat bedekt het kijkgat in rust niet (herkeuring PR3): het midden schuift naar
+       rechts tot het gat vrij van de plaat staat, zonder dat het gat buiten beeld valt.
+       Plaat in de eindstand, met de knoppenrij erbij. */
     const plaat = tekst && tekst.offsetWidth ? {
       l: tekst.offsetLeft - beeld!.offsetLeft,
       t: tekst.offsetTop - beeld!.offsetTop,
@@ -357,43 +234,31 @@ function piek(sectie: HTMLElement) {
       plaat
         ? Math.hypot(Math.max(plaat.l - cx, 0, cx - plaat.r), Math.max(plaat.t - cy, 0, cy - plaat.o)) - 16
         : Infinity;
-    const dxMax = Math.max(0, B / 2 - doos / 2 - 0.04 * B);
+    const dxMax = Math.max(0, B / 2 - r0 - 0.04 * B);
     let dx = 0;
     for (let d = 0; d <= dxMax; d += 4) {
       if (vrij(B / 2 + d) > vrij(B / 2 + dx)) dx = d;
-      if (vrij(B / 2 + dx) >= nodig) break;
+      if (vrij(B / 2 + dx) >= r0) break;
     }
     const cx = B / 2 + dx;
-    const ruimte = vrij(cx);
-    /* De inkeping van de kern ligt op 0,75 van de punt: zo ver open dat ook die buiten beeld valt. */
+    /* Elke ruimte gaat schermvullend open (B2: aan het eind beeldvullend). De inkeping van de
+       kern ligt op 0,75 van de punt: zo ver open dat ook die buiten beeld valt. */
     const vol = Math.hypot(Math.max(cx, B - cx), H / 2) / 0.72;
     for (const k of kamers) {
       const eigen = k.eigen[bp] || k.eigen[0] || B;
       const aspect = k.aspect[bp] || k.aspect[0] || B / H;
-      const D = schuif(k, eigen, aspect);
-      /* Nooit groter dan 110 % van de eigen pixels (BIJSTURING-MOEDER ronde 2g). */
-      const maxW = 1.1 * eigen;
-      let W = Math.max(B / (1 - D), H * aspect);
-      /* Het midden en de halve maat van wat het raam moet dekken: het venster of het hele beeld. */
-      let mx = B / 2;
-      let Rx = B / 2;
-      let Ry = H / 2;
-      k.venster = W > maxW;
-      if (k.venster) {
-        /* Te klein voor het hele scherm: de foto blijft in het venster van de rozet. */
-        W = maxW;
-        const R = Math.max(r0, Math.min(wens(W, D, aspect), ruimte));
-        mx = cx;
-        Rx = R;
-        Ry = R;
-        k.sMax = R / r0;
-      } else k.sMax = Math.max(1, vol / r0);
+      /* Zoveel van haar breedte schuift de foto over haar stuk: per tiende van de tijdlijn een
+         tiende, maar hooguit zover dat ze binnen 110 % van haar eigen pixels blijft. Een kleine
+         foto schuift dan niet en wordt alleen zo groot als het scherm vraagt. */
+      const D = Math.min(0.5, k.b - k.a, Math.max(0, 1 - B / (1.1 * eigen)));
+      const W = Math.max(B / (1 - D), H * aspect);
+      k.sMax = Math.max(1, vol / r0);
       const Hf = W / aspect;
       k.raam.style.setProperty('--rw', `${W.toFixed(1)}px`);
       k.raam.style.setProperty('--rh', `${Hf.toFixed(1)}px`);
-      /* Het raam dekt altijd het venster (of het hele beeld): links tussen deze twee grenzen. */
-      const links: [number, number] = [mx + Rx - W, mx - Rx];
-      const boven: [number, number] = [H / 2 + Ry - Hf, H / 2 - Ry];
+      /* Het raam dekt altijd het hele beeld: links tussen deze twee grenzen. */
+      const links: [number, number] = [B - W, 0];
+      const boven: [number, number] = [H - Hf, 0];
       k.x = k.richting > 0 ? [links[1], links[0]] : links;
       const midden = (boven[0] + boven[1]) / 2;
       const zak = Math.min((boven[1] - boven[0]) / 2, 0.03 * Hf);
@@ -476,8 +341,8 @@ function piek(sectie: HTMLElement) {
     const stijl = podium!.style;
     stijl.setProperty('--piek-s', s.toFixed(4));
     stijl.setProperty('--piek-phi', `${wissels.reduce((som, m) => som + 45 * klem((q - m + 0.02) / 0.04), 0).toFixed(2)}deg`);
-    /* De petrol rozet blijft rond een venster staan; gaat het beeld schermvullend, dan wijkt ze. */
-    stijl.setProperty('--piek-rozet-o', (nu?.venster ? 1 : klem(1 - (e - 0.3) / 0.4)).toFixed(3));
+    /* De petrol lijn omlijst het kijkgat; gaat het beeld schermvullend, dan wijkt ze. */
+    stijl.setProperty('--piek-rozet-o', klem(1 - (e - 0.3) / 0.4).toFixed(3));
     for (const k of kamers) {
       const t = klem((q - k.a) / (k.b - k.a));
       const x = k.x[0] + (k.x[1] - k.x[0]) * t;

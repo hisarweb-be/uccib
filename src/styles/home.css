@@ -126,16 +126,70 @@
   flex-direction: column;
   min-height: var(--podium-h);
   padding: 1.25rem var(--blad) 1.5rem;
+  /* De film ligt achter de tekst (z-index -1) maar boven het papier van de sectie. */
+  isolation: isolate;
+  overflow: clip;
+}
+
+/* ── Hero: de film (bijsturing eigenaar 19 nov, B1) ──
+   De film vult het hele eerste scherm. Tot 1024 px is hij bovenaan helder; vanaf de
+   eerste regel tekst ligt er een plaat papier onder de tekst die met een kort verloop
+   begint (`.hero-label::before`, geen filter). Vanaf 1024 px ligt er een verloop van
+   links achter de tekstkolom en een band onderaan achter het uniewoord. Gemeten: elke
+   tekst haalt AA op de donkerste plek van poster en film. */
+.hero-film {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--lijn);
+}
+.hero-film img,
+.hero-video {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--anker-m, 50% 50%);
+}
+.hero-video {
+  opacity: 0;
+  transition: opacity var(--duur-blad) var(--ease-uit);
+}
+.hero-video.is-klaar {
+  opacity: 1;
+}
+.hero-eerste .knop-tweede {
+  background: var(--color-papier);
 }
 
 .hero-label {
   order: 1;
+  position: relative;
   margin: 0;
   font-size: var(--text-label);
   line-height: var(--text-label--line-height);
   letter-spacing: var(--text-label--letter-spacing);
   font-weight: var(--text-label--font-weight);
   color: var(--color-petrol-diep);
+}
+/* De plaat onder de tekst (tot 1024 px): z-index -1 legt hem tussen film en tekst. Papier
+   92 % zoals de tekstplaat van de piek (petrol-diep slechtst 4,86:1). */
+.hero-label::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: -2.5rem;
+  left: calc(-1 * var(--blad));
+  right: calc(-1 * var(--blad));
+  height: 100vmax;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--color-papier) 0%, transparent),
+    color-mix(in srgb, var(--color-papier) 92%, transparent) 2.5rem
+  );
+  pointer-events: none;
 }
 
 .hero-kop {
@@ -177,10 +231,12 @@
 }
 
 .hero-beeld {
-  order: 3;
+  order: 0;
   flex: 1 1 0;
   min-height: 9rem;
-  margin-top: 1rem;
+  /* Het raam loopt tot de randen van het scherm; de rozet staat erin links boven. */
+  margin: -1.25rem calc(-1 * var(--blad)) 1rem;
+  padding: 1.25rem var(--blad) 0;
   container-type: size;
   display: flex;
   align-items: flex-start;
@@ -194,59 +250,6 @@
 }
 .hero-rozet {
   display: none;
-}
-.hero-foto {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  background: var(--lijn);
-}
-.hero-foto img,
-.hero-foto canvas {
-  position: absolute;
-  inset: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: var(--anker-m);
-}
-.hero-foto canvas {
-  opacity: 0;
-}
-.hero-foto canvas.is-klaar {
-  opacity: 1;
-}
-.hero-stip {
-  position: absolute;
-  top: -0.375rem;
-  left: -0.375rem;
-  width: 0.75rem;
-  height: 0.75rem;
-  border-radius: 50%;
-  background: var(--color-petrol);
-}
-/* DESIGNSYSTEEM 7.8: rechtsonder in het beeld, 24 px van de beeldrand. Onder het venster
-   viel de plaat over de intro-alinea (375 en 768 px). */
-.hero-vermelding {
-  position: absolute;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  max-width: calc(100% - 3rem);
-}
-/* De filmregel staat er vanaf het begin in de lay-out, onzichtbaar. Bij de scènestart gaat alleen
-   de dekking aan; het label springt dan niet van één naar twee regels (herkeuring F2b-2). */
-@media (min-height: 35rem) {
-  html.beweging-aan:not(.home-stil) .hero-vermelding .vermelding-film:not(.is-getoond) {
-    display: inline;
-    opacity: 0;
-    visibility: hidden;
-  }
-  html.beweging-aan:not(.home-stil) .hero-vermelding.vermelding-film:not(.is-getoond) {
-    display: flex;
-    opacity: 0;
-    visibility: hidden;
-  }
 }
 
 .hero-intro {
@@ -277,9 +280,9 @@
 }
 
 @media (min-width: 48rem) {
-  .hero-foto img,
-  .hero-foto canvas {
-    object-position: var(--anker-d);
+  .hero-film img,
+  .hero-video {
+    object-position: var(--anker-d, 50% 50%);
   }
 }
 
@@ -357,10 +360,35 @@
   .hero-beeld {
     grid-column: 8 / span 5;
     grid-row: 1 / span 5;
-    margin-top: 0;
+    margin: 0;
+    padding: 0 0 1.5rem;
     min-height: 12rem;
     justify-content: flex-end;
-    padding-bottom: 1.5rem;
+    box-shadow: none;
+  }
+  .hero-label::before {
+    content: none;
+  }
+  /* Breed: de film ligt open rechts; links een verloop papier achter de tekstkolom en
+     onderaan een band achter het uniewoord (dat breder is dan de kolom). */
+  .hero-film::after {
+    --band: calc(var(--unie-blok) + var(--onder));
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(
+        to top,
+        color-mix(in srgb, var(--color-papier) 92%, transparent) 0,
+        color-mix(in srgb, var(--color-papier) 92%, transparent) var(--band),
+        color-mix(in srgb, var(--color-papier) 0%, transparent) calc(var(--band) + 3rem)
+      ),
+      linear-gradient(
+        to right,
+        color-mix(in srgb, var(--color-papier) 92%, transparent) 0%,
+        color-mix(in srgb, var(--color-papier) 88%, transparent) 46%,
+        color-mix(in srgb, var(--color-papier) 0%, transparent) 70%
+      );
   }
   .hero-slot .hero-knoppen {
     max-width: none;
@@ -420,22 +448,9 @@
         scale(var(--fig-s));
       will-change: transform;
     }
-    .hero-foto {
-      background: none;
-      overflow: visible;
-    }
-    .hero-foto img,
-    .hero-foto canvas.is-klaar {
-      clip-path: var(--venster-pad);
-      opacity: clamp(0, 1 - (var(--hero-p) - 0.9) / 0.03, 1);
-    }
-    /* De vermelding hoort bij de film: weg zodra het venster naar het slot verhuist. */
-    .hero-vermelding {
-      opacity: calc(1 - clamp(0, (var(--hero-p) - 0.89) / 0.01, 1));
-    }
-    .hero-stip {
-      transform: scale(calc(1 / var(--fig-s)));
-      opacity: clamp(0, 1 - (var(--hero-p) - 0.26) / 0.04, 1);
+    /* De film vloeit weg als het verhaal begint; hij krimpt nooit. */
+    .hero-film {
+      opacity: var(--weg);
     }
 
     /* De rozet rond het venster: vierkant A valt op de rand van het venster. */
@@ -706,7 +721,9 @@
       margin-bottom: calc(-1 * var(--podium-h));
     }
     .piek-podium {
-      --piek-doos: min(64svh, 80vw);
+      /* De kern van de rozet is 0,376 van de doos breed: met 1,5 keer de kortste vensterzijde is
+         het kijkgat in rust 56 % van die zijde (bijsturing eigenaar 19 nov, B2: minstens 50 %). */
+      --piek-doos: calc(1.5 * min(100vw, 100svh));
       --beeld-h: 100%;
       --lijn-px: 3px;
       position: sticky;
@@ -742,8 +759,8 @@
     .piek-laag {
       opacity: clamp(0, (var(--piek-p) - var(--in, -1)) / 0.01, 1);
     }
-    /* De foto in haar eigen verhouding; maat en plaats zet het script (`meet`, `zet`):
-       nooit breder dan 110 % van haar eigen pixels, verschoven met translate3d. */
+    /* De foto in haar eigen verhouding; maat en plaats zet het script (`meet`, `zet`),
+       verschoven met translate3d. Het schuiven blijft binnen 110 % van haar eigen pixels. */
     .piek-raam {
       position: absolute;
       top: 0;
@@ -751,6 +768,17 @@
       width: var(--rw, 100%);
       height: var(--rh, 100%);
       will-change: transform;
+    }
+    /* Een waas papier van 7 % over de foto (geen filter). Sinds B2 gaat elke ruimte
+       schermvullend open; een donkere ruimte (hout, nis) haalde dan net niet de regel "geen
+       scherm bijna zwart" (59,6 % licht op 1440, lat 60). Met de waas 63 %. */
+    .piek-raam::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--color-papier);
+      opacity: 0.07;
+      pointer-events: none;
     }
     .piek-foto,
     .piek-film {
@@ -815,19 +843,9 @@
     .piek-film.is-klaar {
       opacity: 1;
     }
-    .piek-vermelding {
-      position: absolute;
-      right: 1rem;
-      bottom: 1rem;
-    }
-    /* De vermelding van een ruimte staat er zolang haar foto de bovenste is; de eerste
-       pas als de kern (de foto's) in beeld komt, op p 0,06. `--in`/`--uit` staan inline. */
-    .piek-plek {
-      opacity: clamp(0, min((var(--piek-p) - var(--in, 0.06)) / 0.01, 1 - (var(--piek-p) - var(--uit, 2)) / 0.01), 1);
-    }
-    /* Het venster en de petrol rozet eromheen: dezelfde maat, samen gedraaid en
-       geschaald met transform; de kern van de rozet is de rand van het venster en de
-       lijn blijft even dik (non-scaling-stroke). */
+    /* Het venster en de petrol lijn erom: dezelfde maat, samen gedraaid en geschaald met
+       transform. De lijn is alleen de kern, de rand van het venster: ze omlijst de foto en is
+       nooit groter dan de foto zelf (B2). Ze blijft even dik (non-scaling-stroke). */
     .piek-masker,
     .piek-rozet {
       display: block;
@@ -929,7 +947,6 @@
 @media (min-height: 35rem) and (max-width: 47.9375rem) {
   html.beweging-aan:not(.home-stil) {
     .piek-podium {
-      --piek-doos: min(48svh, 92vw);
       --beeld-h: min(68%, calc(100% - 14rem));
       --lijn-px: 2px;
     }
@@ -969,12 +986,6 @@
     .piek-tekst .piek-knoppen .knop {
       padding: 0 1.5rem;
     }
-    /* Rechtsboven: vrij van de tekstplaat linksonder en van de WhatsApp-knop rechtsonder. */
-    .piek-vermelding {
-      top: 1rem;
-      right: var(--blad);
-      bottom: auto;
-    }
   }
 }
 
@@ -1001,7 +1012,8 @@
 @media (max-width: 47.9375rem) and (max-height: 43.75rem) {
   .hero-beeld {
     min-height: 5.5rem;
-    margin-top: 0.75rem;
+    margin: -1rem calc(-1 * var(--blad)) 0.75rem;
+    padding-top: 1rem;
   }
   .hero-intro,
   .hero-eerste .hero-knoppen {

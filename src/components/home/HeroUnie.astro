@@ -7,20 +7,24 @@
  * - zonder JavaScript of met beperkte beweging: het eerste scherm, daaronder vijf
  *   sleutelbeelden (rozet per stand met klokwoord, kop en zin) en de twee knoppen;
  * - met beweging: hetzelfde eerste scherm staat vast, `--hero-p` (0 tot 1 over
- *   3 schermhoogten) tekent de rozet rond het venster en wisselt de fasetekst;
- * - met een echt manifest: de frame-reeks van `h1` loopt in hetzelfde venster.
+ *   3 schermhoogten) laat de film wegvloeien, tekent de rozet en wisselt de fasetekst.
+ *
+ * De film (bijsturing eigenaar 19 nov, B1) is het hoofdbeeld van het eerste
+ * scherm: hij vult het hele eerste scherm achter de tekst, zonder bijschrift. De
+ * poster is het LCP-beeld (gewone `<img>` met de maten uit het manifest); de
+ * video heeft `preload="none"` en geen bron: `start.ts` zet de bron pas na
+ * `load` in rust, alleen met beweging en zonder zuinige verbinding. Zonder
+ * JavaScript of met minder beweging blijft de poster staan, even groot.
  *
  * Alle standen staan in `src/styles/home.css` als functie van `--hero-p`; het
  * script (`src/scripts/home/scene.ts`) zet alleen die variabele en een paar maten.
- * De poster is het LCP-beeld: gewone `<img>` met de maten uit het manifest.
  */
-import MediaVermelding from '../MediaVermelding.astro';
 import Sleutelbeelden, { type Sleutelrij } from '../Sleutelbeelden.astro';
 import type { RozetStand } from '../Rozet.astro';
 import { getDictionary, type Locale } from '../../i18n';
 import { f3 } from '../../i18n/f3';
-import { alt, anker, poster, reeks } from '../../lib/media';
-import { R, KERN_PUNT, KERN_INKEPING, hoeken, lijnen } from './rozetpad';
+import { alt, anker, film, poster } from '../../lib/media';
+import { lijnen } from './rozetpad';
 
 interface Props {
   locale: Locale;
@@ -55,29 +59,10 @@ if (kop.endsWith(` ${woord}`)) {
 
 const posterD = poster('h1', 'd');
 const posterM = poster('h1', 'm');
-const reeksD = reeks('h1', 'd');
-const reeksM = reeks('h1', 'm');
-
-/**
- * Het venster krimpt in fase 5 van vierkant naar de kern van de rozet. Zestien
- * punten, elk een rechte lijn tussen zijn plek op de vierkantsrand (k = 0) en zijn
- * plek op de kernster in de logostand (k = 1). Percentages van het venster.
- */
-const zijde = 2 * R * Math.SQRT1_2;
-const kernBuiten = ((R * KERN_PUNT) / zijde) * 100;
-const kernBinnen = ((R * KERN_INKEPING) / zijde) * 100;
-const vensterPad = hoeken(0, 22.5, 16)
-  .map((graden, i) => {
-    const a = (graden * Math.PI) / 180;
-    const c = Math.cos(a);
-    const s = Math.sin(a);
-    const vier = 50 / Math.max(Math.abs(c), Math.abs(s));
-    const doel = i % 2 === 1 ? kernBuiten : kernBinnen;
-    const x = (straal: number) => (straal * c).toFixed(3);
-    const y = (straal: number) => (-straal * s).toFixed(3);
-    return `calc(50% + ${x(vier)}% + ${x(doel - vier)}% * var(--hero-k)) calc(50% + ${y(vier)}% + ${y(doel - vier)}% * var(--hero-k))`;
-  })
-  .join(', ');
+const filmD = film('h1', 'd');
+const filmM = film('h1', 'm');
+/** Telefoon of staand venster: de smalle 4:5-versie (zelfde vraag voor poster en film). */
+const SMAL = '(max-width: 47.9375rem), (orientation: portrait)';
 
 const STANDEN: RozetStand[] = ['cirkel', 'vierkant', 'acht-punten', 'vlecht', 'vol'];
 const rijen: Sleutelrij[] = teksten.mijlpalen.slice(0, 5).map((mijlpaal, i) => ({
@@ -106,6 +91,44 @@ const FASEN = [
   <div class="sh-maat" aria-hidden="true"></div>
   <div class="hero-podium">
     <div class="hero-eerste">
+      <div class="hero-film">
+        <picture>
+          {posterM.avif ? <source media={SMAL} type="image/avif" srcset={posterM.avif} /> : null}
+          <source media={SMAL} srcset={posterM.pad} />
+          {posterD.avif ? <source type="image/avif" srcset={posterD.avif} /> : null}
+          <img
+            data-shot="h1"
+            src={posterD.pad}
+            width={posterD.breedte}
+            height={posterD.hoogte}
+            alt={alt('h1', locale)}
+            fetchpriority="high"
+            loading="eager"
+            decoding="async"
+            style={`--anker-d:${anker('h1', 'd')};--anker-m:${anker('h1', 'm')}`}
+          />
+        </picture>
+        {
+          filmD || filmM ? (
+            <video
+              class="hero-video"
+              muted
+              loop
+              autoplay
+              playsinline
+              preload="none"
+              aria-hidden="true"
+              tabindex="-1"
+              disablepictureinpicture
+              data-smal={SMAL}
+              data-d-mp4={filmD?.pad}
+              data-d-webm={filmD?.webm}
+              data-m-mp4={filmM?.pad}
+              data-m-webm={filmM?.webm}
+            />
+          ) : null
+        }
+      </div>
       <p class="hero-label hero-weg">{teksten.heroKlein}</p>
       <h1 class="hero-kop">
         {
@@ -128,7 +151,7 @@ const FASEN = [
         <a class="knop knop-tweede" href="#contact">{teksten.contactKop}</a>
       </div>
       <div class="hero-beeld">
-        <figure class="hero-venster" data-hero-venster>
+        <figure class="hero-venster" data-hero-venster aria-hidden="true">
           <svg class="hero-rozet" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
             <g class="hero-vlakken">
               <path class="vlak-buiten" d={lijnen.buitenster}></path>
@@ -147,40 +170,6 @@ const FASEN = [
               ))
             }
           </svg>
-          <div class="hero-foto" style={`--venster-pad: polygon(${vensterPad})`}>
-            <picture>
-              {
-                posterM.avif ? (
-                  <source media="(max-width: 47.9375rem)" type="image/avif" srcset={posterM.avif} />
-                ) : null
-              }
-              <source media="(max-width: 47.9375rem)" srcset={posterM.pad} />
-              {posterD.avif ? <source type="image/avif" srcset={posterD.avif} /> : null}
-              <img
-                data-shot="h1"
-                src={posterD.pad}
-                width={posterD.breedte}
-                height={posterD.hoogte}
-                alt={alt('h1', locale)}
-                fetchpriority="high"
-                loading="eager"
-                decoding="async"
-                style={`--anker-d:${anker('h1', 'd')};--anker-m:${anker('h1', 'm')}`}
-              />
-            </picture>
-            {
-              reeksD || reeksM ? (
-                <canvas
-                  class="hero-reeks"
-                  data-reeks-d={reeksD ? JSON.stringify(reeksD) : undefined}
-                  data-reeks-m={reeksM ? JSON.stringify(reeksM) : undefined}
-                  aria-hidden="true"
-                />
-              ) : null
-            }
-          </div>
-          <span class="hero-stip" aria-hidden="true"></span>
-          <MediaVermelding shot="h1" locale={locale} class="hero-vermelding" />
         </figure>
       </div>
     </div>

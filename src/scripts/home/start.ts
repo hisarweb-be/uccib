@@ -79,5 +79,54 @@ function naLoad() {
   requestAnimationFrame(() => setTimeout(() => window.scrollY > 0 && bijIntentie(), 0));
 }
 
-if (document.readyState === 'complete') naLoad();
-else window.addEventListener('load', naLoad, { once: true });
+interface Verbinding {
+  saveData?: boolean;
+  effectiveType?: string;
+}
+
+/**
+ * De film van de hero (bijsturing eigenaar 19 nov, B1). Hij speelt vanzelf, los
+ * van de scène, maar pas na `load` in rust: de poster blijft het LCP-beeld en de
+ * video (`preload="none"`, zonder bron in de HTML) valt buiten het eerste beeld.
+ * Zonder beweging of op een zuinige verbinding blijft de poster staan. De video
+ * wordt pas zichtbaar als hij echt speelt; tot dan staat de poster eronder.
+ */
+function heroFilm() {
+  if (!wortel.classList.contains('beweging-aan')) return;
+  const verbinding = (navigator as Navigator & { connection?: Verbinding }).connection;
+  if (verbinding?.saveData || /(^|-)(2g|3g)$/.test(verbinding?.effectiveType ?? '')) return;
+  const video = document.querySelector<HTMLVideoElement>('video.hero-video');
+  if (!video) return;
+  const smal = window.matchMedia(video.dataset.smal ?? '(max-width: 47.9375rem)').matches;
+  const d = video.dataset;
+  const paar = (bp: 'd' | 'm') => [d[`${bp}Webm`], d[`${bp}Mp4`]].filter((pad): pad is string => Boolean(pad));
+  const bronnen = smal && paar('m').length ? paar('m') : paar('d');
+  if (!bronnen.length) return;
+  for (const pad of bronnen) {
+    const bron = document.createElement('source');
+    bron.src = pad;
+    bron.type = pad.endsWith('.webm') ? 'video/webm' : 'video/mp4';
+    video.append(bron);
+  }
+  video.addEventListener('playing', () => video.classList.add('is-klaar'), { once: true });
+  video.muted = true;
+  video.load();
+  video.play()?.catch(() => {
+    /* Autoplay geweigerd (energiebesparing): de poster blijft staan. */
+  });
+}
+
+function inRust(doe: () => void) {
+  const rust = (window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number })
+    .requestIdleCallback;
+  if (rust) rust(doe, { timeout: 2000 });
+  else setTimeout(doe, 200);
+}
+
+function bijLoad() {
+  naLoad();
+  inRust(heroFilm);
+}
+
+if (document.readyState === 'complete') bijLoad();
+else window.addEventListener('load', bijLoad, { once: true });

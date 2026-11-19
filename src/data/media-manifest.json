@@ -4,8 +4,8 @@
     {
       "shot": "h1",
       "sectie": "hero-unie",
-      "rol": "scrub",
-      "vorm": "frames",
+      "rol": "lus",
+      "vorm": "video",
       "bron": "MESCIT-1.jpg",
       "bewerkt": true,
       "retouche": [
@@ -28,14 +28,14 @@
       },
       "uitsnede": {
         "d": {
-          "vorm": "1:1",
-          "x": 0.0813,
-          "breedte": 0.5625
+          "vorm": "16:9",
+          "x": 0,
+          "breedte": 1
         },
         "m": {
-          "vorm": "1:1",
-          "x": 0.0813,
-          "breedte": 0.5625
+          "vorm": "4:5",
+          "x": 0.2375,
+          "breedte": 0.54
         }
       },
       "anker": {
@@ -64,56 +64,56 @@
       "status": "geleverd",
       "bestanden": {
         "d": {
-          "film": null,
-          "reeks": {
-            "map": "/media/wow/h1-d/",
-            "patroon": "f-%04d.webp",
-            "aantal": 52,
-            "breedte": 640,
-            "hoogte": 640,
-            "fps": 13,
-            "duur": 4,
-            "gewicht": 1793916
+          "film": {
+            "pad": "/media/wow/h1-d.mp4",
+            "breedte": 1280,
+            "hoogte": 720,
+            "gewicht": 1313961,
+            "fps": 24,
+            "frames": 190,
+            "duur": 7.92,
+            "webm": "/media/wow/h1-d.webm"
           },
+          "reeks": null,
           "poster": {
             "pad": "/media/wow/h1-d-poster.webp",
-            "breedte": 640,
-            "hoogte": 640,
-            "gewicht": 51194,
+            "breedte": 1280,
+            "hoogte": 720,
+            "gewicht": 83470,
             "avif": "/media/wow/h1-d-poster.avif"
           },
           "frame0": {
             "pad": "/media/wow/h1-d-frame0.webp",
-            "breedte": 640,
-            "hoogte": 640,
-            "gewicht": 51194
+            "breedte": 1280,
+            "hoogte": 720,
+            "gewicht": 83470
           },
           "eind": null
         },
         "m": {
-          "film": null,
-          "reeks": {
-            "map": "/media/wow/h1-m/",
-            "patroon": "f-%04d.webp",
-            "aantal": 52,
-            "breedte": 480,
-            "hoogte": 480,
-            "fps": 13,
-            "duur": 4,
-            "gewicht": 877400
+          "film": {
+            "pad": "/media/wow/h1-m.mp4",
+            "breedte": 720,
+            "hoogte": 900,
+            "gewicht": 946313,
+            "fps": 24,
+            "frames": 190,
+            "duur": 7.92,
+            "webm": "/media/wow/h1-m.webm"
           },
+          "reeks": null,
           "poster": {
             "pad": "/media/wow/h1-m-poster.webp",
-            "breedte": 480,
-            "hoogte": 480,
-            "gewicht": 31264,
+            "breedte": 720,
+            "hoogte": 900,
+            "gewicht": 52454,
             "avif": "/media/wow/h1-m-poster.avif"
           },
           "frame0": {
             "pad": "/media/wow/h1-m-frame0.webp",
-            "breedte": 480,
-            "hoogte": 480,
-            "gewicht": 31264
+            "breedte": 720,
+            "hoogte": 900,
+            "gewicht": 52454
           },
           "eind": null
         }

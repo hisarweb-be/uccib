@@ -27,6 +27,8 @@ Sitede yer alan hiçbir şey bir teklif, bir sözleşme veya hukuki danışmanl�
 
 Sitedeki metinler, fotoğraflar, logo ve tasarım UCCIB derneğine aittir. Bu materyalleri kaynak göstererek ve değiştirmeden kullanabilirsiniz. Ticari kullanım veya tam kopyalama için önceden yazılı izin gerekir. İzni info@uccib.com adresinden isteyin.
 
+Bu sitedeki bazı fotoğraflar rötuşlanmıştır; ana sayfadaki filmler ise mekânlarımızın gerçek fotoğraflarından yapay zekâ ile üretilmiştir.
+
 ## (4) Bağlantılar
 
 Sitemiz başka web sitelerine bağlantı verebilir. Onları biz yönetmiyoruz ve içeriklerinden sorumlu değiliz. Bir bağlantıya tıkladığınızda o sitenin kendi gizlilik ve çerez kuralları geçerli olur.
@@ -39,4 +41,4 @@ Bu künye Belçika hukukuna tabidir. Bir anlaşmazlıkta Brüksel mahkemeleri ye
 
 Bu sayfanın en son sürümü her zaman bu adreste yayımlanır. Metin değiştiğinde güncelleme tarihini de değiştiririz.
 
-Son güncelleme: 17 Kasım 2026. Sorularınız için info@uccib.com adresine yazabilirsiniz.
+Son güncelleme: 19 Kasım 2026. Sorularınız için info@uccib.com adresine yazabilirsiniz.
