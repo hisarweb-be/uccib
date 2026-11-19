@@ -13,7 +13,7 @@ Ce site, uccib.com, est publié par l'Union des Centres Culturels Islamiques de 
 - Siège (BCE) : Rue Charles Demeer 1-3, 1020 Bruxelles, Belgique
 - Adresse de visite : Rue Charles Demeer 3, 1020 Bruxelles, Belgique
 - Numéro d'entreprise (BCE) : BE 0843.891.981
-- E-mail : contact@hisarweb.be
+- E-mail : info@uccib.com
 - Téléphone : +32 493 344 665
 
 ## (2) Responsabilité
@@ -24,7 +24,7 @@ Rien sur ce site ne constitue une offre, un contrat ou un conseil juridique. Pou
 
 ## (3) Propriété intellectuelle
 
-Les textes, les photos, le logo et le design de ce site appartiennent à l'UCCIB. Vous pouvez les utiliser en mentionnant la source et sans les modifier. Pour un usage commercial ou une reprise complète, une autorisation écrite préalable est nécessaire. Demandez-la via contact@hisarweb.be.
+Les textes, les photos, le logo et le design de ce site appartiennent à l'UCCIB. Vous pouvez les utiliser en mentionnant la source et sans les modifier. Pour un usage commercial ou une reprise complète, une autorisation écrite préalable est nécessaire. Demandez-la via info@uccib.com.
 
 Certaines photos de ce site sont retouchées, et les films de la page d'accueil sont générés par IA à partir de vraies photos de nos espaces.
 
@@ -40,4 +40,4 @@ Ces mentions relèvent du droit belge. En cas de litige, les tribunaux de Bruxel
 
 La version la plus récente de cette page se trouve toujours à cette adresse. Si le texte change, nous adaptons la date.
 
-Dernière mise à jour : 19 novembre 2026. Une question ? Écrivez à contact@hisarweb.be.
+Dernière mise à jour : 19 novembre 2026. Une question ? Écrivez à info@uccib.com.
