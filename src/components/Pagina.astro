@@ -83,7 +83,8 @@ const EIGEN_SECTIES: ReadonlySet<Slug> = new Set(['hizmetlerimiz']);
 /**
  * De vier ledendiensten krijgen hun inhoud uit een eigen collectie in plaats
  * van uit de body van de pagina. `LedenDienst` toont alleen wat de vereniging
- * zelf heeft ingevuld; staat er niets, dan toont het onderdeel niets.
+ * zelf heeft ingevuld; staat er niets, dan toont het alleen de body van de
+ * pagina (de binnenkort-zin) en anders nooit (F3 PR C, C0b).
  */
 const LEDEN_SLUGS = [
   'subelerimiz',
@@ -293,8 +294,15 @@ const ngo =
               {teksten.juridischNoot}
             </p>
           ) : null}
-          {isLedenSlug(slug) ? <LedenDienst slug={slug} locale={locale} /> : null}
-          {heeftBody && !EIGEN_SECTIES.has(slug) ? (
+          {isLedenSlug(slug) ? (
+            <LedenDienst slug={slug} locale={locale}>
+              {heeftBody ? (
+                <div class="tekst">
+                  <Content />
+                </div>
+              ) : null}
+            </LedenDienst>
+          ) : heeftBody && !EIGEN_SECTIES.has(slug) ? (
             <div class="tekst">
               <Content />
             </div>

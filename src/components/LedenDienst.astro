@@ -11,13 +11,17 @@
  * Vormtaal (DESIGNSYSTEEM 7.4, 7.6, 7.7): dezelfde als `CmsBlokOfNiets`. Geen eigen
  * sectiekop (de h1 van de pagina is de kop; de naam van elke regel is een h2,
  * de sectie heeft een aria-label), een `ul` van regels tussen haarlijnen, geen kaartvak, geen
- * achtergrondvlak, geen pictogram. Leeg levert dit onderdeel geen enkel element
+ * achtergrondvlak, geen pictogram. Leeg levert dit onderdeel zelf geen enkel element
  * op: geen sectie, geen kop, geen marge.
  *
  * Geen kaartbeeld, geen tegels en geen coördinaten in beeld (BIJSTURING 1b). Een
  * vestiging met een straat krijgt één gewone routelink naar de zoekpagina van
  * OpenStreetMap; zonder straat is er geen link. `lat` en `lng` uit het CMS
  * worden hier bewust niet gelezen.
+ *
+ * Leeg toont dit onderdeel alleen zijn slot: de body van de pagina met de
+ * binnenkort-zin. Met echte rijen valt die zin weg, zodat "yakında" nooit onder
+ * echte gegevens staat (F3 PR C, C0b).
  *
  * De vier pagina's staan in `src/content/paginas/tr/*.md` op `active: false`; die
  * schakelaar is en blijft de enige knop. Dit onderdeel zet niets aan.
@@ -167,6 +171,7 @@ const [nieuwsteVakit, ...oudereVakitler] = vakitler;
 const [nieuwsteHutbe, ...oudereHutbeler] = hutbeler;
 ---
 
+{leeg ? <slot /> : null}
 {
   !leeg && (
     <section id={id} class="leden" aria-label={kop}>
