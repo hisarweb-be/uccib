@@ -145,8 +145,8 @@ const hutbeler = defineCollection({
 });
 
 /**
- * `kerngegevens`: één bestand, `src/data/kerngegevens.json`, met de wettelijke
- * gegevens van de vereniging (openingsuren, KBO, rechtsvorm, zetel, coördinaten).
+ * `kerngegevens`: één bestand, `src/data/kerngegevens.json`, met openingsuren,
+ * KBO, rechtsvorm en coördinaten (naam en zetel staan in `src/data/rechtspersoon.json`).
  * Leeg betekent: niet tonen. Het CMS bewerkt het als files-collectie "Kerngegevens";
  * dit schema laat de bouw falen als het bestand een ongeldig veld krijgt. De
  * pagina's lezen het JSON-bestand zelf; de collectie is de controle.
@@ -158,12 +158,7 @@ const kerngegevens = defineCollection({
   schema: z.object({
     openingsuren: z.string().default(''),
     kbo: z.string().default(''),
-    naam: z.string().default(''),
-    afkorting: z.string().default(''),
     rechtsvorm: z.string().default(''),
-    rechtsvormFr: z.string().default(''),
-    zetel: z.string().default(''),
-    zetelFr: z.string().default(''),
     lat: coordinaat,
     lng: coordinaat,
   }),
