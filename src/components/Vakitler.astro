@@ -89,8 +89,16 @@ const kort = (datum: string): string => {
  * De dagen die de weektabel toont. De bron levert er drie (gisteren, vandaag,
  * morgen), dus "zeven dagen" boven een tabel van drie is een belofte die we niet
  * houden. Daarom zegt de tabelkop welke dagen er echt in staan.
+ *
+ * Het venster begint bij gisteren en niet bij de eerste dag in het bestand:
+ * `scripts/lever-vakitler.mjs` bewaart tot negen dagen (elke bouw voegt de nieuwe
+ * dagen bij de oude), en de bron levert er drie. Zodra dat bestand meer dan zeven
+ * dagen bevat, nam `slice(0, 7)` de zeven oudste en viel de kolom van vandaag
+ * buiten de tabel. Met dit venster schuift de tabel mee met de dag.
  */
-const tabelDagen = dagen.slice(0, 7);
+const vandaagIndex = vandaag ? dagen.findIndex((dag) => dag.datum === vandaag.datum) : 0;
+const tabelStart = Math.max(0, vandaagIndex - 1);
+const tabelDagen = dagen.slice(tabelStart, tabelStart + 7);
 const eersteDag = tabelDagen[0];
 const laatsteDag = tabelDagen[tabelDagen.length - 1];
 const tabelKop =
@@ -177,8 +185,15 @@ const opgehaaldTekst = opgehaald && !Number.isNaN(opgehaald.getTime())
             </p>
             <p class="vakit-volgend-tijd">
               <span data-vakit-tijd>{volgende ? klok(volgende.moment.toISOString()) : ''}</span>
+              {/*
+                Zonder JavaScript kan de klok niet aftellen: die rekent in de
+                browser. Er stond hier "nog geen tijd bekend" terwijl de tijd
+                ernaast wel degelijk bekend was, en dat is een tegenspraak op
+                het scherm. Nu staat er alleen tekst als er echt geen volgende
+                tijd is; met JavaScript vult het script de aftelling meteen.
+              */}
               <span class="vakit-klok" data-vakit-klok aria-live="off">
-                {teksten.nogNiet}
+                {volgende ? '' : teksten.nogNiet}
               </span>
             </p>
           </div>

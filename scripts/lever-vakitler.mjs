@@ -105,7 +105,33 @@ if (gelukt === 0 && Object.keys(steden).length === 0) {
   process.exit(0);
 }
 
+/*
+ * Alleen schrijven als de tijden echt veranderd zijn.
+ *
+ * `opgehaald` is de tijd van het ophalen, en die verandert bij elke bouw. Zonder
+ * deze vergelijking stond `src/data/vakitler.json` na elke `npm run build` in de
+ * werkmap: een gewijzigd bestand dat niets nieuws zei. Dat leverde ruis in elke
+ * diff en een botsing tussen twee werkbomen die allebei bouwden (gemeten 19-11:
+ * een bouw in deze werkboom overschreef de versie van de andere). De tijden zelf
+ * zijn de enige inhoud die telt; is er niets nieuws, dan blijft het bestand -
+ * inclusief zijn eerlijke ophaalmoment - staan.
+ */
+const kern = (bestand) =>
+  JSON.stringify({
+    tijdstreep: bestand?.tijdstreep,
+    steden: Object.fromEntries(
+      Object.entries(bestand?.steden ?? {}).map(([slug, stad]) => [
+        slug,
+        { bron: stad?.bron, dagen: stad?.dagen },
+      ]),
+    ),
+  });
+
 const inhoud = { tijdstreep: 'Europe/Brussels', opgehaald: nu, steden };
+if (oud && kern(oud) === kern(inhoud)) {
+  console.log('[vakitler] de tijden zijn gelijk aan het bestand; niets geschreven.');
+  process.exit(0);
+}
 writeFileSync(DOEL, JSON.stringify(inhoud, null, 2) + '\n', 'utf8');
 
 const dagenVan = (slug) => steden[slug]?.dagen ?? [];
