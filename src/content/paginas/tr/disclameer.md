@@ -14,7 +14,7 @@ Bu web sitesi uccib.com, kamu yararına vakıf (stichting van openbaar nut) Unio
 - Kayıtlı merkez (KBO): Charles Demeerstraat 1-3, 1020 Brüksel, Belçika
 - Ziyaret adresi: Rue Charles Demeer 3, 1020 Brüksel, Belçika
 - Kayıt numarası (KBO/BTW): BE 0843.891.981
-- E-posta: info@uccib.com
+- E-posta: contact@hisarweb.be
 - Telefon: +32 493 344 665
 
 ## (2) Sorumluluk reddi
@@ -25,7 +25,7 @@ Sitede yer alan hiçbir şey bir teklif, bir sözleşme veya hukuki danışmanl�
 
 ## (3) Fikri mülkiyet
 
-Sitedeki metinler, fotoğraflar, logo ve tasarım UCCIB derneğine aittir. Bu materyalleri kaynak göstererek ve değiştirmeden kullanabilirsiniz. Ticari kullanım veya tam kopyalama için önceden yazılı izin gerekir. İzni info@uccib.com adresinden isteyin.
+Sitedeki metinler, fotoğraflar, logo ve tasarım UCCIB derneğine aittir. Bu materyalleri kaynak göstererek ve değiştirmeden kullanabilirsiniz. Ticari kullanım veya tam kopyalama için önceden yazılı izin gerekir. İzni contact@hisarweb.be adresinden isteyin.
 
 Bu sitedeki bazı fotoğraflar rötuşlanmıştır; ana sayfadaki filmler ise mekânlarımızın gerçek fotoğraflarından yapay zekâ ile üretilmiştir.
 
@@ -41,4 +41,4 @@ Bu künye Belçika hukukuna tabidir. Bir anlaşmazlıkta Brüksel mahkemeleri ye
 
 Bu sayfanın en son sürümü her zaman bu adreste yayımlanır. Metin değiştiğinde güncelleme tarihini de değiştiririz.
 
-Son güncelleme: 19 Kasım 2026. Sorularınız için info@uccib.com adresine yazabilirsiniz.
+Son güncelleme: 19 Kasım 2026. Sorularınız için contact@hisarweb.be adresine yazabilirsiniz.

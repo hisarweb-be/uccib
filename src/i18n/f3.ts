@@ -217,7 +217,7 @@ const TR: F3Teksten = {
   whatsappLabel: 'WhatsApp’tan yazın',
   whatsappAria: 'WhatsApp sohbetini aç',
   juridischNoot:
-    'Bu hukuki metin 19 Kasım 2026 tarihinde güncellenmiştir. Sorularınız için info@uccib.com adresine yazabilirsiniz.',
+    'Bu hukuki metin 19 Kasım 2026 tarihinde güncellenmiştir. Sorularınız için contact@hisarweb.be adresine yazabilirsiniz.',
   leeg: {
     subelerimiz: {
       titel: 'Şube bilgileri hazırlanıyor',
@@ -385,7 +385,7 @@ const NL: F3Teksten = {
   whatsappLabel: 'Stuur een WhatsApp',
   whatsappAria: 'Open de WhatsApp-gesprek',
   juridischNoot:
-    'Deze juridische tekst is bijgewerkt op 19 november 2026. Vragen? Schrijf naar info@uccib.com.',
+    'Deze juridische tekst is bijgewerkt op 19 november 2026. Vragen? Schrijf naar contact@hisarweb.be.',
   leeg: {
     subelerimiz: {
       titel: 'De afdelingen worden aangevuld',
@@ -553,7 +553,7 @@ const FR: F3Teksten = {
   whatsappLabel: 'Écrire sur WhatsApp',
   whatsappAria: 'Ouvrir la conversation WhatsApp',
   juridischNoot:
-    'Ce texte juridique a été mis à jour le 19 novembre 2026. Une question ? Écrivez à info@uccib.com.',
+    'Ce texte juridique a été mis à jour le 19 novembre 2026. Une question ? Écrivez à contact@hisarweb.be.',
   leeg: {
     subelerimiz: {
       titel: 'Les sections sont en cours de complétion',

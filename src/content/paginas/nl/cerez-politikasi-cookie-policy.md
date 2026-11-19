@@ -12,7 +12,7 @@ uccib.com plaatst geen cookies. Wij bewaren geen gegevens in uw browser, wij vol
 
 ## (1) Verantwoordelijke
 
-Union des Centres Culturels Islamiques de Belgique (UCCIB), stichting van openbaar nut. Zetel Charles Demeerstraat 1-3, 1020 Brussel; bezoekadres Rue Charles Demeer 3, 1020 Brussel, België. Ondernemingsnummer BE 0843.891.981. E-mail info@uccib.com, telefoon +32 493 344 665.
+Union des Centres Culturels Islamiques de Belgique (UCCIB), stichting van openbaar nut. Zetel Charles Demeerstraat 1-3, 1020 Brussel; bezoekadres Rue Charles Demeer 3, 1020 Brussel, België. Ondernemingsnummer BE 0843.891.981. E-mail contact@hisarweb.be, telefoon +32 493 344 665.
 
 ## (2) Wat wij op de site meten
 
@@ -38,10 +38,10 @@ De WhatsApp-knop en de routelink op deze site zijn gewone links. Er staat geen i
 
 ## (6) Uw rechten
 
-U hebt het recht om informatie te vragen over uw persoonsgegevens, om ze te laten verbeteren of wissen en om bezwaar te maken tegen de verwerking. Schrijf daarvoor naar info@uccib.com. Wij antwoorden binnen een maand. Lost dat niets op, dan kunt u klagen bij de Belgische Gegevensbeschermingsautoriteit, Drukpersstraat 35, 1000 Brussel.
+U hebt het recht om informatie te vragen over uw persoonsgegevens, om ze te laten verbeteren of wissen en om bezwaar te maken tegen de verwerking. Schrijf daarvoor naar contact@hisarweb.be. Wij antwoorden binnen een maand. Lost dat niets op, dan kunt u klagen bij de Belgische Gegevensbeschermingsautoriteit, Drukpersstraat 35, 1000 Brussel.
 
 ## (7) Wijzigingen
 
 De meest recente versie van deze pagina staat altijd op dit adres. Voegen wij ooit een functie toe die gegevens bewaart, dan wordt deze pagina eerst bijgewerkt.
 
-Laatst bijgewerkt: 17 november 2026. Vragen? Schrijf naar info@uccib.com.
+Laatst bijgewerkt: 17 november 2026. Vragen? Schrijf naar contact@hisarweb.be.

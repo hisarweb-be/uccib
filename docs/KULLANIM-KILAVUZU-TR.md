@@ -27,18 +27,21 @@ taşındığında bu kılavuzdaki adresler `uccib.com` olarak değişecek; yapı
 1. Tarayıcıyı açın (Chrome, Edge veya Safari).
 2. Adres çubuğuna şunu yazın: `https://uccib.pages.dev/admin/`
 3. Ekranda iki seçenek çıkar:
-   - **Sign In with GitHub**
-   - **Sign In Using Access Token**
-4. Şu an geçerli olan yol **Sign In Using Access Token**: size bir kez verilen uzun harf dizisini (token) buraya
-   yapıştırırsınız ve giriş yaparsınız. Token bir şifre gibidir, kimseyle paylaşılmaz.
+   - **Sign In with GitHub** (önerilen)
+   - **Sign In Using Access Token** (yedek yol)
+4. **Sign In with GitHub** düğmesine basın. Küçük bir pencere açılır; kendi GitHub hesabınızla giriş yaparsınız.
+   Bir kez yapılır: sonraki girişlerde tarayıcı sizi hatırlar. Token yazmanız gerekmez.
 5. Giriş yaptıktan sonra sol tarafta menü görünür: **Sayfalar**, **Bağış tutarları**, **Şubeler**, **Bölge dernekleri**,
    **Namaz vakitleri**, **Cuma hutbeleri**, **Kerngegevens**.
 
    Bazı başlıkların yanında parantez içinde Felemenkçe bir kelime görünür (örnek: "Şubeler (vestigingen)"). Bu yalnızca
    menünün iç adıdır, sizi ilgilendirmez. Parantezden önceki Türkçe ad geçerlidir.
 
-Not: **Sign In with GitHub** düğmesi kısa süre içinde çalışacak. O zaman token'a hiç gerek kalmayacak, kendi GitHub
-hesabınızla tek tıkla gireceksiniz. Bu değişiklik hazır olduğunda size ayrıca haber verilecek.
+GitHub düğmesi bir gün çalışmazsa: **Sign In Using Access Token** yolunu kullanın. Size bir kez verilen uzun harf
+dizisini kutuya yapıştırırsınız. Token bir şifre gibidir, kimseyle paylaşılmaz.
+
+Önemli: giriş yaptığınız GitHub hesabının `hisarweb-be/uccib` deposunda **yazma yetkisi** olmalıdır. Bu yetki bir kez
+verilir; kimin gireceğini bize iletin, yetkiyi biz veririz.
 
 ---
 
@@ -98,7 +101,7 @@ Not: **Yayında** anahtarı üç dil için birdendir. Bir kez açarsınız, Tür
 4. **Save**'e basın.
 
 Aynı yöntem **Bölge dernekleri** için de geçerlidir; orada ayrıca **Bölge veya şehir**, **Kısa tanıtım**,
-**İlgili kişi** ve **Web sitesi** (https:// ile başlayan tam adres) alanları vardır. Enlem ve boylam orada da isteğe
+**İlgili kişi** (ad ve telefon) ve **Web sitesi** (https:// ile başlayan tam adres) alanları vardır. Enlem ve boylam orada da isteğe
 bağlıdır.
 
 **Namaz vakitleri** ve **Cuma hutbeleri** ayrı bölümlerdedir: aylık çizelge veya hutbe metni eklenir. Cuma hutbesinde
@@ -177,7 +180,7 @@ ziyaretçiler için doğru dil her zaman daha iyidir.
 
 Her kayıt bir "sürüm" olarak saklanır. Geri almak mümkündür:
 
-1. Bize tek bir e-posta yazın: **info@uccib.com**. Konu: "Geri alma".
+1. Bize tek bir e-posta yazın: **contact@hisarweb.be**. Konu: "UCCIB geri alma".
 2. Yazın: hangi sayfa, hangi tarih ve saat, ne yapmak istiyorsunuz.
 3. Değişiklik 1 iş günü içinde geri alınır.
 
@@ -202,7 +205,8 @@ sayfaların içeriğini ise siz serbestçe değiştirebilirsiniz.
 C: Fotoğrafın boyutu 10 MB'dan büyükse küçültün. Yine olmazsa farklı bir tarayıcı deneyin.
 
 **S: Şifremi unuttum.**
-C: Giriş için kullanılan token yenilenir; bize yazın, yenisini iletelim.
+C: GitHub girişinde şifre sizde kalır, biz göremeyiz. GitHub şifrenizi unuttuysanız github.com üzerinden
+sıfırlarsınız. Yedek yolu (Access Token) kullanıyorsanız token yenilenir; bize yazın, yenisini iletelim.
 
 **S: Telefonla düzenleyebilir miyim?**
 C: Evet. Tarayıcıdan aynı adrese girin. Telefonda menü altta açılır.
@@ -225,7 +229,7 @@ C: Evet. Tarayıcıdan aynı adrese girin. Telefonda menü altta açılır.
 
 İçerikle ilgili sorular: UCCIB yönetimi (kendi aranızda).
 
-Teknik bir sorun (giriş yapamıyorum, kaydetmiyor, site açılmıyor): **info@uccib.com**, konu "Web sitesi".
+Teknik bir sorun (giriş yapamıyorum, kaydetmiyor, site açılmıyor): **contact@hisarweb.be**, konu "UCCIB web sitesi".
 
 Sorunu yazarken şunları ekleyin: hangi sayfa, saat kaçta, hangi tarayıcı, ekranda ne yazıyordu. Bu üç bilgi sorunu
 çoğu zaman tek seferde çözer.

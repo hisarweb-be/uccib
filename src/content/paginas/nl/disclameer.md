@@ -13,7 +13,7 @@ Deze website, uccib.com, wordt uitgegeven door Union des Centres Culturels Islam
 - Maatschappelijke zetel (KBO): Charles Demeerstraat 1-3, 1020 Brussel, België
 - Bezoekadres: Rue Charles Demeer 3, 1020 Brussel, België
 - Ondernemingsnummer (KBO): BE 0843.891.981
-- E-mail: info@uccib.com
+- E-mail: contact@hisarweb.be
 - Telefoon: +32 493 344 665
 
 ## (2) Aansprakelijkheid
@@ -24,7 +24,7 @@ Niets op deze site geldt als een aanbod, een overeenkomst of juridisch advies. V
 
 ## (3) Intellectuele eigendom
 
-De teksten, de foto's, het logo en het ontwerp op deze site zijn eigendom van UCCIB. U mag ze gebruiken met bronvermelding en zonder ze te wijzigen. Voor commercieel gebruik of een volledige overname is voorafgaande schriftelijke toestemming nodig. Die vraagt u aan via info@uccib.com.
+De teksten, de foto's, het logo en het ontwerp op deze site zijn eigendom van UCCIB. U mag ze gebruiken met bronvermelding en zonder ze te wijzigen. Voor commercieel gebruik of een volledige overname is voorafgaande schriftelijke toestemming nodig. Die vraagt u aan via contact@hisarweb.be.
 
 Sommige foto's op deze site zijn bijgewerkt, en de films op de startpagina zijn met AI gemaakt op basis van echte foto's van onze ruimtes.
 
@@ -40,4 +40,4 @@ Dit colofon valt onder het Belgische recht. Bij een geschil zijn de rechtbanken 
 
 De meest recente versie van deze pagina staat altijd op dit adres. Als de tekst verandert, passen wij de datum aan.
 
-Laatst bijgewerkt: 19 november 2026. Vragen? Schrijf naar info@uccib.com.
+Laatst bijgewerkt: 19 november 2026. Vragen? Schrijf naar contact@hisarweb.be.
