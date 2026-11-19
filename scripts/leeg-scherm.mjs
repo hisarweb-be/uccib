@@ -282,7 +282,6 @@ const PIEK_OPEN = { papier: 0.45, licht: 205 };
 /* De oude maten (zoals op Altuners schermbeelden): moeten afgekeurd worden. */
 const OUDE_MATEN =
   '.piek-podium{--piek-doos:min(64svh,80vw)!important}' +
-  '.piek-masker g,.piek-rozet g{transform:rotate(0deg) scale(1)!important}' +
   '.hero-film{inset:auto 0 0 auto!important;width:260px!important;height:260px!important}';
 
 /** Het filmvlak van de hero als deel van het venster, en zijn dekking. */
@@ -462,13 +461,16 @@ async function tegentoetsMaten(browser, basis) {
   const { context, page } = await nieuwePagina(browser, [860, 900]);
   try {
     await openVoorpagina(page, basis + pagePath('nl', ''), OUDE_MATEN);
+    // De oude stand van de ster: haar eigen maat in plaats van de schermmaat. Het script zet
+    // --piek-s inline per stand, dus de tegentoets houdt hem zelf op 1.
+    await page.evaluate(() => setInterval(() => document.querySelector('.piek-podium')?.style.setProperty('--piek-s', '1', 'important'), 25));
     const hero = await keurHero(page, 'tegentoets oude hero', 'stil');
     oordeel(hero.length > 0, 'tegentoets B1: een film van 260 px in de hero wordt afgekeurd', hero);
     const piek = await keurPiek(page, 'tegentoets oud kijkgat');
     oordeel(piek.fout.length > 0, 'tegentoets B2: het oude kijkgat min(64svh, 80vw) wordt afgekeurd (kleinste ' + Math.round(piek.laagst * 100) + ' %)', piek.fout);
     // B3 moet de oude opening (de ster op haar eigen kleine maat, 83 % papier) afkeuren.
     await openVoorpagina(page, basis + pagePath('nl', ''));
-    await page.addStyleTag({ content: '.piek-masker g, .piek-rozet g { transform: rotate(0deg) scale(1) !important }' });
+    await page.evaluate(() => setInterval(() => document.querySelector('.piek-podium')?.style.setProperty('--piek-s', '1', 'important'), 25));
     const oudOpen = await keurPiekOpen(page, 'tegentoets oude opening');
     oordeel(oudOpen.length > 0, 'tegentoets B3: de oude opening met de ster op haar eigen maat wordt afgekeurd', oudOpen);
   } finally {
