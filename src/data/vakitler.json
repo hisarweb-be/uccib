@@ -1,10 +1,10 @@
 {
   "tijdstreep": "Europe/Brussels",
-  "opgehaald": "2026-11-19T20:27:53.493Z",
+  "opgehaald": "2026-11-19T20:38:16.894Z",
   "steden": {
     "brussel": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/brussel",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -46,7 +46,7 @@
     },
     "antwerpen": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/antwerpen",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -88,7 +88,7 @@
     },
     "gent": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/gent",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -130,7 +130,7 @@
     },
     "aalst": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/aalst",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -172,7 +172,7 @@
     },
     "bastogne": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/bastogne",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -214,7 +214,7 @@
     },
     "beringen": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/beringen",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -256,7 +256,7 @@
     },
     "brugge": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/brugge",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -298,7 +298,7 @@
     },
     "charleroi": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/charleroi",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -340,7 +340,7 @@
     },
     "dendermonde": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/dendermonde",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -382,7 +382,7 @@
     },
     "diest": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/diest",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -424,7 +424,7 @@
     },
     "eupen": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/eupen",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -466,7 +466,7 @@
     },
     "genk": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/genk",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -508,7 +508,7 @@
     },
     "hasselt": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/hasselt",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -550,7 +550,7 @@
     },
     "heusden-zolder": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/heusden-zolder",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -592,7 +592,7 @@
     },
     "kortrijk": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/kortrijk",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -634,7 +634,7 @@
     },
     "la-louviere": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/la-louviere",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -676,7 +676,7 @@
     },
     "leopoldsburg": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/leopoldsburg",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -718,7 +718,7 @@
     },
     "leuven": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/leuven",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -760,7 +760,7 @@
     },
     "liege": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/liege",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -802,7 +802,7 @@
     },
     "lier": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/lier",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -844,7 +844,7 @@
     },
     "lokeren": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/lokeren",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -886,7 +886,7 @@
     },
     "lommel": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/lommel",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -928,7 +928,7 @@
     },
     "maasmechelen": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/maasmechelen",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -970,7 +970,7 @@
     },
     "meulebeke": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/meulebeke",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -1012,7 +1012,7 @@
     },
     "mol": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/mol",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -1054,7 +1054,7 @@
     },
     "mons": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/mons",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -1096,7 +1096,7 @@
     },
     "namur": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/namur",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -1138,7 +1138,7 @@
     },
     "saint-vith": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/saint-vith",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -1180,7 +1180,7 @@
     },
     "sint-niklaas": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/sint-niklaas",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -1222,7 +1222,7 @@
     },
     "turnhout": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/turnhout",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -1264,7 +1264,7 @@
     },
     "verviers": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/verviers",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -1306,7 +1306,7 @@
     },
     "virton": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/virton",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -1348,7 +1348,7 @@
     },
     "willebroek": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/willebroek",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",
@@ -1390,7 +1390,7 @@
     },
     "zele": {
       "bron": "https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/zele",
-      "opgehaald": "2026-11-19T20:27:53.493Z",
+      "opgehaald": "2026-11-19T20:38:16.894Z",
       "dagen": [
         {
           "datum": "2026-11-18",

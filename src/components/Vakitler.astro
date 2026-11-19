@@ -85,6 +85,18 @@ const kort = (datum: string): string => {
   }).format(new Date(Date.UTC(jaar, maand - 1, dag)));
 };
 
+/**
+ * De dagen die de weektabel toont. De bron levert er drie (gisteren, vandaag,
+ * morgen), dus "zeven dagen" boven een tabel van drie is een belofte die we niet
+ * houden. Daarom zegt de tabelkop welke dagen er echt in staan.
+ */
+const tabelDagen = dagen.slice(0, 7);
+const tabelKop = tabelDagen.length > 1
+  ? `${kort(tabelDagen[0].datum)} – ${kort(tabelDagen[tabelDagen.length - 1].datum)}`
+  : tabelDagen.length === 1
+    ? kort(tabelDagen[0].datum)
+    : teksten.week;
+
 /** De regel onder de kop: welke dag, welke stad, hoe oud de gegevens zijn. */
 const vandaagDatum = new Intl.DateTimeFormat('en-CA', {
   timeZone: 'Europe/Brussels',
@@ -204,11 +216,11 @@ const opgehaaldTekst = opgehaald && !Number.isNaN(opgehaald.getTime())
 
             <div class="vakit-tabel-wrap">
               <table class="vakit-tabel" data-vakit-tabel>
-                <caption class="vakit-tabel-caption">{teksten.week}</caption>
+                <caption class="vakit-tabel-caption">{tabelKop}</caption>
                 <thead>
                   <tr>
                     <th scope="col">{teksten.tijd}</th>
-                    {dagen.slice(0, 7).map((dag) => (
+                    {tabelDagen.map((dag) => (
                       <th scope="col" data-datum={dag.datum} class:list={{ 'is-vandaag': dag.datum === vandaagDatum }}>
                         {kort(dag.datum)}
                       </th>
@@ -219,7 +231,7 @@ const opgehaaldTekst = opgehaald && !Number.isNaN(opgehaald.getTime())
                   {TIJDEN.map((sleutel) => (
                     <tr>
                       <th scope="row">{namen[sleutel]}</th>
-                      {dagen.slice(0, 7).map((dag) => (
+                      {tabelDagen.map((dag) => (
                         <td class:list={{ 'is-vandaag': dag.datum === vandaagDatum }}>
                           <time>{dag.tijden[sleutel] ? klok(dag.tijden[sleutel]) : '--:--'}</time>
                         </td>
