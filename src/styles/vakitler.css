@@ -459,7 +459,10 @@
 }
 
 .vakit-steden a {
-  display: inline-block;
+  /* Het hele vak is het tikdoel: een korte naam als "Mol" was 28 px breed
+     en haalde de 44 px van WCAG 2.5.8 niet (gemeten 19-11 in CI op 390 px). */
+  display: flex;
+  align-items: center;
   min-height: 44px;
   padding: 0.5rem 0;
   color: var(--color-inkt);
