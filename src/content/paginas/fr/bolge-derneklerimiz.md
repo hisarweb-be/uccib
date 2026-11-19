@@ -6,4 +6,4 @@ intro: ""
 order: 8
 ---
 
-Belçika’daki bölge derneklerimizin listesi yakında burada yer alacaktır.
+La liste de nos associations régionales en Belgique figurera bientôt ici.

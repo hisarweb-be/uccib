@@ -6,4 +6,4 @@ intro: ""
 order: 10
 ---
 
-Haftalık Cuma hutbelerimiz burada yayınlanacaktır.
+Nos prêches hebdomadaires du vendredi seront publiés ici.

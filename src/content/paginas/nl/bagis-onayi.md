@@ -6,4 +6,4 @@ intro: ""
 order: 6
 ---
 
-![Teşekkür görseli](/beeld/dank-donatie/960.webp)
+![Bedankbeeld](/beeld/dank-donatie/960.webp)

@@ -102,3 +102,39 @@ if (buiten.size) {
   process.exit(1);
 }
 console.log('verify:tekens: 0 tekens buiten de reeks');
+
+/**
+ * Turkse-zintoets (F3 PR C, C0): NL- en FR-tekst mag geen Turkse zin bevatten.
+ * Bronnen: src/content/paginas/{nl,fr}, src/i18n/{nl,fr}.json en de NL- en
+ * FR-objecten in src/i18n/f3.ts. Een citaat tussen “ ” of « » en de eigennamen
+ * in EIGENNAMEN tellen niet mee. Een treffer is een letter die alleen Turks
+ * heeft (ğ ş ı İ Ş Ğ) of een gangbaar Turks woord.
+ */
+const EIGENNAMEN = [/Bahar Kermesi/g];
+const TURKSE_LETTER = /[ğşıİŞĞ]/u;
+const TURKS_WOORD = /(?<![\p{L}])(ve|bir|için|ile|olarak|burada|yakında|henüz|bulunmuyor|alacaktır|yayınlanacaktır|bilgileri|listesi|hakkımızda|derneklerimiz|şubelerimiz)(?![\p{L}])/iu;
+const zonderCitaat = (s) => EIGENNAMEN.reduce((t, re) => t.replace(re, ''), s.replace(/“[^”]*”|«[^»]*»/g, ''));
+const turksBronnen = [
+  ...['nl', 'fr'].flatMap((l) => walk(join(ROOT, 'src/content/paginas', l)).filter((f) => f.endsWith('.md')).map((f) => [f, [readFileSync(f, 'utf8')]])),
+  ...['nl', 'fr'].map((l) => { const f = join(ROOT, `src/i18n/${l}.json`); return [f, jsonStrings(JSON.parse(readFileSync(f, 'utf8')))]; }),
+  (() => { const f = join(ROOT, 'src/i18n/f3.ts'); const s = readFileSync(f, 'utf8'); return [f, tsStrings(s.slice(s.indexOf('const NL:'), s.indexOf('export const F3:')))]; })(),
+];
+const turks = [];
+for (const [file, texts] of turksBronnen) {
+  const rel = relative(ROOT, file).replaceAll('\\', '/');
+  for (const text of texts) {
+    // Een sleutel, slug of pad zonder spatie (bv. 'bolge-derneklerimiz') is geen zin.
+    if (/^[\w\/#.:-]*$/.test(text)) continue;
+    for (const regel of text.split('\n')) {
+      // Het URL-pad van een link of beeld is geen zichtbare tekst (slugs zijn Turks).
+      const zicht = zonderCitaat(regel.replace(/\]\([^)]*\)/g, ']').replace(/(?:href|src|slug):\s*\S+/g, ''));
+      if (TURKSE_LETTER.test(zicht) || TURKS_WOORD.test(zicht)) turks.push(`${rel}: ${regel.trim().slice(0, 100)}`);
+    }
+  }
+}
+if (turks.length) {
+  for (const t of turks) console.log(`FOUT: Turkse tekst in NL/FR: ${t}`);
+  console.log(`verify:tekens: ${turks.length} Turkse regel(s) in NL/FR`);
+  process.exit(1);
+}
+console.log('verify:tekens: 0 Turkse zinnen in NL/FR');

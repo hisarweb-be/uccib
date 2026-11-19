@@ -6,4 +6,4 @@ intro: ""
 order: 9
 ---
 
-Brüksel ve Belçika şehirleri için namaz vakitleri yakında burada yer alacaktır.
+De gebedstijden voor Brussel en de Belgische steden verschijnen binnenkort hier.

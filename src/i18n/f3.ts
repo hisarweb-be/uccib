@@ -289,14 +289,14 @@ const NL: F3Teksten = {
   heroCtaSecundair: 'Gebedstijden',
   dienstenKop: 'Onze diensten',
   dienstenIntro:
-    'Achter elke dienst staat een vestiging, een vrijwilliger en een deur die openstaat.',
+    'Achter elke dienst staat een afdeling, een vrijwilliger en een deur die openstaat.',
   dienstenAlle: 'Alle diensten',
   dienstenMeer: 'Meer info',
   diensten: [
     {
       titel: 'Gebedstijden',
       tekst:
-        'De dagelijkse tijden voor Brussel en onze vestigingen: imsak, zonsopgang, middag, namiddag, avond en nacht.',
+        'De dagelijkse tijden voor Brussel en onze afdelingen: imsak, zonsopgang, middag, namiddag, avond en nacht.',
       href: '/namaz-vakitleri',
     },
     {
@@ -306,8 +306,8 @@ const NL: F3Teksten = {
       href: '/cuma-hutbesi',
     },
     {
-      titel: 'Onze vestigingen',
-      tekst: 'Onze vestigingen in heel België: adres, telefoon en de plaats op de kaart.',
+      titel: 'Onze afdelingen',
+      tekst: 'Onze afdelingen in heel België: adres, telefoon en de plaats op de kaart.',
       href: '/subelerimiz',
     },
     {
@@ -318,13 +318,13 @@ const NL: F3Teksten = {
     {
       titel: 'Onderwijs en jeugdwerk',
       tekst:
-        'In onze vestigingen bieden wij kinderen en jongeren naast godsdienstige en morele vorming ook ondersteuning bij de schoolvakken, en sociale en culturele activiteiten.',
+        'In onze afdelingen bieden wij kinderen en jongeren naast godsdienstige en morele vorming ook ondersteuning bij de schoolvakken, en sociale en culturele activiteiten.',
       href: '/hakkimizda',
     },
     {
       titel: 'Moskeebezoeken',
       tekst:
-        'Voor scholen, instellingen en iedereen die interesse heeft organiseren wij bezoeken aan de moskee. Neem daarvoor contact op met de dichtstbijzijnde vestiging.',
+        'Voor scholen, instellingen en iedereen die interesse heeft organiseren wij bezoeken aan de moskee. Neem daarvoor contact op met de dichtstbijzijnde afdeling.',
       href: '/subelerimiz',
       rol: 'bezoek',
     },
@@ -393,9 +393,9 @@ const NL: F3Teksten = {
     'Deze juridische tekst is bijgewerkt op 19 november 2026. Vragen? Schrijf naar info@uccib.com.',
   leeg: {
     subelerimiz: {
-      titel: 'De vestigingen worden aangevuld',
+      titel: 'De afdelingen worden aangevuld',
       tekst:
-        'Wij controleren de adressen en contactgegevens van onze vestigingen een voor een. Een verkeerd adres is erger dan een bezoeker die even wacht. In de tussentijd noemt ons secretariaat u graag de dichtstbijzijnde vestiging.',
+        'Wij controleren de adressen en contactgegevens van onze afdelingen een voor een. Een verkeerd adres is erger dan een bezoeker die even wacht. In de tussentijd noemt ons secretariaat u graag de dichtstbijzijnde afdeling.',
     },
     'bolge-derneklerimiz': {
       titel: 'De lijst van de regionale verenigingen volgt',
@@ -405,7 +405,7 @@ const NL: F3Teksten = {
     'namaz-vakitleri': {
       titel: 'Het tijdschema wordt opgemaakt',
       tekst:
-        'Wij brengen de dagelijkse tijden in één schema samen: imsak, zonsopgang, middag, namiddag, avond en nacht. Tot dan kunt u de tijden bij onze vestigingen vragen.',
+        'Wij brengen de dagelijkse tijden in één schema samen: imsak, zonsopgang, middag, namiddag, avond en nacht. Tot dan kunt u de tijden bij onze afdelingen vragen.',
     },
     'cuma-hutbesi': {
       titel: 'Het preekarchief wordt opgebouwd',
@@ -450,7 +450,7 @@ const NL: F3Teksten = {
   rozetMenuSluit: 'Menu sluiten',
   mediaAi: 'Film: AI-gegenereerd',
   mediaBewerkt: 'Foto bijgewerkt',
-  piekSlagen: ['Achter elke dienst staat', 'een vestiging,', 'een vrijwilliger', 'en een deur die openstaat.'],
+  piekSlagen: ['Achter elke dienst staat', 'een afdeling,', 'een vrijwilliger', 'en een deur die openstaat.'],
 };
 
 const FR: F3Teksten = {
@@ -459,14 +459,14 @@ const FR: F3Teksten = {
   heroCtaSecundair: 'Heures de prière',
   dienstenKop: 'Nos services',
   dienstenIntro:
-    'Derrière chaque service, il y a un centre, un bénévole et une porte ouverte.',
+    'Derrière chaque service, il y a une section, un bénévole et une porte ouverte.',
   dienstenAlle: 'Tous les services',
   dienstenMeer: 'En savoir plus',
   diensten: [
     {
       titel: 'Heures de prière',
       tekst:
-        'Les horaires quotidiens pour Bruxelles et nos centres : imsak, lever du soleil, midi, après-midi, soir et nuit.',
+        'Les horaires quotidiens pour Bruxelles et nos sections : imsak, lever du soleil, midi, après-midi, soir et nuit.',
       href: '/namaz-vakitleri',
     },
     {
@@ -476,8 +476,8 @@ const FR: F3Teksten = {
       href: '/cuma-hutbesi',
     },
     {
-      titel: 'Nos centres',
-      tekst: 'Nos centres dans toute la Belgique : adresse, téléphone et position sur la carte.',
+      titel: 'Nos sections',
+      tekst: 'Nos sections dans toute la Belgique : adresse, téléphone et position sur la carte.',
       href: '/subelerimiz',
     },
     {
@@ -488,13 +488,13 @@ const FR: F3Teksten = {
     {
       titel: 'Enseignement et jeunesse',
       tekst:
-        'Dans nos centres, nous offrons aux enfants et aux jeunes, outre une formation religieuse et morale, un soutien pour les cours scolaires ainsi que des activités sociales et culturelles.',
+        'Dans nos sections, nous offrons aux enfants et aux jeunes, outre une formation religieuse et morale, un soutien pour les cours scolaires ainsi que des activités sociales et culturelles.',
       href: '/hakkimizda',
     },
     {
       titel: 'Visites de la mosquée',
       tekst:
-        'Nous organisons des visites de la mosquée pour les écoles, les institutions et toute personne intéressée. Pour une visite, contactez le centre le plus proche.',
+        'Nous organisons des visites de la mosquée pour les écoles, les institutions et toute personne intéressée. Pour une visite, contactez la section la plus proche.',
       href: '/subelerimiz',
       rol: 'bezoek',
     },
@@ -563,9 +563,9 @@ const FR: F3Teksten = {
     'Ce texte juridique a été mis à jour le 19 novembre 2026. Une question ? Écrivez à info@uccib.com.',
   leeg: {
     subelerimiz: {
-      titel: 'Les centres sont en cours de complétion',
+      titel: 'Les sections sont en cours de complétion',
       tekst:
-        'Nous vérifions une à une les adresses et les coordonnées de nos centres. Une adresse erronée est pire qu’un visiteur qui attend un peu. Entre-temps, notre secrétariat vous indique volontiers le centre le plus proche.',
+        'Nous vérifions une à une les adresses et les coordonnées de nos sections. Une adresse erronée est pire qu’un visiteur qui attend un peu. Entre-temps, notre secrétariat vous indique volontiers la section la plus proche.',
     },
     'bolge-derneklerimiz': {
       titel: 'La liste des associations régionales suit',
@@ -575,7 +575,7 @@ const FR: F3Teksten = {
     'namaz-vakitleri': {
       titel: 'Le tableau des horaires est en préparation',
       tekst:
-        'Nous réunirons les horaires quotidiens dans un seul tableau : imsak, lever du soleil, midi, après-midi, soir et nuit. D’ici là, vous pouvez demander les horaires à nos centres.',
+        'Nous réunirons les horaires quotidiens dans un seul tableau : imsak, lever du soleil, midi, après-midi, soir et nuit. D’ici là, vous pouvez demander les horaires à nos sections.',
     },
     'cuma-hutbesi': {
       titel: 'Les archives des prêches se constituent',
@@ -620,7 +620,7 @@ const FR: F3Teksten = {
   rozetMenuSluit: 'Fermer le menu',
   mediaAi: 'Film : généré par IA',
   mediaBewerkt: 'Photo retouchée',
-  piekSlagen: ['Derrière chaque service, il y a', 'un centre,', 'un bénévole', 'et une porte ouverte.'],
+  piekSlagen: ['Derrière chaque service, il y a', 'une section,', 'un bénévole', 'et une porte ouverte.'],
 };
 
 export const F3: Record<Locale, F3Teksten> = { tr: TR, nl: NL, fr: FR };
