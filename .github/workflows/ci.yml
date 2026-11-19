@@ -18,7 +18,7 @@ jobs:
   bouw-en-keur:
     name: Bouwen en keuren
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 35
     steps:
       - name: Ophalen
         uses: actions/checkout@v4
@@ -67,6 +67,9 @@ jobs:
 
       - name: Eerste scherm in pixels
         run: npm run verify:scherm
+
+      - name: Leeg scherm, witte ster en tweede posterlaag
+        run: npm run verify:leeg
 
       - name: Mobiel met een echte vinger
         run: npm run verify:mobiel
