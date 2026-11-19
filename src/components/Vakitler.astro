@@ -51,6 +51,8 @@ const dagen: readonly Dag[] = heeftVakitler() ? gegevens.dagen : [];
 const vandaag = kiesDag(dagen);
 const volgende = volgendeTijd(dagen);
 const namen = NAMEN[locale];
+/** De plaats van de getoonde tijden, in de taal van de pagina. */
+const stadNaam = STEDEN.find((stad) => stad.slug === gegevens.stad)?.naam[locale] ?? gegevens.stad;
 
 /** De dag als `donderdag 19 november`, in de taal van de pagina. */
 const datumTekst = (datum: string): string => {
@@ -106,7 +108,13 @@ const opgehaaldTekst = opgehaald && !Number.isNaN(opgehaald.getTime())
   aria-labelledby="vakitler-kop"
 >
   <div class="vakit-kop">
-    <h2 id="vakitler-kop" class="vakit-titel">{teksten.kop}</h2>
+    {/* Op de eigen pagina staat de titel al groot bovenaan (de h1 uit de inhoud).
+        Hier dus alleen een kop voor schermlezers, geen tweede grote titel. */}
+    {vorm === 'blad' ? (
+      <h2 id="vakitler-kop" class="sr-only">{teksten.kop}</h2>
+    ) : (
+      <h2 id="vakitler-kop" class="vakit-titel">{teksten.kop}</h2>
+    )}
     {vorm === 'blad' && <p class="vakit-lead">{teksten.lead}</p>}
   </div>
 
@@ -116,7 +124,11 @@ const opgehaaldTekst = opgehaald && !Number.isNaN(opgehaald.getTime())
   <script
     type="application/json"
     data-vakit-data
-    set:html={JSON.stringify({ stad: gegevens.stad, dagen })}
+    set:html={JSON.stringify({
+      stad: gegevens.stad,
+      dagen,
+      plaatsen: Object.fromEntries(STEDEN.map((stad) => [stad.slug, stad.naam[locale]])),
+    })}
   />
 
   {
@@ -125,7 +137,15 @@ const opgehaaldTekst = opgehaald && !Number.isNaN(opgehaald.getTime())
     ) : (
       <>
         <div class="vakit-nu">
-          <p class="vakit-datum" data-vakit-datum>{vandaag ? datumTekst(vandaag.datum) : ''}</p>
+          <div class="vakit-herkomst">
+            <p class="vakit-datum" data-vakit-datum>{vandaag ? datumTekst(vandaag.datum) : ''}</p>
+            {/* Voor welke plaats gelden deze tijden? Dat stond nergens, ook niet
+                als de lezer een andere stad koos. */}
+            <p class="vakit-plaats">
+              <span class="vakit-plaats-label">{teksten.stad}</span>
+              <span class="vakit-plaats-naam" data-vakit-plaats>{stadNaam}</span>
+            </p>
+          </div>
           <div class="vakit-volgend">
             <p class="vakit-volgend-label">{teksten.volgend}</p>
             <p class="vakit-volgend-naam" data-vakit-volgend>
