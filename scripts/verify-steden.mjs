@@ -39,6 +39,44 @@ const { STEDEN } = await import(new URL('../functions/_lib/vakitler.js', import.
 const slugs = STEDEN.map((stad) => stad.slug);
 
 const fouten = [];
+
+/*
+ * De stadslijst staat op twee plekken: `functions/_lib/vakitler.js` (wat de rand
+ * ophaalt, en wat deze poort als bron van waarheid neemt) en `src/lib/vakitler.ts`
+ * (wat de pagina's tekenen). Ze zijn met de hand gelijk gehouden en niets keek
+ * ernaar; één stad die maar op één plek staat levert een pagina zonder tijden of
+ * een kiezer met een dode optie. Daarom vergelijkt deze poort ze hier, vóór de
+ * rest: loopt de lijst uiteen, dan zegt elke andere uitslag niets meer.
+ */
+{
+  const lib = await readFile(new URL('../src/lib/vakitler.ts', import.meta.url), 'utf8');
+  const blok = /export const STEDEN[^=]*=\s*\[([\s\S]*?)\n\];/.exec(lib)?.[1] ?? '';
+  const gezien = [...blok.matchAll(
+    /\{\s*slug:\s*'([^']+)',\s*naam:\s*\{\s*tr:\s*'([^']*)',\s*nl:\s*'([^']*)',\s*fr:\s*'([^']*)'\s*\}\s*\}/g,
+  )].map((m) => ({ slug: m[1], tr: m[2], nl: m[3], fr: m[4] }));
+  if (gezien.length === 0) {
+    fouten.push('src/lib/vakitler.ts: de stadslijst kon niet gelezen worden');
+  } else {
+    if (gezien.length !== STEDEN.length) {
+      fouten.push(
+        `de stadslijsten lopen uiteen: ${STEDEN.length} in functions/_lib/vakitler.js, ${gezien.length} in src/lib/vakitler.ts`,
+      );
+    }
+    for (const [i, stad] of STEDEN.entries()) {
+      const ander = gezien[i];
+      if (!ander) {
+        fouten.push(`src/lib/vakitler.ts mist ${stad.slug}`);
+        continue;
+      }
+      const wijkt = LOCALES.find((taal) => ander.slug !== stad.slug || ander[taal] !== stad[taal]);
+      if (wijkt) {
+        fouten.push(
+          `stad ${i + 1} wijkt af (${wijkt}): functions heeft "${stad.slug}/${stad[wijkt]}", src/lib heeft "${ander.slug}/${ander[wijkt]}"`,
+        );
+      }
+    }
+  }
+}
 const stadPad = (taal, stad) => `${PREFIX[taal]}/namaz-vakitleri/${stad}/`;
 const fileVoor = (pad) => join(DIST, pad, 'index.html');
 
