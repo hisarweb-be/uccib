@@ -153,11 +153,16 @@
   object-fit: cover;
   object-position: var(--anker-m, 50% 50%);
 }
-/* De poster staat IN de videokaart (`poster`-attribuut): de browser tekent hem met dezelfde
-   `object-fit` en `object-position` als het eerste filmbeeld, dus er is geen tweede element en
-   geen sprong bij de overdracht (bijsturing eigenaar 19 nov: de hero trilde). De video zelf is
-   daarom vanaf de eerste tekening zichtbaar; `is-klaar` blijft alleen een teken voor de poort. */
+/* De video heeft géén eigen poster: de `<img>` eronder is de poster, in precies dezelfde
+   `object-fit` en `object-position` (bijsturing eigenaar 19 nov, tweede ronde: een eigen
+   `poster`-attribuut gaf op een telefoon de desktopuitsnede te zien en op elk scherm een tweede
+   laag die net anders wordt getekend, en dat las als bibberen). De video komt pas in beeld als
+   hij echt speelt, met een korte kruisvervaging: geen enkel moment zonder foto. */
 .hero-video {
+  opacity: 0;
+  transition: opacity 400ms linear;
+}
+.hero-video.is-klaar {
   opacity: 1;
 }
 .hero-eerste .knop-tweede {

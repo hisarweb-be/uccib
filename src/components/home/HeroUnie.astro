@@ -112,7 +112,6 @@ const FASEN = [
           filmD || filmM ? (
             <video
               class="hero-video"
-              poster={posterD.pad}
               muted
               loop
               autoplay
@@ -122,6 +121,7 @@ const FASEN = [
               tabindex="-1"
               disablepictureinpicture
               data-smal={SMAL}
+              style={`--anker-d:${anker('h1', 'd')};--anker-m:${anker('h1', 'm')}`}
               data-d-mp4={filmD?.pad}
               data-d-webm={filmD?.webm}
               data-m-mp4={filmM?.pad}
