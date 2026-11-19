@@ -97,9 +97,6 @@ export interface F3Teksten {
   /** Toegankelijke naam van de menuknop in de kop (DESIGNSYSTEEM 7.3). */
   rozetMenuOpen: string;
   rozetMenuSluit: string;
-  /** Vermelding bij een AI-film (FILMDRAAIBOEK 5.1); gelijk aan `vermelding` in het manifest. */
-  mediaAi: string;
-  mediaBewerkt: string;
   /** De vier slagen van de piek, in volgorde (BRIEF); zelfde zin als dienstenIntro. */
   piekSlagen: readonly [string, string, string, string];
 }
@@ -278,8 +275,6 @@ const TR: F3Teksten = {
   },
   rozetMenuOpen: 'Menü',
   rozetMenuSluit: 'Menüyü kapat',
-  mediaAi: 'Film: yapay zekâ ile üretildi',
-  mediaBewerkt: 'Fotoğraf rötuşlandı',
   piekSlagen: ['Elinizdeki her hizmetin arkasında', 'bir şube,', 'bir gönüllü', 've bir kapı var.'],
 };
 
@@ -448,8 +443,6 @@ const NL: F3Teksten = {
   },
   rozetMenuOpen: 'Menu',
   rozetMenuSluit: 'Menu sluiten',
-  mediaAi: 'Film: AI-gegenereerd',
-  mediaBewerkt: 'Foto bijgewerkt',
   piekSlagen: ['Achter elke dienst staat', 'een afdeling,', 'een vrijwilliger', 'en een deur die openstaat.'],
 };
 
@@ -618,8 +611,6 @@ const FR: F3Teksten = {
   },
   rozetMenuOpen: 'Menu',
   rozetMenuSluit: 'Fermer le menu',
-  mediaAi: 'Film : généré par IA',
-  mediaBewerkt: 'Photo retouchée',
   piekSlagen: ['Derrière chaque service, il y a', 'une section,', 'un bénévole', 'et une porte ouverte.'],
 };
 

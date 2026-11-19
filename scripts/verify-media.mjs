@@ -1,4 +1,5 @@
-// Toets public/media/wow/ tegen src/data/media-manifest.json (CONTRACT.md 2.1, 2.3, 3, 9.2).
+// Toets public/media/wow/ tegen src/data/media-manifest.json (CONTRACT.md 2.1, 2.3, 3, 9.2;
+// bijsturing eigenaar 19 nov: B1 de hero is een echte lusfilm, B3 geen bijschrift op beeld).
 // Gebruik: node scripts/verify-media.mjs [--map <pad>] [--manifest <pad>] [--dist <pad>] [--leeg-toegestaan]
 // --dist: de bouw bij dit manifest (standaard dist/ als het manifest het standaardmanifest is).
 // Eén regel per toets (OK of FOUT), eindtelling, exitcode 0 alleen als alles OK is.
@@ -19,18 +20,26 @@ const mapDir = optie('--map', join(root, 'public/media/wow'));
 const manifestPad = optie('--manifest', join(root, 'src/data/media-manifest.json'));
 const leegToegestaan = args.includes('--leeg-toegestaan');
 const distDir = optie('--dist', manifestPad === join(root, 'src/data/media-manifest.json') ? join(root, 'dist') : null);
-const f3Pad = join(root, 'src/i18n/f3.ts');
 
 const KB = 1000;
 const MB = 1000 * 1000;
-const MAX = { poster: 120 * KB, frame0: 120 * KB, eind: 120 * KB, reeksD: 1800 * KB, reeksM: 900 * KB, piek: 4 * MB };
+const MAX = { poster: 120 * KB, frame0: 120 * KB, eind: 120 * KB, reeksD: 1800 * KB, reeksM: 900 * KB, piek: 4 * MB, lusD: 2.5 * MB, lusM: 1.5 * MB };
 const SHOTS = ['h1', 'p1', 'p2', 'p3', 'p4', 'r1', 'r2'];
 const SECTIE = (s) => (s === 'h1' ? 'hero-unie' : 'piek-ruimtes');
 const STATUS = ['geleverd', 'vervallen', 'terugval'];
 const EIND_SHOTS = ['p3', 'p4', 'r1'];
 const VERMELDING = { tr: 'Film: yapay zekâ ile üretildi', nl: 'Film: AI-gegenereerd', fr: 'Film : généré par IA' };
+/* B3: deze bijschriften staan nergens meer in de bouw, behalve op de disclaimer- en cookiepagina. */
+const BIJSCHRIFTEN = [...Object.values(VERMELDING), 'Fotoğraf rötuşlandı', 'Foto bijgewerkt', 'Photo retouchée'];
+const OPENHEID = {
+  tr: 'Bu sitedeki bazı fotoğraflar rötuşlanmıştır; ana sayfadaki filmler ise mekânlarımızın gerçek fotoğraflarından yapay zekâ ile üretilmiştir.',
+  nl: "Sommige foto's op deze site zijn bijgewerkt, en de films op de startpagina zijn met AI gemaakt op basis van echte foto's van onze ruimtes.",
+  fr: "Certaines photos de ce site sont retouchées, et les films de la page d'accueil sont générés par IA à partir de vraies photos de nos espaces.",
+};
+/* Een lusfilm (de hero) speelt gewoon af: een sleutelframe hooguit elke 2 s, niet elk frame. */
+const LUS_SLEUTEL_S = 2;
 const PREFIX = '/media/wow/';
-const NAAM = /^(?:[a-z0-9]+-[dm](?:\.mp4|-poster\.webp|-poster\.avif|-frame0\.webp|-eind(?:-v\d+)?\.webp)|[a-z0-9]+-[dm]\/f-\d{4}\.webp)$/;
+const NAAM = /^(?:[a-z0-9]+-[dm](?:\.mp4|\.webm|-poster\.webp|-poster\.avif|-frame0\.webp|-eind(?:-v\d+)?\.webp)|[a-z0-9]+-[dm]\/f-\d{4}\.webp)$/;
 
 const resultaten = [];
 const toets = async (naam, fn) => {
@@ -92,8 +101,9 @@ await toets('schema (velden, types, status, paden)', () => {
     if (gezien.has(s.shot)) f.push(`${w}: dubbel`);
     gezien.add(s.shot);
     if (s.sectie !== SECTIE(s.shot)) f.push(`${w}: sectie moet ${SECTIE(s.shot)} zijn`);
-    if (s.rol !== 'scrub' && s.rol !== 'lus') f.push(`${w}: rol`);
-    if (s.vorm !== (s.shot === 'h1' ? 'frames' : 'video')) f.push(`${w}: vorm moet ${s.shot === 'h1' ? 'frames' : 'video'} zijn`);
+    // B1: de hero is een echte film die vanzelf in een lus speelt; de piek scrubt.
+    if (s.rol !== (s.shot === 'h1' ? 'lus' : 'scrub')) f.push(`${w}: rol moet ${s.shot === 'h1' ? 'lus' : 'scrub'} zijn`);
+    if (s.vorm !== 'video') f.push(`${w}: vorm moet video zijn`);
     if (!isTekst(s.bron)) f.push(`${w}: bron`);
     if (typeof s.bewerkt !== 'boolean') f.push(`${w}: bewerkt is geen boolean`);
     if (!Array.isArray(s.retouche)) f.push(`${w}: retouche is geen lijst`);
@@ -121,6 +131,8 @@ await toets('schema (velden, types, status, paden)', () => {
         for (const v of ['breedte', 'hoogte', 'gewicht']) if (!isGetal(o[v])) f.push(`${w}.${bp}.${k}: ${v}`);
       }
       if (b.film) for (const v of ['fps', 'frames', 'duur']) if (!isGetal(b.film[v])) f.push(`${w}.${bp}.film: ${v}`);
+      if (b.film && 'webm' in b.film && !(isTekst(b.film.webm) && b.film.webm.startsWith(PREFIX) && b.film.webm.endsWith('.webm'))) f.push(`${w}.${bp}.film.webm: pad onder ${PREFIX} op .webm`);
+      if (b.film && s.rol === 'lus' && !b.film.webm) f.push(`${w}.${bp}.film: een lusfilm heeft ook een webm`);
       if (b.poster && !(b.poster.avif === null || (isTekst(b.poster.avif) && b.poster.avif.startsWith(PREFIX)))) f.push(`${w}.${bp}.poster.avif`);
       if (b.reeks && !(isTekst(b.reeks.map) && b.reeks.map.startsWith(PREFIX) && b.reeks.map.endsWith('/') && b.reeks.patroon === 'f-%04d.webp' && ['aantal', 'breedte', 'hoogte', 'fps', 'duur', 'gewicht'].every((v) => isGetal(b.reeks[v])))) f.push(`${w}.${bp}.reeks: map, patroon of getallen`);
     }
@@ -148,14 +160,8 @@ await toets('status en bestandssoorten per shot', () => {
   return f;
 });
 
-// 4. aiFilm en vermelding
-let f3Tekst = null;
-if (existsSync(f3Pad)) {
-  const t = readFileSync(f3Pad, 'utf8');
-  // Alleen de waarderegels (`mediaAi: '...'`), niet de typedefinitie die eerder in het bestand staat.
-  if (t.includes('mediaAi')) f3Tekst = t.split('\n').filter((r) => /mediaAi:\s*['"`]/.test(r)).join('\n');
-}
-await toets(`aiFilm-vlaggen en vermelding (${f3Tekst ? 'gelijk aan f3.mediaAi' : 'f3.mediaAi nog niet aanwezig: vaste tekst uit CONTRACT 3.3'})`, () => {
+// 4. aiFilm en vermelding: de vermelding blijft administratie in het manifest (B3: ze wordt niet meer getoond).
+await toets('aiFilm-vlaggen en vermelding in het manifest (administratie, vaste tekst uit CONTRACT 3.3)', () => {
   const f = [];
   for (const s of shots) {
     const heeftAi = ['d', 'm'].some((bp) => { const b = s.bestanden?.[bp]; return b && (b.film || b.reeks || b.frame0 || b.eind); });
@@ -164,7 +170,6 @@ await toets(`aiFilm-vlaggen en vermelding (${f3Tekst ? 'gelijk aan f3.mediaAi' :
       if (!isObj(s.vermelding)) f.push(`${s.shot}: vermelding ontbreekt bij aiFilm true`);
       else for (const t of ['tr', 'nl', 'fr']) {
         if (s.vermelding[t] !== VERMELDING[t]) f.push(`${s.shot}: vermelding.${t} wijkt af van de contracttekst`);
-        if (f3Tekst && !f3Tekst.includes(s.vermelding[t])) f.push(`${s.shot}: vermelding.${t} staat niet in f3.mediaAi`);
       }
       if (!isTekst(s.model)) f.push(`${s.shot}: model ontbreekt bij aiFilm true`);
     } else {
@@ -186,6 +191,7 @@ const reeksBestanden = new Map(); // reeks-object -> lijst bestanden op schijf
 for (const s of shots) for (const bp of ['d', 'm']) {
   const b = s.bestanden?.[bp] ?? {};
   for (const o of [b.film, b.poster, b.frame0, b.eind]) if (o?.pad) verwacht.add(o.pad.slice(PREFIX.length));
+  if (b.film?.webm) verwacht.add(b.film.webm.slice(PREFIX.length));
   if (b.poster?.avif) verwacht.add(b.poster.avif.slice(PREFIX.length));
   if (b.reeks?.map) {
     const m = b.reeks.map.slice(PREFIX.length);
@@ -204,8 +210,10 @@ await toets('elk bestand in het manifest bestaat', () => {
   return f;
 });
 await toets('elk bestand in public/media/wow staat in het manifest', () => opSchijf.filter((p) => !verwacht.has(p)).map((p) => `niet in manifest: ${p}`));
-await toets('naamregels en verboden formaten (geen gif, mov, webm, png, jpg)', () =>
-  opSchijf.flatMap((p) => /\.(gif|mov|webm|png|jpe?g)$/i.test(p) ? [`verboden formaat: ${p}`] : NAAM.test(p) ? [] : [`naam voldoet niet: ${p}`]));
+// Webm alleen als tweede bron van een film in het manifest (B1), nooit los.
+const webmVanFilm = new Set(shots.flatMap((s) => ['d', 'm'].map((bp) => s.bestanden?.[bp]?.film?.webm?.slice(PREFIX.length)).filter(Boolean)));
+await toets('naamregels en verboden formaten (geen gif, mov, png, jpg; webm alleen bij een film)', () =>
+  opSchijf.flatMap((p) => /\.(gif|mov|png|jpe?g)$/i.test(p) || (/\.webm$/i.test(p) && !webmVanFilm.has(p)) ? [`verboden formaat: ${p}`] : NAAM.test(p) ? [] : [`naam voldoet niet: ${p}`]));
 
 // 6. Beeldbestanden: bytes en afmetingen kloppen met schijf
 const beeldMeta = async (pad, formaat) => {
@@ -238,7 +246,7 @@ await toets('beelden: formaat, bytes en afmetingen kloppen met schijf', async ()
 
 // 7. Films: ffprobe (maat, fps, frames, duur), geen geluid, elk frame een sleutelframe
 const films = [];
-for (const s of shots) for (const bp of ['d', 'm']) { const o = s.bestanden?.[bp]?.film; if (o) films.push({ w: `${s.shot}.${bp}.film`, bp, obj: o }); }
+for (const s of shots) for (const bp of ['d', 'm']) { const o = s.bestanden?.[bp]?.film; if (o) films.push({ w: `${s.shot}.${bp}.film`, bp, obj: o, lus: s.rol === 'lus' }); }
 const filmFeiten = new Map();
 await toets('films: bytes, maat, fps, frames, duur kloppen met ffprobe', () => {
   const f = [];
@@ -266,12 +274,31 @@ await toets('films: bytes, maat, fps, frames, duur kloppen met ffprobe', () => {
   return f;
 });
 await toets('films: geen geluidsspoor', () => films.flatMap((x) => (filmFeiten.get(x.obj)?.audio.length ? [`${x.w}: heeft ${filmFeiten.get(x.obj).audio.length} extra spoor(en)`] : [])));
-await toets('films: elk frame een sleutelframe (I-frames = frames)', () =>
+await toets(`films: een scrubfilm heeft elk frame als sleutelframe, een lusfilm hooguit elke ${LUS_SLEUTEL_S} s`, () =>
   films.flatMap((x) => {
     const t = filmFeiten.get(x.obj)?.typen;
     if (!t) return [];
-    const i = t.filter((p) => p === 'I').length;
-    return i === t.length && i > 0 ? [] : [`${x.w}: ${i} I-frames van ${t.length}`];
+    const plekken = t.flatMap((p, n) => (p === 'I' ? [n] : []));
+    const i = plekken.length;
+    if (!x.lus) return i === t.length && i > 0 ? [] : [`${x.w}: ${i} I-frames van ${t.length}`];
+    const max = LUS_SLEUTEL_S * x.obj.fps;
+    const gaten = [...plekken, t.length].map((n, k, rij) => (k ? n - rij[k - 1] : n));
+    return plekken[0] === 0 && gaten.every((g) => g <= max) ? [] : [`${x.w}: sleutelframes op ${plekken.join(',')}, gat boven ${max} frames`];
+  }));
+await toets('lusfilms: webm is vp9 zonder geluid en even groot; mp4 en webm onder de grens (d 2,5 MB, m 1,5 MB)', () =>
+  films.filter((x) => x.lus).flatMap((x) => {
+    const f = [];
+    const grens = x.bp === 'd' ? MAX.lusD : MAX.lusM;
+    if (x.obj.gewicht > grens) f.push(`${x.w}: mp4 ${x.obj.gewicht} bytes boven ${grens}`);
+    const webm = x.obj.webm ? naarSchijf(x.obj.webm) : null;
+    if (!webm || !existsSync(webm)) return [...f, `${x.w}: webm ontbreekt`];
+    if (statSync(webm).size > grens) f.push(`${x.w}: webm ${statSync(webm).size} bytes boven ${grens}`);
+    const info = JSON.parse(ffprobe(['-show_streams', '-of', 'json', webm]));
+    const v = info.streams.find((t) => t.codec_type === 'video');
+    if (v?.codec_name !== 'vp9') f.push(`${x.w}: webm codec ${v?.codec_name}, moet vp9 zijn`);
+    if (v && (v.width !== x.obj.breedte || v.height !== x.obj.hoogte)) f.push(`${x.w}: webm ${v.width}x${v.height} tegen ${x.obj.breedte}x${x.obj.hoogte}`);
+    if (info.streams.some((t) => t.codec_type !== 'video')) f.push(`${x.w}: webm heeft geluid of een ander spoor`);
+    return f;
   }));
 
 // 8. Frame-reeksen: compleet, doorlopend, maat, gewicht
@@ -412,8 +439,9 @@ if (bouwPaginas.length) await toets(`piek in de bouw volgt het manifest (aanwezi
     const sectie = html.slice(html.lastIndexOf('<section', begin), html.indexOf('</section>', begin));
     const lagen = [...sectie.matchAll(/class="piek-laag"[^>]*?data-laag="(\d)"/g)].map((m) => `p${m[1]}`);
     if (lagen.join() !== erNu.join()) f.push(`${w}: lagen ${lagen.join()} tegen ${erNu.join()}`);
-    const plekken = [...sectie.matchAll(/class="piek-plek"[^>]*?data-laag="(\d)"/g)].map((m) => `p${m[1]}`);
-    if (plekken.join() !== erNu.join()) f.push(`${w}: vermeldingen ${plekken.join()}`);
+    // B3: geen bijschrift meer bij een ruimte.
+    const plekken = (sectie.match(/class="piek-plek"/g) ?? []).length;
+    if (plekken) f.push(`${w}: ${plekken} vermelding(en) in de piek, moet 0 zijn`);
     const rijen = (sectie.match(/class="sleutelrij"/g) ?? []).length;
     if (rijen !== plan.zinnen.length) f.push(`${w}: ${rijen} sleutelrijen tegen ${plan.zinnen.length}`);
     const sprongen = (/data-sprongen="([^"]*)"/.exec(sectie)?.[1] ?? '[]').replaceAll('&quot;', '"');
@@ -423,5 +451,31 @@ if (bouwPaginas.length) await toets(`piek in de bouw volgt het manifest (aanwezi
   }
   return f;
 });
+
+// 12. B3: geen bijschrift op beeld. 0 treffers op de bijschriften in de hele bouw (html, js, css)
+// buiten de disclaimer- en cookiepagina, en de openheidszin staat op de drie disclaimerpagina's.
+const gewoon = (t) => t.replace(/&nbsp;|&#160;|&#xa0;|\u00a0|\u202f/gi, ' ').replace(/&#39;|&#x27;|&apos;|\u2019/gi, "'");
+const bijschriftTreffers = (bestanden) => bestanden.flatMap(([pad, tekst]) => {
+  if (/(^|\/)(disclameer|cerez-politikasi-cookie-policy)(\/|$)/.test(pad)) return [];
+  const t = gewoon(tekst);
+  return BIJSCHRIFTEN.filter((b) => t.includes(b)).map((b) => `${pad}: "${b}"`);
+});
+const openheidOntbreekt = (paginas) => Object.entries(paginas).flatMap(([taal, html]) =>
+  html !== null && gewoon(html).includes(OPENHEID[taal]) ? [] : [`${taal}: openheidszin ontbreekt op de disclaimerpagina`]);
+if (distDir && existsSync(join(distDir, 'index.html'))) {
+  const bouw = lijst(distDir).filter((p) => /\.(html|js|mjs|css|json|xml|txt)$/i.test(p)).map((p) => [p, readFileSync(join(distDir, p), 'utf8')]);
+  const disclaimer = (p) => (existsSync(join(distDir, p)) ? readFileSync(join(distDir, p), 'utf8') : null);
+  await toets('tegentoets B3: een bijschrift buiten de disclaimer en een ontbrekende zin worden afgekeurd', () => {
+    const f = [];
+    const nep = [['index.html', '<p>Film: AI-gegenereerd</p>'], ['fr/index.html', 'Film&nbsp;: généré par IA'], ['nl/disclameer/index.html', 'Foto bijgewerkt'], ['tr/x.js', '"Fotoğraf rötuşlandı"']];
+    const n = bijschriftTreffers(nep).length;
+    if (n !== 3) f.push(`verwacht 3 treffers, kreeg ${n}`);
+    if (openheidOntbreekt({ tr: '', nl: OPENHEID.nl.replaceAll("'", '&#39;'), fr: null }).length !== 2) f.push('ontbrekende zin niet afgekeurd of escape niet herkend');
+    return f;
+  });
+  await toets(`B3: geen bijschrift op beeld in ${bouw.length} bouwbestanden (buiten disclaimer en cookiepagina)`, () => bijschriftTreffers(bouw));
+  await toets('B3: de openheidszin staat op de disclaimerpagina in tr, nl en fr', () =>
+    openheidOntbreekt({ tr: disclaimer('disclameer/index.html'), nl: disclaimer('nl/disclameer/index.html'), fr: disclaimer('fr/disclameer/index.html') }));
+}
 
 klaar();

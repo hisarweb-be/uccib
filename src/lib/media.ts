@@ -38,6 +38,8 @@ export interface Film extends Beeldbestand {
   fps: number;
   frames: number;
   duur: number;
+  /** Dezelfde film als webm (vp9), optioneel; de browser kiest de eerste die hij speelt. */
+  webm?: string;
 }
 
 export interface Reeks {
@@ -75,6 +77,7 @@ export interface Shot {
   ankers: Record<Breekpunt, Array<{ x: number; y: number }>>;
   bestanden: Record<Breekpunt, Bestanden>;
   fase: { van: number; tot: number; variabele: '--hero-p' | '--piek-p' };
+  /** Administratie (bijsturing 19 nov, B3): nooit getoond; de openheid staat op de disclaimerpagina. */
   vermelding: Talen<string> | null;
   alt: Talen<string>;
   status: 'geleverd' | 'vervallen' | 'terugval';
@@ -132,7 +135,7 @@ export type Vorm = 'film' | 'poster' | 'weg';
  * - er ligt een film of een frame-reeks (op een van de breekpunten): `film`,
  *   de scrub;
  * - er ligt alleen een poster: `poster`, de echte foto met beweging en licht in
- *   code, zonder de vermelding "Film: AI-gegenereerd".
+ *   code.
  */
 export function vormVan(naam: ShotNaam): Vorm {
   if (!aanwezig(naam)) return 'weg';
@@ -156,15 +159,6 @@ export const reeks = (naam: ShotNaam, bp: Breekpunt): Reeks | null => shot(naam)
 export const anker = (naam: ShotNaam, bp: Breekpunt): string => shot(naam).anker[bp];
 
 export const alt = (naam: ShotNaam, locale: Locale): string => shot(naam).alt[locale];
-
-/**
- * De AI-vermelding van één shot in de vorm die de bezoeker te zien krijgt.
- * `getoond` is wat er echt in beeld staat: zonder JavaScript of met reduced motion
- * is dat de poster, ook als er een film ligt. Alleen bij `film` (een film of reeks
- * die er ligt én getoond wordt) en een AI-film is er een regel.
- */
-export const vermelding = (naam: ShotNaam, getoond: Vorm, locale: Locale): string | null =>
-  getoond === 'film' && vormVan(naam) === 'film' && shot(naam).aiFilm ? (shot(naam).vermelding?.[locale] ?? null) : null;
 
 /**
  * Hoeveel eigen pixels de breedte van een shot heeft (BIJSTURING ronde 2g punt 2).
