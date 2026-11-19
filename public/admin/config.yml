@@ -11,10 +11,13 @@
 # De labels staan in het Turks: dat is de taal van wie dit scherm gebruikt. De
 # veldnamen zelf zijn Engels, net als de rest van de code.
 #
-# Inloggen werkt vandaag via "Sign in with token": een fine-grained GitHub-token
-# met Contents read/write op hisarweb-be/uccib. Dat vraagt geen server en geen
-# tweede account. De knop "Sign in with GitHub" komt erbij zodra de Sveltia CMS
-# Authenticator op Cloudflare Workers Free staat; pas dan komt hier base_url bij.
+# Inloggen gaat met de knop "Sign In with GitHub": dhr. Omer klikt, autoriseert
+# zijn eigen GitHub-account en is binnen. Geen persoonlijk toegangstoken meer,
+# geen token dat hij moet bewaren of vernieuwen. Dat werkt via de kleine
+# authenticator in `cms-auth/` (een Cloudflare Worker op het gratis plan, eigen
+# code in deze repo, uitgelegd in `cms-auth/README.md`); `base_url` hieronder
+# wijst ernaar. Wie liever met een token inlogt kan dat nog steeds, maar het
+# hoeft niet en het is niet de route die wij uitleggen.
 #
 # Waarom create/delete op false: de site heeft veertien vaste pagina's, elk met
 # een eigen plek in de menubalk en een eigen ontworpen kop. Een vijftiende pagina
@@ -26,6 +29,10 @@ backend:
   name: github
   repo: hisarweb-be/uccib
   branch: main
+  # De authenticator die de GitHub-login regelt. Meet deze Worker na een
+  # wijziging: `curl https://uccib-cms-auth.hisarweb-be.workers.dev/auth`
+  # hoort 200 te geven en bij een ingevulde client-ID een 302 naar GitHub.
+  base_url: https://uccib-cms-auth.hisarweb-be.workers.dev
 
 media_folder: public/beeld
 public_folder: /beeld
