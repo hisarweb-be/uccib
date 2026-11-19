@@ -91,11 +91,14 @@ const kort = (datum: string): string => {
  * houden. Daarom zegt de tabelkop welke dagen er echt in staan.
  */
 const tabelDagen = dagen.slice(0, 7);
-const tabelKop = tabelDagen.length > 1
-  ? `${kort(tabelDagen[0].datum)} – ${kort(tabelDagen[tabelDagen.length - 1].datum)}`
-  : tabelDagen.length === 1
-    ? kort(tabelDagen[0].datum)
-    : teksten.week;
+const eersteDag = tabelDagen[0];
+const laatsteDag = tabelDagen[tabelDagen.length - 1];
+const tabelKop =
+  eersteDag && laatsteDag && tabelDagen.length > 1
+    ? `${kort(eersteDag.datum)} – ${kort(laatsteDag.datum)}`
+    : eersteDag
+      ? kort(eersteDag.datum)
+      : teksten.week;
 
 /** De regel onder de kop: welke dag, welke stad, hoe oud de gegevens zijn. */
 const vandaagDatum = new Intl.DateTimeFormat('en-CA', {
