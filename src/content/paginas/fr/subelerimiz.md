@@ -6,4 +6,4 @@ intro: ""
 order: 7
 ---
 
-Belçika genelindeki şubelerimizin adres ve iletişim bilgileri yakında burada yer alacaktır.
+Les adresses et coordonnées de nos sections dans toute la Belgique figureront bientôt ici.

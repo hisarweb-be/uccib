@@ -6,4 +6,4 @@ intro: ""
 order: 8
 ---
 
-Belçika’daki bölge derneklerimizin listesi yakında burada yer alacaktır.
+De lijst van onze regionale verenigingen in België verschijnt binnenkort hier.

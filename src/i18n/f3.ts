@@ -306,7 +306,7 @@ const NL: F3Teksten = {
       href: '/cuma-hutbesi',
     },
     {
-      titel: 'Onze vestigingen',
+      titel: 'Onze afdelingen',
       tekst: 'Onze vestigingen in heel België: adres, telefoon en de plaats op de kaart.',
       href: '/subelerimiz',
     },
@@ -476,7 +476,7 @@ const FR: F3Teksten = {
       href: '/cuma-hutbesi',
     },
     {
-      titel: 'Nos centres',
+      titel: 'Nos sections',
       tekst: 'Nos centres dans toute la Belgique : adresse, téléphone et position sur la carte.',
       href: '/subelerimiz',
     },
