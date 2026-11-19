@@ -307,8 +307,10 @@ html[lang='fr'] {
     text-underline-offset: 0.18em;
   }
 
-  a:hover {
-    text-decoration: underline;
+  @media (hover: hover) {
+    a:hover {
+      text-decoration: underline;
+    }
   }
 
   /* Focusring petrol-diep: 5,81:1 op papier (petrol haalde maar 2,99:1). */

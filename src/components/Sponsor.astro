@@ -172,12 +172,20 @@ const doneerHref = pagePath(locale, 'bagislar');
     text-decoration: none;
   }
 
-  .tegel:hover,
   .tegel:focus-visible {
     background: var(--color-brand-dark);
     border-color: var(--color-brand-dark);
     color: #fff;
     text-decoration: none;
+  }
+
+  @media (hover: hover) {
+    .tegel:hover {
+      background: var(--color-brand-dark);
+      border-color: var(--color-brand-dark);
+      color: #fff;
+      text-decoration: none;
+    }
   }
 
   .bedrag {

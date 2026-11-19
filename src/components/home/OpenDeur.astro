@@ -111,8 +111,10 @@ const bezoek = teksten.diensten.find((d) => d.rol === 'bezoek');
     text-decoration: underline;
     text-underline-offset: 0.2em;
   }
-  .deur-link:hover {
-    color: var(--color-inkt);
+  @media (hover: hover) {
+    .deur-link:hover {
+      color: var(--color-inkt);
+    }
   }
   .deur-link:focus-visible {
     outline: 3px solid var(--color-petrol);

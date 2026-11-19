@@ -72,6 +72,7 @@ const languageHref = (other: Locale) =>
 
 <style>
   .kop {
+    position: relative;
     background: var(--color-papier);
     border-bottom: 1px solid var(--lijn);
   }
@@ -85,12 +86,25 @@ const languageHref = (other: Locale) =>
 
   /*
     De haarlijn verschijnt na 8 px scroll. Een scroll-driven animatie op de
-    randkleur, geen JavaScript; kan de browser dat niet of vraagt de bezoeker
-    minder beweging, dan staat de lijn er gewoon altijd.
+    opacity van een lijn die over de (dan onzichtbare) rand ligt, geen JavaScript
+    en geen randkleur die beweegt (DESIGNSYSTEEM 6.5). De rand zelf blijft 1 px
+    breed, zodat de kop even hoog blijft. Kan de browser dat niet of vraagt de
+    bezoeker minder beweging, dan staat de lijn er gewoon altijd.
   */
   @supports (animation-timeline: scroll()) {
     @media (prefers-reduced-motion: no-preference) {
       .kop {
+        border-bottom-color: transparent;
+      }
+      .kop::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        bottom: -1px;
+        left: 0;
+        height: 1px;
+        background: var(--lijn);
+        pointer-events: none;
         animation: kop-lijn linear both;
         animation-timeline: scroll(root);
         animation-range: 0 8px;
@@ -100,10 +114,10 @@ const languageHref = (other: Locale) =>
 
   @keyframes kop-lijn {
     from {
-      border-bottom-color: transparent;
+      opacity: 0;
     }
     to {
-      border-bottom-color: var(--lijn);
+      opacity: 1;
     }
   }
 
@@ -148,10 +162,16 @@ const languageHref = (other: Locale) =>
     }
   }
 
-  .menuknop:hover .menuknop-tekst,
   .menuknop:focus-visible .menuknop-tekst {
     color: var(--color-petrol-diep);
     text-decoration: underline;
+  }
+
+  @media (hover: hover) {
+    .menuknop:hover .menuknop-tekst {
+      color: var(--color-petrol-diep);
+      text-decoration: underline;
+    }
   }
 
   .woordmerk {
@@ -189,10 +209,16 @@ const languageHref = (other: Locale) =>
     text-decoration: none;
   }
 
-  .taal:hover,
   .taal:focus-visible {
     color: var(--color-petrol-diep);
     text-decoration: underline;
+  }
+
+  @media (hover: hover) {
+    .taal:hover {
+      color: var(--color-petrol-diep);
+      text-decoration: underline;
+    }
   }
 
   .taal[aria-current='true'] {
@@ -222,10 +248,16 @@ const languageHref = (other: Locale) =>
       white-space: nowrap;
     }
 
-    .giftlink:hover,
     .giftlink:focus-visible {
       background: var(--color-petrol-diep);
       color: var(--color-wit);
+    }
+
+    @media (hover: hover) {
+      .giftlink:hover {
+        background: var(--color-petrol-diep);
+        color: var(--color-wit);
+      }
     }
   }
 

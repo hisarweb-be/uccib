@@ -125,14 +125,15 @@
   font-size: var(--text-nav);
   font-weight: 600;
   text-decoration: none;
-  transition:
-    background-color 0.18s ease,
-    border-color 0.18s ease;
+  /* Alleen de achtergrond loopt over; de rand wisselt meteen (DESIGNSYSTEEM 6.5). */
+  transition: background-color 0.18s ease;
 }
 
-.tekst > p.knop-alinea > a:hover {
-  border-color: var(--color-brand);
-  background: var(--color-brand-light);
+@media (hover: hover) {
+  .tekst > p.knop-alinea > a:hover {
+    border-color: var(--color-brand);
+    background: var(--color-brand-light);
+  }
 }
 
 /* ---------- Een alinea met één afbeelding is een figuur ---------- */
