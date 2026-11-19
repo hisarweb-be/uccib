@@ -55,6 +55,34 @@
   gap: 0.25rem;
 }
 
+.vakit-herkomst {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+}
+
+/*
+ * Voor welke plaats gelden deze tijden. Zonder deze regel was dat nergens te
+ * zien, ook niet nadat de lezer een andere stad koos: de stad stond alleen in
+ * een `data`-attribuut (gemeten 19-11-2026).
+ */
+.vakit-plaats {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.35em;
+  margin: 0;
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  color: var(--color-ink-muted);
+}
+
+.vakit-plaats-naam {
+  font-weight: var(--text-label--font-weight);
+  color: var(--color-petrol-diep);
+}
+
 .vakit-datum {
   margin: 0;
   font-size: var(--text-label);

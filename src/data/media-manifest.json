@@ -68,10 +68,10 @@
             "pad": "/media/wow/h1-d.mp4",
             "breedte": 1280,
             "hoogte": 720,
-            "gewicht": 1313961,
-            "fps": 24,
-            "frames": 190,
-            "duur": 7.92,
+            "gewicht": 1969619,
+            "fps": 20,
+            "frames": 152,
+            "duur": 7.6,
             "webm": "/media/wow/h1-d.webm"
           },
           "reeks": null,
@@ -79,14 +79,14 @@
             "pad": "/media/wow/h1-d-poster.webp",
             "breedte": 1280,
             "hoogte": 720,
-            "gewicht": 83470,
+            "gewicht": 99216,
             "avif": "/media/wow/h1-d-poster.avif"
           },
           "frame0": {
             "pad": "/media/wow/h1-d-frame0.webp",
             "breedte": 1280,
             "hoogte": 720,
-            "gewicht": 83470
+            "gewicht": 99216
           },
           "eind": null
         },
@@ -95,10 +95,10 @@
             "pad": "/media/wow/h1-m.mp4",
             "breedte": 720,
             "hoogte": 900,
-            "gewicht": 946313,
-            "fps": 24,
-            "frames": 190,
-            "duur": 7.92,
+            "gewicht": 1119772,
+            "fps": 20,
+            "frames": 152,
+            "duur": 7.6,
             "webm": "/media/wow/h1-m.webm"
           },
           "reeks": null,
@@ -106,14 +106,14 @@
             "pad": "/media/wow/h1-m-poster.webp",
             "breedte": 720,
             "hoogte": 900,
-            "gewicht": 52454,
+            "gewicht": 65964,
             "avif": "/media/wow/h1-m-poster.avif"
           },
           "frame0": {
             "pad": "/media/wow/h1-m-frame0.webp",
             "breedte": 720,
             "hoogte": 900,
-            "gewicht": 52454
+            "gewicht": 65964
           },
           "eind": null
         }

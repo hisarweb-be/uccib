@@ -23,7 +23,7 @@
 const TIJDEN = ['imsak', 'gunes', 'ogle', 'ikindi', 'aksam', 'yatsi'] as const;
 
 type Dag = { datum: string; tijden: Record<string, string> };
-type Antwoord = { success?: boolean; dagen?: Dag[] };
+type Antwoord = { success?: boolean; stad?: string; dagen?: Dag[] };
 
 /** Namen per taal, dezelfde als in `src/lib/vakitler.ts`. */
 const NAMEN: Record<string, Record<string, string>> = {
@@ -59,6 +59,18 @@ function klok(iso: string): string {
   }).format(moment);
 }
 
+/** `donderdag 19 november`, in de taal van de pagina (dezelfde opmaak als bij de bouw). */
+function datumTekst(datum: string, taal: string): string {
+  const [jaar, maand, dag] = datum.split('-').map(Number);
+  if (!jaar || !maand || !dag) return datum;
+  return new Intl.DateTimeFormat(taal === 'tr' ? 'tr-BE' : taal === 'fr' ? 'fr-BE' : 'nl-BE', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    timeZone: TIJDZONE,
+  }).format(new Date(Date.UTC(jaar, maand - 1, dag, 12)));
+}
+
 /** De eerstvolgende tijd over alle dagen heen; na yatsi is dat de imsak van morgen. */
 function volgende(dagen: readonly Dag[], nu: number): { sleutel: string; moment: Date } | null {
   const gesorteerd = [...dagen].sort((a, b) => (a.datum < b.datum ? -1 : 1));
@@ -91,6 +103,7 @@ function levend(root: HTMLElement): void {
   const namen = NAMEN[taal] ?? NAMEN.nl ?? {};
 
   const datumEl = root.querySelector('[data-vakit-datum]');
+  const plaatsEl = root.querySelector('[data-vakit-plaats]');
   const volgendEl = root.querySelector('[data-vakit-volgend]');
   const tijdEl = root.querySelector('[data-vakit-tijd]');
   const klokEl = root.querySelector('[data-vakit-klok]');
@@ -102,16 +115,30 @@ function levend(root: HTMLElement): void {
 
   /** De tijden die de bouw al in de pagina zette; zonder netwerk werkt dit door. */
   let dagen: Dag[] = [];
+  /** De plaatsnamen per taal, meegegeven door het onderdeel (dezelfde lijst als de kiezer). */
+  let plaatsen: Record<string, string> = {};
   try {
     const bron = root.querySelector('[data-vakit-data]');
-    const mee = bron ? (JSON.parse(bron.textContent ?? '{}') as { dagen?: Dag[] }) : null;
+    const mee = bron
+      ? (JSON.parse(bron.textContent ?? '{}') as { dagen?: Dag[]; plaatsen?: Record<string, string> })
+      : null;
     if (Array.isArray(mee?.dagen)) dagen = mee.dagen;
+    if (mee?.plaatsen) plaatsen = mee.plaatsen;
   } catch {
     /* Onleesbare gegevens: dan beginnen we leeg en vult het verzoek de rest. */
   }
 
   let nuVolgend: { sleutel: string; moment: Date } | null = null;
   let timer: number | undefined;
+  /** De stad waarvan de tijden nu in de tabel staan. */
+  let huidigeStad = root.dataset.stad || 'brussel';
+
+  /*
+   * De plaats van de getoonde tijden staat als tekst in beeld ("Stad: Brussel").
+   * Die moet meeveranderen met de keuze: anders leest de bezoeker na het kiezen
+   * van Gent nog steeds Brussel, en dat is precies de verwarring van 19-11.
+   */
+  const zetPlaats = (slug: string): void => zetTekst(plaatsEl, plaatsen[slug] ?? slug);
 
   try {
     const bewaard = window.localStorage.getItem(GEKOZEN_STAD);
@@ -120,6 +147,8 @@ function levend(root: HTMLElement): void {
     /* Privémodus: geen keuze bewaren, de rest werkt gewoon. */
   }
 
+  zetPlaats(keuze?.value || root.dataset.stad || 'brussel');
+
   /** De zeven tijden van de dag, de weektabel en de klok, uit `dagen`. */
   const teken = (): void => {
     if (dagen.length === 0) return;
@@ -127,6 +156,7 @@ function levend(root: HTMLElement): void {
     const vandaag = dagen.find((dag) => dag.datum === vandaagIso()) ?? dagen[dagen.length - 1];
     if (!vandaag) return;
 
+    zetTekst(datumEl, datumTekst(vandaag.datum, taal));
     nuVolgend = volgende(dagen, Date.now());
 
     if (rij) {
@@ -212,21 +242,35 @@ function levend(root: HTMLElement): void {
       });
       if (!antwoord.ok) {
         zetTekst(statusEl, root.dataset.meldingFout ?? '');
+        toonHuidigeStad();
         return;
       }
       const body = (await antwoord.json()) as Antwoord;
       if (!Array.isArray(body.dagen) || body.dagen.length === 0) {
         zetTekst(statusEl, root.dataset.meldingFout ?? '');
+        toonHuidigeStad();
         return;
       }
       dagen = body.dagen;
-      zetTekst(datumEl, datumEl?.textContent ?? '');
+      huidigeStad = stad;
+      zetPlaats(stad);
       zetTekst(statusEl, '');
       teken();
     } catch {
       zetTekst(statusEl, root.dataset.meldingFout ?? '');
+      toonHuidigeStad();
     }
   };
+
+  /*
+   * Mislukt het ophalen, dan blijven de tijden van de vorige stad staan. De
+   * plaatsregel en de kiezer moeten dan terug naar die stad, anders zeggen ze
+   * iets anders dan de tabel (en de tijden zijn dan van de verkeerde plaats).
+   */
+  function toonHuidigeStad(): void {
+    zetPlaats(huidigeStad);
+    if (keuze) keuze.value = huidigeStad;
+  }
 
   void haal(keuze?.value || root.dataset.stad || 'brussel');
 
