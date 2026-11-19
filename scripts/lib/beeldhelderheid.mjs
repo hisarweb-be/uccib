@@ -146,3 +146,30 @@ export function lichtAandeel(png, { tegel = 16, drempel = 0.35 * 255 } = {}) {
   }
   return licht / totaal;
 }
+
+/**
+ * Welk deel van het scherm papier is (kleur `#f2f6f5`, het papier van het
+ * designsysteem). Dit is de meter van de klacht van 19 nov: de ster opende met
+ * een foto in het gat, maar met 83 % papier eromheen, en de poort keek alleen
+ * naar rechthoeken en opacity en zag dat niet. Papier herkennen we aan zijn
+ * kleur: groen boven 228 en rood en blauw binnen 12 daarvan, zodat een foto die
+ * toevallig licht is niet meetelt.
+ */
+export function papierAandeel(png) {
+  const beeld = ontleed(png);
+  const pixels = ontfilter(beeld);
+  const { breedte, hoogte, kanalen } = beeld;
+  const aantal = breedte * hoogte;
+  let stap = 1;
+  while (aantal / stap > 400000) stap += 1;
+  let papier = 0;
+  let geteld = 0;
+  for (let i = 0; i + kanalen <= pixels.length; i += kanalen * stap) {
+    const r = pixels[i];
+    const g = pixels[i + 1];
+    const b = pixels[i + 2];
+    if (g > 228 && Math.abs(r - g) < 12 && Math.abs(b - g) < 12) papier += 1;
+    geteld += 1;
+  }
+  return papier / geteld;
+}
