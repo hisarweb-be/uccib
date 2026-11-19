@@ -13,7 +13,7 @@ uccib.com hiçbir çerez yerleştirmez. Tarayıcınıza bilgi kaydetmeyiz, sizi 
 
 ## (1) Sorumlu
 
-Union des Centres Culturels Islamiques Belgium (UCCIB), Rue Charles Demeer 3, 1020 Brüksel, Belçika. KBO/BTW BE 0843.891.981. E-posta info@uccib.com, telefon +32 493 344 665.
+Union des Centres Culturels Islamiques de Belgique (UCCIB), kamu yararına vakıf (stichting van openbaar nut). Kayıtlı merkez Charles Demeerstraat 1-3, 1020 Brüksel; ziyaret adresi Rue Charles Demeer 3, 1020 Brüksel, Belçika. KBO/BTW BE 0843.891.981. E-posta info@uccib.com, telefon +32 493 344 665.
 
 ## (2) Sitede ölçtüğümüz durum
 

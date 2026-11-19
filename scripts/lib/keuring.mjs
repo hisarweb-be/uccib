@@ -419,10 +419,21 @@ export async function checkConcepten({ distDir, slugs = CONCEPT_SLUGS, locales =
     const html = await readFile(file, 'utf8');
     const bodyStart = html.search(/<body\b/i);
     const body = bodyStart === -1 ? html : html.slice(bodyStart);
-    for (const match of body.matchAll(/href\s*=\s*"([^"]*)"/gi)) {
+    // Herontwerp (18 nov 2026, CONTRACT 7.2): het menu toont altijd alle punten, ook
+    // een pagina die uit staat. Zo'n menulink is eerlijk gemerkt met
+    // aria-describedby="binnenkort-<slug>" en mag; elke andere link naar een concept
+    // blijft een fout.
+    for (const match of body.matchAll(/<[^>]*\bhref\s*=\s*"([^"]*)"[^>]*>/gi)) {
+      if (/aria-describedby="binnenkort-/.test(match[0])) continue;
+      // F2b PR4 (CONTRACT 4.2, STORYBOARD D09, DESIGNSYSTEEM 7.4): een dienstregel
+      // op de startpagina linkt naar haar eigen binnenkort-pagina en toont daar
+      // de leeg-titel. Die regel draagt data-binnenkort="<slug>"; alleen een link
+      // naar precies die slug mag, elke andere conceptlink blijft een fout.
+      const binnenkort = match[0].match(/\bdata-binnenkort="([^"]*)"/)?.[1];
       const href = match[1];
       const pad = href.replace(/^https?:\/\/uccib\.com/i, '').split(/[?#]/)[0];
       for (const slug of slugs) {
+        if (slug === binnenkort) continue;
         for (const locale of locales) {
           const route = pagePath(locale, slug);
           if (pad === route || pad === route.slice(0, -1)) {

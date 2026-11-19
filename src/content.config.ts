@@ -4,7 +4,7 @@
  * bevatten; Astro controleert elk Markdown-bestand er tegen bij de bouw, en
  * Sveltia CMS leest dezelfde velden uit `public/admin/config.yml`.
  *
- * Zes collecties:
+ * Zeven collecties (de zevende, `kerngegevens`, staat onderaan):
  *   - `paginas`: één bestand per pagina per taal, `src/content/paginas/<taal>/<slug>.md`.
  *     Het bestand voor de startpagina heet `index.md` (dus `tr/index`), alle andere
  *     heten naar hun slug (`tr/hakkimizda`).
@@ -21,6 +21,7 @@
  */
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
+import kerngegevensBron from './data/kerngegevens.json';
 
 const paginas = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/paginas' }),
@@ -76,6 +77,13 @@ const dienstBasis = {
   active: z.boolean().default(true),
 };
 
+/**
+ * Een coördinaat is optioneel: leeg (of een leeg CMS-veld, dat als '' binnenkomt)
+ * wordt null. Ze dienen alleen om later een route te kunnen berekenen; de site
+ * toont nooit een kaart, tegel of coördinaat (DESIGNSYSTEEM 7.6).
+ */
+const coordinaat = z.preprocess((v) => (v === '' ? null : v), z.number().nullable().default(null));
+
 const subeler = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/subeler' }),
   schema: z.object({
@@ -91,6 +99,8 @@ const subeler = defineCollection({
     openingHours: z.string().default(''),
     /** Pad onder /beeld/ of een volledig adres; leeg betekent geen foto. */
     photo: z.string().default(''),
+    lat: coordinaat,
+    lng: coordinaat,
   }),
 });
 
@@ -110,6 +120,8 @@ const dernekler = defineCollection({
     /** Volledig adres met https://; leeg betekent geen knop. */
     website: z.string().default(''),
     photo: z.string().default(''),
+    lat: coordinaat,
+    lng: coordinaat,
   }),
 });
 
@@ -143,6 +155,24 @@ const hutbeler = defineCollection({
   }),
 });
 
+/**
+ * `kerngegevens`: één bestand, `src/data/kerngegevens.json`, met openingsuren,
+ * KBO, rechtsvorm en coördinaten (naam en zetel staan in `src/data/rechtspersoon.json`).
+ * Leeg betekent: niet tonen. Het CMS bewerkt het als files-collectie "Kerngegevens";
+ * dit schema laat de bouw falen als het bestand een ongeldig veld krijgt. De
+ * pagina's lezen het JSON-bestand zelf; de collectie is de controle.
+ */
+const kerngegevens = defineCollection({
+  loader: async () => [{ id: 'kerngegevens', ...kerngegevensBron }],
+  schema: z.object({
+    openingsuren: z.string().default(''),
+    kbo: z.string().default(''),
+    rechtsvorm: z.string().default(''),
+    lat: coordinaat,
+    lng: coordinaat,
+  }),
+});
+
 export const collections = {
   paginas,
   sponsorblokken,
@@ -150,4 +180,5 @@ export const collections = {
   dernekler,
   vakitler,
   hutbeler,
+  kerngegevens,
 };

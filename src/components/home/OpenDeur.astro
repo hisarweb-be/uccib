@@ -1,0 +1,144 @@
+---
+/**
+ * Open deur (STORYBOARD D10 tot D12, M06; DESIGNSYSTEEM 7.10): de rust voor de piek.
+ *
+ * Kop en zin komen van de dienst met `rol: 'deur'` (Açık Cami Günü / Open
+ * Moskeedag / Journée portes ouvertes), de regel eronder van de dienst met
+ * `rol: 'bezoek'` (de moskeebezoeken). CONTRACT 4.2 zegt "kies op href, niet op
+ * index"; de bezoeken en de vestigingen delen echter dezelfde href, dus kiest dit
+ * blok op een expliciete rol in f3. Ontbreekt de deur-dienst, dan verdwijnt het
+ * blok; ontbreekt alleen de bezoekregel, dan staat de rest er wel.
+ *
+ * De zin is een `p` in citaatmaat, geen blockquote: het is eigen tekst. De rozet
+ * staat er als stilstaande lijntekening (stand open-kern), ook zonder JavaScript.
+ */
+import Rozet from '../Rozet.astro';
+import { type Locale } from '../../i18n';
+import { f3 } from '../../i18n/f3';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const teksten = f3(locale);
+const deur = teksten.diensten.find((d) => d.rol === 'deur');
+const bezoek = teksten.diensten.find((d) => d.rol === 'bezoek');
+---
+
+{
+  deur ? (
+    <section id="open-deur" data-sectie="open-deur" class="open-deur">
+      <h2 class="deur-kop">{deur.titel}</h2>
+      <p class="deur-zin">{deur.tekst}</p>
+      <div class="deur-rozet" aria-hidden="true">
+        <Rozet stand="open-kern" maat={240} />
+      </div>
+      {bezoek ? (
+        <p class="deur-bezoek">
+          <strong class="deur-bezoek-titel">{bezoek.titel}</strong>
+          <span>{bezoek.tekst}</span>
+          <a class="deur-link" href="#contact">
+            {teksten.contactKop}
+          </a>
+        </p>
+      ) : null}
+    </section>
+  ) : null
+}
+
+<style>
+  .open-deur {
+    --blad: max(var(--spacing-marge), calc((100% - var(--container-blad)) / 2));
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 2rem;
+    align-content: center;
+    min-height: calc(100svh - var(--kop-hoogte));
+    padding: 4rem var(--blad);
+    background: var(--color-papier);
+    color: var(--color-inkt);
+  }
+  .deur-kop {
+    margin: 0;
+    font-family: var(--font-kop);
+    font-size: var(--text-h2);
+    line-height: var(--text-h2--line-height);
+    letter-spacing: var(--text-h2--letter-spacing);
+    font-weight: var(--text-h2--font-weight);
+  }
+  .deur-zin {
+    margin: 0;
+    max-width: 28ch;
+    font-family: var(--font-kop);
+    font-size: var(--text-citaat);
+    line-height: var(--text-citaat--line-height);
+    letter-spacing: var(--text-citaat--letter-spacing);
+    font-weight: var(--text-citaat--font-weight);
+  }
+  .deur-rozet {
+    color: var(--color-petrol-diep);
+  }
+  .deur-rozet :global(svg) {
+    display: block;
+    width: 6rem;
+    height: auto;
+  }
+  .deur-bezoek {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: 44rem;
+    margin: 0;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--lijn);
+    font-size: var(--text-body);
+    line-height: 1.55;
+  }
+  .deur-bezoek-titel {
+    font-family: var(--font-tekst);
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+    font-weight: 600;
+  }
+  .deur-link {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    min-height: 44px;
+    color: var(--color-petrol-diep);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  @media (hover: hover) {
+    .deur-link:hover {
+      color: var(--color-inkt);
+    }
+  }
+  .deur-link:focus-visible {
+    outline: 3px solid var(--color-petrol);
+    outline-offset: 3px;
+  }
+
+  @media (min-width: 64rem) {
+    .open-deur {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: 1.5rem;
+    }
+    .deur-kop,
+    .deur-zin,
+    .deur-bezoek {
+      grid-column: 2 / 10;
+    }
+    .deur-rozet {
+      grid-column: 10 / 13;
+      grid-row: 2 / 4;
+      align-self: center;
+      justify-self: center;
+    }
+    .deur-rozet :global(svg) {
+      width: min(15rem, 100%);
+    }
+  }
+</style>

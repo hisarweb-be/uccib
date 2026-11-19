@@ -1,0 +1,99 @@
+---
+/**
+ * De startpagina (F2b). Volgorde (CONTRACT 4.2, STORYBOARD): `hero-unie`,
+ * `diensten-index`, de plek voor `CmsBlokOfNiets`, `open-deur`, `piek-ruimtes`,
+ * en daarna in `.na-piek` (het papier schuift over de piek) `steun` en `contact`.
+ *
+ * PR4 vervangt de oude dienstenkaarten, de lopende welkomsttekst en het fotoblok
+ * (`CinemaBeeld`) door de nieuwe delen. De welkomsttekst blijft in het CMS
+ * (`src/content/paginas/<taal>/index.md`) maar staat niet meer op de startpagina:
+ * "wie wij zijn" staat nu vooraan in de hero (BRIEF d-07).
+ */
+import { getEntry } from 'astro:content';
+
+import Layout from '../../layouts/Layout.astro';
+import CmsBlokOfNiets, { type CmsRegel } from '../CmsBlokOfNiets.astro';
+import HeroUnie from './HeroUnie.astro';
+import DienstenIndex from './DienstenIndex.astro';
+import OpenDeur from './OpenDeur.astro';
+import PiekRuimtes from './PiekRuimtes.astro';
+import SteunKeuze from './SteunKeuze.astro';
+import AdresBlad from './AdresBlad.astro';
+import { getDictionary, type Locale } from '../../i18n';
+import { SITE } from '../../data/site';
+import kern from '../../data/kerngegevens.json';
+import '../../styles/home.css';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale);
+const pagina = t.pages[''];
+
+/* De lader laat `index` vallen: `fr` voor `fr/index.md`. */
+const entry = await getEntry('paginas', locale);
+if (!entry) {
+  throw new Error(`Geen inhoud voor ${locale}: src/content/paginas/${locale}/index.md ontbreekt.`);
+}
+const h1 = entry.data.h1 || pagina.h1;
+
+/* Nieuws: er is nog geen collectie `haberler`, dus nul berichten en geen blok
+   (DESIGNSYSTEEM 7.7). Komt de collectie er, dan vult zij deze lijst (hooguit drie). */
+const nieuws: CmsRegel[] = [];
+
+/* Coördinaten en uren alleen uit de kerngegevens van de vzw, nooit uit site.ts. */
+const geo =
+  typeof kern.lat === 'number' && typeof kern.lng === 'number'
+    ? { geo: { '@type': 'GeoCoordinates', latitude: kern.lat, longitude: kern.lng } }
+    : {};
+const uren = typeof kern.openingsuren === 'string' && kern.openingsuren.trim() !== '' ? { openingHours: kern.openingsuren.trim() } : {};
+
+const ngo = {
+  '@context': 'https://schema.org',
+  '@type': 'NGO',
+  name: 'Union des Centres Culturels Islamiques Belgium',
+  alternateName: 'UCCIB',
+  url: SITE.url,
+  logo: new URL(SITE.logo, SITE.url).href,
+  foundingDate: SITE.founded,
+  telephone: SITE.phone,
+  email: SITE.email,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: SITE.street,
+    postalCode: SITE.postalCode,
+    addressLocality: SITE.city,
+    addressCountry: SITE.country,
+  },
+  ...geo,
+  ...uren,
+  areaServed: { '@type': 'Country', name: 'Belgium' },
+};
+---
+
+<Layout
+  locale={locale}
+  slug=""
+  title={entry.data.title || pagina.title}
+  description={entry.data.description || pagina.description}
+  volleBreedte
+>
+  <HeroUnie locale={locale} h1={h1} intro={entry.data.intro} />
+  <DienstenIndex locale={locale} />
+  <CmsBlokOfNiets id="haberler" kop={t.pages.haberler.h1} items={nieuws} />
+  <OpenDeur locale={locale} />
+  <PiekRuimtes locale={locale} />
+
+  <div class="na-piek">
+    <SteunKeuze locale={locale} />
+    <AdresBlad locale={locale} />
+  </div>
+
+  <script type="application/ld+json" set:html={JSON.stringify(ngo)} />
+</Layout>
+
+<script>
+  import '../../scripts/home/start';
+</script>

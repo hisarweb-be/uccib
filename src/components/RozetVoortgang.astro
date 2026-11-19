@@ -1,0 +1,68 @@
+---
+/**
+ * De rozet in de kop, die meegroeit met de paginavoortgang (DESIGNSYSTEEM 5.3, 6.3).
+ * `--sc-p` (0..1) zet de CSS zelf: `animation-timeline: scroll(root)` op het
+ * document, alleen als de browser dat kan en de bezoeker beweging toelaat. Het
+ * getypte `@property --sc-p` staat in tokens.css; daar staat ook de terugval:
+ * zonder scroll-driven animation of bij minder beweging is `--sc-p` 1 en staat het
+ * volle logo er. Geen JavaScript.
+ *
+ * De lijnrozet staat er altijd helemaal (herkenbaar, ook bovenaan de pagina) en
+ * groeit met de scroll van 78 naar 100 % (bij 32 px nooit onder de 24 px); tegen
+ * het einde vullen de vlakken zich en wordt de lijn wit (stand vol).
+ * Animeert alleen transform, opacity en kleur, nooit een maat.
+ */
+import Rozet from './Rozet.astro';
+
+interface Props {
+  /** 32 px in de mobiele kop, 40 px vanaf 1024 (DESIGNSYSTEEM 5.4). */
+  maat?: number;
+}
+
+const { maat = 32 } = Astro.props;
+---
+
+<span class="voortgang" aria-hidden="true">
+  <Rozet stand="vol" maat={maat} lijn={1.5} binnenlijnen={false} metPunt />
+</span>
+
+<style>
+  .voortgang {
+    display: inline-flex;
+    /* De vlakken komen pas in de laatste tiende; daarvoor is het een lijntekening. */
+    --vol: clamp(0, (var(--sc-p) - 0.9) * 10, 1);
+    transform: scale(calc(0.78 + 0.22 * var(--sc-p)));
+    transform-origin: 50% 50%;
+  }
+
+  /* svg.rozet--vol erbij: anders wint de witte lijn van stand vol uit Rozet.astro. */
+  .voortgang :global(svg.rozet--vol .rozet-lijn) {
+    stroke: color-mix(in srgb, var(--color-wit) calc(var(--vol) * 100%), var(--color-petrol-diep));
+  }
+
+  .voortgang :global(.rozet-vlakken) {
+    opacity: var(--vol);
+  }
+
+  .voortgang :global(.rozet-punt) {
+    opacity: calc(1 - var(--vol));
+  }
+
+  @keyframes sc-voortgang {
+    from {
+      --sc-p: 0;
+    }
+    to {
+      --sc-p: 1;
+    }
+  }
+
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      :global(html) {
+        animation: sc-voortgang linear both;
+        animation-timeline: scroll(root);
+      }
+    }
+  }
+</style>

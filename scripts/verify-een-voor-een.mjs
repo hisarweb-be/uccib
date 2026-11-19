@@ -275,10 +275,16 @@ async function main() {
         );
     for (const [file, html] of teKijken) {
       const romp = html.slice(Math.max(0, html.search(/<body\b/i)));
-      for (const [, href] of romp.matchAll(/href\s*=\s*"([^"]*)"/gi)) {
+      // Herontwerp (18 nov 2026): een menulink met aria-describedby="binnenkort-<slug>"
+      // mag naar een pagina die uit staat wijzen (zie checkConcepten in lib/keuring.mjs).
+      for (const [tag, href] of romp.matchAll(/<[^>]*\bhref\s*=\s*"([^"]*)"[^>]*>/gi)) {
+        if (/aria-describedby="binnenkort-/.test(tag)) continue;
+        // F2b PR4: een dienstregel met data-binnenkort="<slug>" mag alleen naar die ene slug.
+        const binnenkort = tag.match(/\bdata-binnenkort="([^"]*)"/)?.[1];
         const pad = href.replace(/^https?:\/\/uccib\.com/i, '').split(/[?#]/)[0];
         linkTelling += 1;
         for (const slug of CONCEPT_SLUGS) {
+          if (slug === binnenkort) continue;
           for (const locale of LOCALES) {
             const route = pagePath(locale, slug);
             if (pad === route || pad === route.slice(0, -1)) linkFouten.push(`${file}: ${href}`);
@@ -323,14 +329,19 @@ async function main() {
     );
 
     // Een onbekend pad moet een echte 404 zijn, geen homepage met status 200.
-    for (const pad of ['/zzz-qw-8888', '/nl/zzz-qw-8888', '/fr/zzz-qw-8888']) {
+    // Elke taal heeft een eigen 404 (scripts/lib/taal-404.mjs zet nl/fr op <taal>/404.html).
+    for (const [pad, bestand, kop] of [
+      ['/zzz-qw-8888', '404.html', /Sayfa bulunamad/],
+      ['/nl/zzz-qw-8888', 'nl/404.html', /Pagina niet gevonden/],
+      ['/fr/zzz-qw-8888', 'fr/404.html', /Page introuvable/],
+    ]) {
       if (levend) {
         const antwoord = await fetch(`${siteBasis}${pad}`);
         const html = await antwoord.text();
-        meld(antwoord.status === 404 && /Sayfa bulunamad/.test(html), `onbekend ${pad}`, `status ${antwoord.status}`);
+        meld(antwoord.status === 404 && kop.test(html), `onbekend ${pad}`, `status ${antwoord.status}`);
       } else {
-        const html = await readFile(join(distDir, '404.html'), 'utf8');
-        meld(ontleed(html).h1 === 1 && ontleed(html).noindex, `404.html voor ${pad}`, 'bestaat, één h1, noindex');
+        const html = await readFile(join(distDir, bestand), 'utf8').catch(() => '');
+        meld(ontleed(html).h1 === 1 && ontleed(html).noindex && kop.test(html), `${bestand} voor ${pad}`, 'bestaat, één h1, noindex, juiste taal');
       }
     }
 

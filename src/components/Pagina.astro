@@ -7,8 +7,8 @@
  * één oogopslag en houdt de koppen, het beeld en de keuring consequent.
  *
  * De tekst komt uit `src/content/paginas/<taal>/<slug>.md`: Markdown die dhr. Omer
- * in Sveltia CMS bewerkt, zonder code. Wat een pagina aan vaste secties heeft (de
- * diensten, het adresblok, de tijdlijn) staat in `src/i18n/f3.ts` en noemt nooit
+ * in Sveltia CMS bewerkt, zonder code. Wat een pagina aan vaste secties heeft (het
+ * adresblok) staat in `src/i18n/f3.ts` en noemt nooit
  * een adres, telefoonnummer of bestuurssamenstelling die niet in `src/data/site.ts`
  * staat.
  */
@@ -26,6 +26,9 @@ import { SITE, type Slug } from '../data/site';
 import { isActiveSlug } from '../lib/actief';
 import { isConceptHref } from '../lib/concepten';
 import { f3 } from '../i18n/f3';
+import kern from '../data/kerngegevens.json';
+import ContactBlad from './ContactBlad.astro';
+import { rechtspersoon } from '../lib/rechtspersoon';
 
 interface Props {
   locale: Locale;
@@ -70,17 +73,18 @@ function doel(href: string): string {
 
 /**
  * Pagina's die hun tekst in eigen secties zetten in plaats van als lopende
- * tekst: de diensten op /hizmetlerimiz/, het adresblok op /iletisim/ en de
+ * tekst: de diensten op /hizmetlerimiz/ en de
  * tijdlijn op /hakkimizda/. Bij die laatste is het geen keuze maar noodzaak:
  * de vijf zinnen van die pagina zijn de vijf mijlpalen, dus de body eronder
  * zou dezelfde tekst een tweede keer tonen.
  */
-const EIGEN_SECTIES: ReadonlySet<Slug> = new Set(['hizmetlerimiz', 'iletisim']);
+const EIGEN_SECTIES: ReadonlySet<Slug> = new Set(['hizmetlerimiz']);
 
 /**
  * De vier ledendiensten krijgen hun inhoud uit een eigen collectie in plaats
  * van uit de body van de pagina. `LedenDienst` toont alleen wat de vereniging
- * zelf heeft ingevuld; staat er niets, dan toont het onderdeel niets.
+ * zelf heeft ingevuld; staat er niets, dan toont het alleen de body van de
+ * pagina (de binnenkort-zin) en anders nooit (F3 PR C, C0b).
  */
 const LEDEN_SLUGS = [
   'subelerimiz',
@@ -107,16 +111,9 @@ const ALT = {
   mescit: 'De lege gebedsruimte met de mihrab, de preekstoel en een witte zuil.',
 } as const;
 
-/** Beeld per blok op /hizmetlerimiz/: alleen waar een foto echt iets toont. */
-const DIENST_BEELD: Record<number, keyof typeof ALT> = {
-  0: 'mescit',
-  4: 'interieur',
-  5: 'gebouw',
-};
-
 const sponsorblokken = slug === '' ? await getCollection('sponsorblokken') : [];
 const steun = sponsorblokken
-  .filter((blok) => blok.data.active !== false)
+  .flatMap((blok) => (blok.data.active === false ? [] : [blok]))
   .sort((a, b) => a.data.order - b.data.order)
   .map((blok) => ({ bedrag: blok.data.amount, label: blok.data.label, link: blok.data.link }));
 
@@ -127,6 +124,7 @@ const ngo =
         '@context': 'https://schema.org',
         '@type': 'NGO',
         name: 'Union des Centres Culturels Islamiques Belgium',
+        legalName: rechtspersoon(locale).naam ?? undefined,
         alternateName: 'UCCIB',
         url: SITE.url,
         logo: new URL(SITE.logo, SITE.url).href,
@@ -140,16 +138,13 @@ const ngo =
           addressLocality: SITE.city,
           addressCountry: SITE.country,
         },
-        geo: {
-          '@type': 'GeoCoordinates',
-          latitude: SITE.geo.lat,
-          longitude: SITE.geo.lng,
-        },
+        ...(typeof kern.lat === 'number' && typeof kern.lng === 'number'
+          ? { geo: { '@type': 'GeoCoordinates', latitude: kern.lat, longitude: kern.lng } }
+          : {}),
         areaServed: { '@type': 'Country', name: 'Belgium' },
       }
     : null;
 
-const kaartUrl = `https://www.google.com/maps/search/?api=1&query=${SITE.geo.lat},${SITE.geo.lng}`;
 ---
 
 <Layout
@@ -157,16 +152,12 @@ const kaartUrl = `https://www.google.com/maps/search/?api=1&query=${SITE.geo.lat
   slug={slug}
   title={entry.data.title || pagina.title}
   description={entry.data.description || pagina.description}
-  volleBreedte={slug === ''}
+  volleBreedte={slug === '' || slug === 'iletisim'}
 >
   {
     slug === '' ? (
       <>
         <section class="relative overflow-hidden border-b border-line bg-surface-alt">
-          <div
-            aria-hidden="true"
-            class="pointer-events-none absolute -top-40 right-[-8rem] h-96 w-96 rounded-full bg-brand-light blur-3xl"
-          />
           <div class="relative mx-auto grid w-full max-w-6xl gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-14 lg:px-8 lg:py-24">
             <div>
               {/* Hier stond het logo nog een keer, 220 px op een telefoon en
@@ -277,147 +268,41 @@ const kaartUrl = `https://www.google.com/maps/search/?api=1&query=${SITE.geo.lat
           </div>
         </section>
       </>
+    ) : slug === 'iletisim' ? (
+      /* Contact: het adresblad van DESIGNSYSTEEM 7.6 is de hele pagina, met de h1
+         als kop; geen formulier, geen kaart, telefoon in lead-maat (F3-PLAN D2). */
+      <ContactBlad locale={locale} h1={h1} />
     ) : (
       <>
         <KopBand
           h1={h1}
-          intro={entry.data.intro || (slug === 'hizmetlerimiz' ? teksten.dienstenIntro : null)}
+          intro={entry.data.intro || null}
           beeldSlug={slug === 'hakkimizda' ? 'gebouw' : undefined}
           beeldAlt={ALT.gebouw}
         />
-        <div class="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
-          {slug === 'hizmetlerimiz' ? (
-            <ol class="m-0 grid list-none gap-6 p-0">
-              {teksten.diensten.map((dienst, index) => {
-                const foto = DIENST_BEELD[index];
-                return (
-                  <li class="grid items-center gap-6 rounded-2xl border border-line bg-surface p-5 sm:p-6 md:grid-cols-[minmax(0,1fr)_minmax(0,0.55fr)]">
-                    <div>
-                      <h2 class="text-h3">{dienst.titel}</h2>
-                      <p class="mt-3 max-w-[62ch] text-ink-muted">{dienst.tekst}</p>
-                      <a
-                        href={doel(dienst.href)}
-                        class="mt-4 inline-flex min-h-[44px] items-center text-nav font-semibold text-brand-dark"
-                      >
-                        {teksten.dienstenMeer}
-                        <svg
-                          class="ml-1 inline-block h-[1em] w-[1em] align-[-0.125em]"
-                          viewBox="0 0 16 16"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="1.75"
-                          aria-hidden="true"
-                          focusable="false"
-                        >
-                          <path d="M2 8h11M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                      </a>
-                    </div>
-                    {foto ? (
-                      <CinemaBeeld
-                        slug={foto}
-                        alt={ALT[foto]}
-                        sizes="(min-width: 768px) 340px, 100vw"
-                        klasse="rounded-xl"
-                      />
-                    ) : (
-                      <span
-                        aria-hidden="true"
-                        class="hidden text-[5rem] leading-none font-light text-ink-muted md:flex md:items-center md:justify-center"
-                      >
-                        {String(index + 1).padStart(2, '0')}
-                      </span>
-                    )}
-                  </li>
-                );
-              })}
-            </ol>
-          ) : null}
-
-          {slug === 'hakkimizda' ? (
-            <section class="mt-12">
-              <h2>{teksten.mijlpalenKop}</h2>
-              <ol class="mt-8 ml-0 grid list-none gap-0 p-0">
-                {teksten.mijlpalen.map((mijlpaal) => (
-                  <li class="relative border-l-2 border-line pb-8 pl-6 last:pb-0 sm:pl-8">
-                    <span
-                      aria-hidden="true"
-                      class="absolute top-1 -left-[9px] h-4 w-4 rounded-full border-2 border-surface bg-brand"
-                    />
-                    <p class="text-small font-semibold tracking-[0.14em] text-brand-dark uppercase">
-                      {mijlpaal.jaar} · {mijlpaal.label}
-                    </p>
-                    <p class="mt-2 max-w-[64ch]">{mijlpaal.tekst}</p>
-                  </li>
-                ))}
-              </ol>
-            </section>
-          ) : null}
-
-          {slug === 'iletisim' ? (
-            <div class="grid gap-6 md:grid-cols-2">
-              <dl class="m-0 grid gap-5 rounded-2xl border border-line bg-surface-alt p-6 sm:p-8">
-                <div>
-                  <dt class="text-small font-semibold tracking-[0.14em] text-brand-dark uppercase">
-                    {teksten.labelAdres}
-                  </dt>
-                  <dd class="mt-1 m-0">
-                    {SITE.street}
-                    <br />
-                    {SITE.postalCode} {SITE.city}
-                  </dd>
-                </div>
-                <div>
-                  <dt class="text-small font-semibold tracking-[0.14em] text-brand-dark uppercase">
-                    {teksten.labelTelefoon}
-                  </dt>
-                  <dd class="mt-1 m-0">
-                    <a href={`tel:${SITE.phoneHref}`}>{SITE.phone}</a>
-                  </dd>
-                </div>
-                <div>
-                  <dt class="text-small font-semibold tracking-[0.14em] text-brand-dark uppercase">
-                    {teksten.labelEmail}
-                  </dt>
-                  <dd class="mt-1 m-0">
-                    <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
-                  </dd>
-                </div>
-                <div>
-                  <dt class="text-small font-semibold tracking-[0.14em] text-brand-dark uppercase">
-                    {teksten.labelUren}
-                  </dt>
-                  <dd class="mt-1 m-0">{SITE.openingHours}</dd>
-                </div>
-              </dl>
-              <div class="flex flex-col gap-3">
-                <a
-                  class="inline-flex min-h-[48px] items-center justify-center rounded-pill bg-brand-dark px-6 text-nav font-semibold text-surface no-underline transition-colors hover:bg-ink"
-                  href={`https://wa.me/${SITE.whatsapp.replace('+', '')}`}
-                  rel="noopener"
-                  target="_blank"
-                >
-                  {teksten.whatsappLabel}
-                </a>
-                <a
-                  class="inline-flex min-h-[48px] items-center justify-center rounded-pill border border-line bg-surface px-6 text-nav font-semibold text-brand-dark no-underline transition-colors hover:border-brand hover:bg-brand-light"
-                  href={kaartUrl}
-                  rel="noopener"
-                  target="_blank"
-                >
-                  {teksten.labelRoute}: {teksten.routeTekst}
-                </a>
-              </div>
+        <div class="py-12 lg:py-16">
+          {slug === 'hizmetlerimiz' && heeftBody ? (
+            /* De activiteiten staan als `## Titel` plus uitleg in de Markdown (bron:
+               uccib.com); elke titel met zijn uitleg is één dienstregel (7.4). */
+            <div class="diensten">
+              <Content />
             </div>
           ) : null}
 
           {slug === 'disclameer' || slug === 'cerez-politikasi-cookie-policy' ? (
-            <p class="mb-8 rounded-2xl border border-line bg-surface-alt p-4 text-small text-ink-muted">
+            <p class="mb-8 max-w-[66ch] border-y border-[color:var(--lijn)] py-4 text-voet text-inkt">
               {teksten.juridischNoot}
             </p>
           ) : null}
-          {isLedenSlug(slug) ? <LedenDienst slug={slug} locale={locale} /> : null}
-          {heeftBody && !EIGEN_SECTIES.has(slug) ? (
+          {isLedenSlug(slug) ? (
+            <LedenDienst slug={slug} locale={locale}>
+              {heeftBody ? (
+                <div class="tekst">
+                  <Content />
+                </div>
+              ) : null}
+            </LedenDienst>
+          ) : heeftBody && !EIGEN_SECTIES.has(slug) ? (
             <div class="tekst">
               <Content />
             </div>
@@ -459,3 +344,47 @@ const kaartUrl = `https://www.google.com/maps/search/?api=1&query=${SITE.geo.lat
     ) : null
   }
 </Layout>
+
+<style>
+  /* Dienstregel (DESIGNSYSTEEM 7.4): regels over de volle breedte met een haarlijn
+     eronder; geen nummer, geen kaartvak, geen beeld. */
+  .diensten {
+    display: grid;
+  }
+
+  .diensten :global(h2) {
+    margin: 0;
+    padding-top: 1.5rem;
+    font-family: var(--font-kop);
+    font-size: var(--text-dienst);
+    line-height: var(--text-dienst--line-height);
+    letter-spacing: var(--text-dienst--letter-spacing);
+    font-weight: var(--text-dienst--font-weight);
+    color: var(--color-inkt);
+  }
+
+  .diensten :global(p) {
+    margin: 0.5rem 0 0;
+    padding-bottom: 1.5rem;
+    max-inline-size: 66ch;
+    border-bottom: 1px solid var(--lijn);
+    color: var(--color-inkt);
+  }
+
+  @media (min-width: 64rem) {
+    .diensten {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    }
+
+    .diensten :global(h2) {
+      padding-block: 2rem;
+      padding-right: 2rem;
+      border-bottom: 1px solid var(--lijn);
+    }
+
+    .diensten :global(p) {
+      margin: 0;
+      padding-block: 2rem;
+    }
+  }
+</style>

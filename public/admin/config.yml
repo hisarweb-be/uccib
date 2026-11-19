@@ -115,6 +115,8 @@ collections:
       - { name: email, label: E-posta, widget: string, required: false }
       - { name: openingHours, label: "Açılış saatleri (serbest metin)", widget: string, required: false }
       - { name: photo, label: Fotoğraf, widget: image, required: false, media_folder: public/beeld, public_folder: /beeld }
+      - { name: lat, label: "Enlem (isteğe bağlı, örnek 50.85)", widget: number, value_type: float, min: -90, max: 90, required: false }
+      - { name: lng, label: "Boylam (isteğe bağlı, örnek 4.35)", widget: number, value_type: float, min: -180, max: 180, required: false }
       - { name: order, label: Sıra numarası, widget: number, default: 0 }
       - { name: active, label: Yayında, widget: boolean, default: true }
 
@@ -138,6 +140,8 @@ collections:
       - { name: email, label: E-posta, widget: string, required: false }
       - { name: website, label: "Web sitesi (https:// ile)", widget: string, required: false }
       - { name: photo, label: Fotoğraf, widget: image, required: false, media_folder: public/beeld, public_folder: /beeld }
+      - { name: lat, label: "Enlem (isteğe bağlı, örnek 50.85)", widget: number, value_type: float, min: -90, max: 90, required: false }
+      - { name: lng, label: "Boylam (isteğe bağlı, örnek 4.35)", widget: number, value_type: float, min: -180, max: 180, required: false }
       - { name: order, label: Sıra numarası, widget: number, default: 0 }
       - { name: active, label: Yayında, widget: boolean, default: true }
 
@@ -180,3 +184,21 @@ collections:
       - { name: body, label: Hutbe metni, widget: markdown, required: false }
       - { name: order, label: Sıra numarası, widget: number, default: 0 }
       - { name: active, label: Yayında, widget: boolean, default: true }
+
+  # Eén bestand met uren, KBO, rechtsvorm en coördinaten. Een leeg veld
+  # verschijnt nergens op de site; vul alleen wat de raad van bestuur bevestigt.
+  # Naam, zetel en KBO van het adresblad komen uit src/data/rechtspersoon.json.
+  - name: kerngegevens
+    label: Kerngegevens
+    i18n: false
+    files:
+      - name: kerngegevens
+        label: "Kerngegevens (saatler, KBO, hukuki şekil, konum)"
+        file: src/data/kerngegevens.json
+        format: json
+        fields:
+          - { name: openingsuren, label: Açılış saatleri, widget: text, required: false }
+          - { name: kbo, label: "KBO numarası (örnek 0123.456.789)", widget: string, required: false }
+          - { name: rechtsvorm, label: Hukuki şekil (Felemenkçe), widget: string, required: false }
+          - { name: lat, label: Enlem, widget: number, value_type: float, required: false }
+          - { name: lng, label: Boylam, widget: number, value_type: float, required: false }

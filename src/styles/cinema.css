@@ -108,14 +108,15 @@ html.cinema-aan .cinema-laag[data-laag='massa'] {
   background-size: 140px 140px;
 }
 
-/* Cinemakader: laat de randen van het beeld zacht wegvallen in het donker.
-   Ruim genoeg open dat de foto aan de randen zichtbaar blijft; een dicht
-   zwart kader maakte van het geheel weer een vlak in plaats van een beeld. */
+/* Cinemakader: een effen dekkingslaag die het beeld een tikje donkerder zet,
+   zodat de witte tekst erop leesbaar blijft. Geen verloop (DESIGNSYSTEEM: het
+   enige verloop is de lichtlaag van de piek); de foto blijft overal zichtbaar. */
 .cinema-vignet {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(135% 105% at 50% 42%, transparent 46%, rgba(6, 10, 10, 0.78) 100%);
+  background: rgb(6 10 10);
+  opacity: 0.22;
 }
 
 /* ── Beeldsecties: onthulling bij binnenkomst en trage parallax ── */

@@ -1,0 +1,310 @@
+---
+/**
+ * Het menublad (DESIGNSYSTEEM 7.3). Altijd de zeven menupunten plus Bağış, in elke
+ * taal: niets wordt verborgen en er is geen doorverwijzing. Staat de pagina van
+ * een punt uit, dan geeft ze 200 met de eerlijke binnenkort-pagina, en hier staat
+ * onder het punt dezelfde titel (`f3 leeg.<slug>.titel`).
+ *
+ * Met JavaScript is dit een modale `dialog` (focus gevangen, Escape sluit, focus
+ * terug naar de knop; dat doet de browser zelf). Zonder JavaScript staat de
+ * dialog open als gewone lijst onder de kopbalk: alles blijft bereikbaar.
+ * De structuur `header nav ul a` en `a.donate` blijft (verify-mobiel).
+ */
+import { SITE } from '../data/site';
+import { getDictionary, type Locale } from '../i18n';
+import { pagePath } from '../i18n/config';
+import { f3 } from '../i18n/f3';
+import type { Slug } from '../data/site';
+import { isActiveSlug } from '../lib/actief';
+import Rozet from './Rozet.astro';
+
+interface Props {
+  locale: Locale;
+  slug: Slug | null;
+}
+
+const { locale, slug } = Astro.props;
+const t = getDictionary(locale);
+const teksten = f3(locale);
+
+/** De volgorde uit STORYBOARD D.2; Bağış als achtste, als gewone bestemming. */
+const PUNTEN = [
+  'home',
+  'hakkimizda',
+  'haberler',
+  'bolge-derneklerimiz',
+  'subelerimiz',
+  'namaz-vakitleri',
+  'cuma-hutbesi',
+  'bagislar',
+] as const;
+
+const punten = PUNTEN.map((key) => {
+  const doel = (key === 'home' ? '' : key) as Slug;
+  const binnenkort = key !== 'home' && !isActiveSlug(doel) ? teksten.leeg[key].titel : null;
+  return {
+    key,
+    href: pagePath(locale, doel),
+    label: t.nav[key],
+    huidig: key === 'home' ? slug === '' : slug === key,
+    binnenkort,
+  };
+});
+---
+
+<dialog id="rozetmenu" class="rozetmenu" aria-label={t.navLabel} open>
+  <div class="blad">
+    <div class="blad-kop">
+      <Rozet stand="vlecht" maat={56} class="blad-rozet" />
+      <button type="button" class="sluit" data-menu-sluit>{teksten.rozetMenuSluit}</button>
+    </div>
+
+    <nav aria-label={t.navLabel}>
+      <ul class="bestemmingen">
+        {
+          punten.map((p) => (
+            <li>
+              <a
+                class:list={['bestemming', { donate: p.key === 'bagislar' }]}
+                href={p.href}
+                aria-current={p.huidig ? 'page' : undefined}
+                aria-describedby={p.binnenkort ? `binnenkort-${p.key}` : undefined}
+              >
+                {p.label}
+              </a>
+              {p.binnenkort && (
+                <span class="binnenkort" id={`binnenkort-${p.key}`}>
+                  {p.binnenkort}
+                </span>
+              )}
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <p class="contact">
+      <a href={`tel:${SITE.phoneHref}`}><span class="sr-only">{t.footer.phone}: </span>{SITE.phone}</a>
+      <a href={`mailto:${SITE.email}`}><span class="sr-only">{t.footer.email}: </span>{SITE.email}</a>
+    </p>
+  </div>
+</dialog>
+
+<script>
+  /*
+    Het menu als modale dialog. De HTML levert hem open (zonder JavaScript een
+    gewone lijst); hier gaat hij dicht en opent hij pas met de knop. De browser
+    doet de focusval en Escape; wij geven de focus terug en zetten een klasse op
+    html zodat de WhatsApp-knop wegvalt zolang het blad open is.
+  */
+  const menu = document.getElementById('rozetmenu') as HTMLDialogElement | null;
+  const knop = document.querySelector<HTMLButtonElement>('[data-menu-open]');
+  if (menu && knop && typeof menu.showModal === 'function') {
+    // Het sluiten bij het laden geeft ook een `close`-gebeurtenis (asynchroon).
+    // Zonder deze vlag zou die de focus op de knop zetten op elke pagina.
+    let geopend = false;
+    menu.close();
+    const wortel = document.documentElement;
+    knop.addEventListener('click', () => {
+      menu.showModal();
+      geopend = true;
+      knop.setAttribute('aria-expanded', 'true');
+      wortel.classList.add('menu-open');
+      menu.querySelector<HTMLAnchorElement>('.bestemming')?.focus();
+    });
+    menu.querySelector('[data-menu-sluit]')?.addEventListener('click', () => menu.close());
+    menu.addEventListener('close', () => {
+      if (!geopend) return;
+      geopend = false;
+      knop.setAttribute('aria-expanded', 'false');
+      wortel.classList.remove('menu-open');
+      knop.focus();
+    });
+  }
+</script>
+
+<style>
+  .rozetmenu {
+    /* Zonder JavaScript: een gewone lijst onder de kopbalk, zonder dialogkader. */
+    position: static;
+    display: block;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--color-papier);
+    color: var(--color-inkt);
+  }
+
+  /* Met JavaScript is het blad verborgen tot het modaal opent: geen flits. */
+  :global(html.js-aan) .rozetmenu:not(:modal) {
+    display: none;
+  }
+
+  .rozetmenu:modal {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    overflow-y: auto;
+  }
+
+  /* Papier dekkend, geen donkere sluier. */
+  .rozetmenu::backdrop {
+    background: transparent;
+  }
+
+  .blad {
+    width: 100%;
+    max-width: var(--container-blad);
+    margin-inline: auto;
+    padding: 1rem var(--spacing-marge) 2rem;
+  }
+
+  .blad-kop {
+    display: none;
+  }
+
+  .rozetmenu:modal .blad-kop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: var(--kop-hoogte);
+    margin-bottom: 1.5rem;
+  }
+
+  .sluit {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 1rem;
+    border: 2px solid var(--color-petrol-diep);
+    border-radius: var(--radius-vak);
+    background: transparent;
+    color: var(--color-petrol-diep);
+    font: inherit;
+    font-size: var(--text-knop);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .bestemmingen {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .bestemmingen li {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .bestemming {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--color-inkt);
+    font-family: var(--font-kop);
+    font-size: var(--text-knop);
+    font-weight: 600;
+    text-decoration: none;
+    overflow-wrap: break-word;
+    hyphens: manual;
+  }
+
+  .rozetmenu:modal .bestemmingen {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+  }
+
+  .rozetmenu:modal .bestemming {
+    font-size: var(--text-h2);
+    line-height: var(--text-h2--line-height);
+    letter-spacing: var(--text-h2--letter-spacing);
+  }
+
+  /* De krappe regelhoogte van h2 laat de staarten (p, g) onder de regel hangen;
+     de binnenkort-regel krijgt daarom eigen ruimte en raakt ze niet. */
+  .rozetmenu:modal .binnenkort {
+    margin-top: 0.4rem;
+  }
+
+  /* Op desktop twee kolommen naast elkaar: acht bestemmingen in h2-maat passen niet onder elkaar. */
+  @media (min-width: 64rem) {
+    .rozetmenu:modal .bestemmingen {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem 3rem;
+    }
+  }
+
+  .bestemming:focus-visible {
+    color: var(--color-petrol-diep);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.18em;
+  }
+
+  @media (hover: hover) {
+    .bestemming:hover {
+      color: var(--color-petrol-diep);
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 0.18em;
+    }
+  }
+
+  .bestemming[aria-current='page'] {
+    color: var(--color-petrol-diep);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.18em;
+  }
+
+  .bestemming:focus-visible {
+    outline: 3px solid var(--color-petrol-diep);
+    outline-offset: 3px;
+  }
+
+  .binnenkort {
+    color: var(--inkt-zacht);
+    font-size: var(--text-label);
+    line-height: var(--text-label--line-height);
+  }
+
+  .contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.5rem;
+    margin: 1.5rem 0 0;
+  }
+
+  .contact a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--color-petrol-diep);
+    font-size: var(--text-klok);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html.beweging-aan) .rozetmenu:modal {
+      animation: blad-in var(--duur-blad) var(--ease-uit) both;
+    }
+  }
+
+  @keyframes blad-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+</style>

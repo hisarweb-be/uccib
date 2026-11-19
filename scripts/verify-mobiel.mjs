@@ -23,8 +23,8 @@
  *   2. overloop        geen horizontale overloop op 390 px en op 320 px
  *   3. menu            elk menu-item is met een vinger aan te tikken en komt aan
  *   4. sponsoren       tik op de doneerknop en daarna op een bedrag tot bij Mollie
- *   5. scroll-cinema   de lagen bouwen zich op onder een vingerbeweging
- *   6. reduced motion  met minder beweging staat alles stil op de eindfoto
+ *   5. scènes          hero-unie en piek-ruimtes volgen een vingerbeweging, nooit leeg
+ *   6. reduced motion  met minder beweging staat het verhaal er als sleutelbeelden
  *
  * Draait met `npm run verify:mobiel`. Exitcode 1 bij elke afwijking.
  */
@@ -128,6 +128,33 @@ function meetOverloop() {
   return { breed, scroll: document.documentElement.scrollWidth, uit };
 }
 
+/**
+ * Woorden die midden in breken (F2b PR4): op 390 px brak "Hakkımızda" in een
+ * smal vak over twee regels, omdat `overflow-wrap: anywhere` elk woord mocht
+ * knippen. Per tekstnode wordt elk woord van vier of meer tekens (gesplitst op
+ * spatie, koppelteken en schuine streep, waar afbreken wel mag) als bereik gemeten;
+ * staan de stukken van één woord op meer dan één regelhoogte, dan is het gebroken.
+ */
+function meetGebrokenWoorden() {
+  const uit = [];
+  const loper = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const bereik = document.createRange();
+  for (let node = loper.nextNode(); node; node = loper.nextNode()) {
+    const ouder = node.parentElement;
+    if (!ouder || ouder.closest('script, style, noscript, template, dialog:not([open])')) continue;
+    const tekst = node.textContent;
+    for (const woord of tekst.matchAll(/[^\s\-\/\u2010-\u2014]{4,}/gu)) {
+      bereik.setStart(node, woord.index);
+      bereik.setEnd(node, woord.index + woord[0].length);
+      const rects = [...bereik.getClientRects()].filter((r) => r.width > 0 && r.height > 0);
+      if (rects.length < 2) continue;
+      const toppen = new Set(rects.map((r) => Math.round(r.top)));
+      if (toppen.size > 1) uit.push(woord[0]);
+    }
+  }
+  return uit;
+}
+
 /* ── Tegelefoon ── */
 
 function maakContext(browser, viewport, opties = {}) {
@@ -190,14 +217,18 @@ async function tikMetVinger(cdp, x, y) {
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
 }
 
-const opacity = (page, laag) =>
-  page.evaluate(
-    (naam) => {
-      const el = document.querySelector('[data-laag="' + naam + '"]');
-      return el ? Number(getComputedStyle(el).opacity) : -1;
-    },
-    laag,
-  );
+/**
+ * Het menu staat sinds F2b PR2 in een modale dialog achter de rozetknop
+ * (DESIGNSYSTEEM 7.3): eerst openen, dan pas meten of tikken. De knop zelf is een
+ * gewoon tikdoel en wordt in stap 1 al op 44 px gekeurd. Zonder JavaScript is
+ * er geen knop en staat de lijst al open; dan doet deze stap niets.
+ */
+async function openMenu(page) {
+  const knop = page.locator('[data-menu-open]').first();
+  if ((await knop.count()) === 0 || !(await knop.isVisible())) return;
+  await knop.click();
+  await page.waitForSelector('dialog#rozetmenu[open]', { timeout: 5000 });
+}
 
 /* ── 0. Tegentoetsen: de poort moet zelf kunnen afkeuren ── */
 
@@ -211,6 +242,8 @@ async function tegentoets(browser) {
      <a href="/" style="display:inline-block;width:20px;height:20px;background:#333">klein</a>
      <a href="/" style="display:inline-block;width:44px;height:44px;background:#333">goed</a>
      <div style="width:600px;height:10px;background:#ccc"></div>
+     <p style="width:60px;overflow-wrap:anywhere;font-size:20px">Hakkımızda</p>
+     <p style="width:300px;overflow-wrap:break-word;font-size:20px">Bize ulaşın vandaag</p>
      </body></html>`,
     'utf8',
   );
@@ -227,6 +260,10 @@ async function tegentoets(browser) {
 
     const over = await page.evaluate(meetOverloop);
     oordeel(over.scroll > over.breed, 'tegentoets overloop: 600 px in een venster van ' + over.breed + ' px wordt gezien');
+
+    const gebroken = await page.evaluate(meetGebrokenWoorden);
+    oordeel(gebroken.includes('Hakkımızda'), 'tegentoets woordbreuk: een woord dat in een vak van 60 px over twee regels valt, wordt gezien');
+    oordeel(!gebroken.includes('ulaşın') && !gebroken.includes('vandaag'), 'tegentoets woordbreuk: heel gebleven woorden worden niet genoemd');
   } finally {
     await context.close();
     await server.close();
@@ -246,6 +283,7 @@ async function keurPaginas(browser, baseUrl) {
   const tikFout = [];
   const overFout = [];
   const menuFout = [];
+  const woordFout = [];
   let tikUitgezonderd = 0;
   let gemeten = 0;
 
@@ -280,7 +318,12 @@ async function keurPaginas(browser, baseUrl) {
         );
       }
 
-      // 3. menu: elk item is zichtbaar, niet bedekt en binnen het venster
+      // 2b. geen woord dat midden in breekt
+      const gebroken = await page.evaluate(meetGebrokenWoorden);
+      if (gebroken.length > 0) woordFout.push(label + ': ' + [...new Set(gebroken)].slice(0, 6).join(', '));
+
+      // 3. menu: elk item is zichtbaar, niet bedekt en binnen het venster (na openen)
+      await openMenu(page);
       const menu = await page.evaluate(() => {
         const nav = document.querySelector('header nav ul');
         if (!nav) return { aantal: 0, fout: ['geen hoofdmenu gevonden'] };
@@ -320,6 +363,7 @@ async function keurPaginas(browser, baseUrl) {
     tikFout,
   );
   oordeel(overFout.length === 0, "overloop op 390 px: geen enkele pagina breder dan het venster", overFout);
+  oordeel(woordFout.length === 0, 'woorden op 390 px: geen woord breekt midden in over twee regels', woordFout);
 
   // Hetzelfde op 320 px, de smalste telefoon die nog rondgaat.
   const smal = await maakContext(browser, KLEIN);
@@ -357,11 +401,13 @@ async function tikMenu(browser, baseUrl) {
   const foutenLijst = [];
   try {
     await page.goto(baseUrl + '/hakkimizda/', { waitUntil: 'load' });
+    await openMenu(page);
     const items = await page.$$eval('header nav ul a', (as) =>
       as.map((a) => ({ tekst: a.textContent.trim(), href: a.getAttribute('href') })),
     );
     for (const item of items) {
       await page.goto(baseUrl + '/hakkimizda/', { waitUntil: 'load' });
+      await openMenu(page);
       // De vinger tikt in het midden van het item; geen `click()` die zelf het
       // midden uitrekent en daarmee een bedekking zou omzeilen.
       const box = await page.locator('header nav ul a', { hasText: item.tekst }).first().boundingBox();
@@ -404,6 +450,7 @@ async function tikSponsor(browser, baseUrl) {
   const foutenLijst = [];
   try {
     await page.goto(baseUrl + '/', { waitUntil: 'load' });
+    await openMenu(page);
     const doneer = page.locator('a.donate').first();
     const box = await doneer.boundingBox();
     if (!box) {
@@ -445,26 +492,155 @@ async function tikSponsor(browser, baseUrl) {
   );
 }
 
-/* ── 5. Scroll-cinema onder een vinger ── */
+/* ── 4b. Steunkeuze op de voorpagina: bedrag kiezen, dan doneren ── */
 
-async function keurCinema(browser, baseUrl) {
+/**
+ * De oude bedragtegels op de voorpagina zijn vervangen door de steunkeuze
+ * (STORYBOARD D21, DESIGNSYSTEEM 7.5): een rij keuzerondjes en één knop. Met een
+ * vinger in elke taal: tik een ander bedrag dan het voorgekozen, het getoonde
+ * bedrag volgt, en de knop opent precies de betaallink van dat bedrag bij Mollie.
+ */
+async function tikSteun(browser, baseUrl) {
+  const foutenLijst = [];
+  for (const locale of LOCALES) {
+    const context = await maakContext(browser, TELEFOON);
+    const gevraagd = [];
+    await context.route('https://payment-links.mollie.com/**', async (route) => {
+      gevraagd.push(route.request().url());
+      await route.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: '<!DOCTYPE html><title>Mollie</title>' });
+    });
+    const page = await context.newPage();
+    const cdp = await context.newCDPSession(page);
+    try {
+      await page.goto(baseUrl + pagePath(locale, ''), { waitUntil: 'load' });
+      const rondjes = page.locator('#steun input[type="radio"]');
+      const aantal = await rondjes.count();
+      if (aantal < 2) {
+        foutenLijst.push(locale + ': ' + aantal + ' bedragen in de steunkeuze, verwacht minstens 2');
+        continue;
+      }
+      const voor = await rondjes.evaluateAll((els) => els.findIndex((e) => e.checked));
+      const doel = voor === 0 ? 1 : 0;
+      const label = page.locator('#steun label').nth(doel);
+      await label.scrollIntoViewIfNeeded();
+      const lb = await label.boundingBox();
+      if (!lb || lb.width < MIN_TIK || lb.height < MIN_TIK) {
+        foutenLijst.push(locale + ': bedragvak ' + (lb ? Math.round(lb.width) + 'x' + Math.round(lb.height) : 'onzichtbaar'));
+        continue;
+      }
+      await tikMetVinger(cdp, lb.x + lb.width / 2, lb.y + lb.height / 2);
+      await page.waitForTimeout(100);
+      const stand = await page.evaluate((i) => {
+        const r = document.querySelectorAll('#steun input[type="radio"]')[i];
+        return {
+          gekozen: r.checked,
+          link: r.value,
+          bedrag: r.dataset.bedrag,
+          getoond: document.querySelector('#steun .steun-bedrag')?.textContent ?? '',
+          knop: document.querySelector('#steun [data-steun-knop]')?.getAttribute('href') ?? '',
+        };
+      }, doel);
+      if (!stand.gekozen) foutenLijst.push(locale + ': tik op het bedragvak kiest het bedrag niet');
+      if (stand.getoond.trim() !== stand.bedrag) foutenLijst.push(locale + ': getoond "' + stand.getoond + '" volgt het gekozen bedrag ' + stand.bedrag + ' niet');
+      if (stand.knop !== stand.link) foutenLijst.push(locale + ': de knop wijst naar ' + stand.knop + ' in plaats van de link van het gekozen bedrag');
+      const knop = page.locator('#steun [data-steun-knop]');
+      await knop.scrollIntoViewIfNeeded();
+      const kb = await knop.boundingBox();
+      if (!kb) {
+        foutenLijst.push(locale + ': geen doneerknop in de steunkeuze');
+        continue;
+      }
+      await tikMetVinger(cdp, kb.x + kb.width / 2, kb.y + kb.height / 2);
+      for (let i = 0; i < 80 && gevraagd.length === 0; i += 1) await page.waitForTimeout(100);
+      const ok = gevraagd.length === 1 && gevraagd[0] === stand.link;
+      if (!ok) foutenLijst.push(locale + ': Mollie-aanvraag ' + (gevraagd.join(' | ') || 'geen') + ', verwacht ' + stand.link);
+    } finally {
+      await context.close();
+    }
+  }
+  oordeel(
+    foutenLijst.length === 0,
+    'steunkeuze: in drie talen een bedrag met een vinger gekozen en met de knop precies die betaallink bij Mollie geopend',
+    foutenLijst,
+  );
+}
+
+/* ── 5. De twee scènes onder een vinger ── */
+
+/**
+ * Sinds F2b PR3 is de donkere gebouw-cinema weg (`[data-cinema]`, de lagen
+ * kontour, massa en foto). Ervoor in de plaats staan twee scènes die met
+ * `position: sticky` vastgepind zijn: `hero-unie` (drie schermhoogten) en
+ * `piek-ruimtes` (vijf, of minder als een shot ontbreekt). De eisen zijn
+ * dezelfde gebleven, alleen de namen niet: het verhaal begint met een beeld en
+ * niet met een leeg vlak, de voortgang volgt de vinger, het beeld staat nooit
+ * leeg, en het blijft vloeiend.
+ */
+const sceneStand = (page) =>
+  page.evaluate(() => {
+    const hero = document.querySelector('[data-sectie="hero-unie"]');
+    const piek = document.querySelector('[data-sectie="piek-ruimtes"]');
+    const getal = (el, naam) => (el ? Number(getComputedStyle(el).getPropertyValue(naam)) || 0 : -1);
+    const dekking = (el) => (el ? Number(getComputedStyle(el).opacity) : -1);
+    const knoppen = document.querySelector('[data-hero-knoppen="slot"]');
+    const kr = knoppen ? knoppen.getBoundingClientRect() : null;
+    return {
+      hero: getal(hero, '--hero-p'),
+      stand: hero ? (hero.dataset.stand ?? '') : '',
+      piek: getal(piek, '--piek-p'),
+      kern: dekking(document.querySelector('.piek-kern')),
+      lagen: [...document.querySelectorAll('.piek-laag')].map((el) => dekking(el)),
+      slotKnoppen: Boolean(knoppen && !knoppen.inert && kr && kr.top >= 0 && kr.bottom <= window.innerHeight),
+    };
+  });
+
+async function keurScenes(browser, baseUrl) {
   const context = await maakContext(browser, TELEFOON);
   const page = await context.newPage();
   const cdp = await context.newCDPSession(page);
   try {
     await page.goto(baseUrl + '/', { waitUntil: 'load' });
-    const heeftPodium = await page.locator('[data-cinema]').count();
-    if (heeftPodium === 0) {
-      oordeel(false, 'scroll-cinema: geen podium op de voorpagina');
+    const secties = await page.locator('[data-sectie="hero-unie"], [data-sectie="piek-ruimtes"]').count();
+    if (secties < 2) {
+      oordeel(false, 'scènes: hero-unie en piek-ruimtes staan niet allebei op de voorpagina (' + secties + ')');
       return;
     }
-    const start = {
-      kontour: await opacity(page, 'kontour'),
-      massa: await opacity(page, 'massa'),
-      foto: await opacity(page, 'foto'),
-    };
+    // De bewegingslaag komt pas bij de eerste intentie binnen (GSAP zit niet in de
+    // eerste bundel, en er is geen wekker meer: herkeuring F2b, herstelpunt 1).
+    // Zonder intentie blijft het eerste scherm stil, ook na een tijd rust.
+    await page.waitForTimeout(4000);
+    const zonderIntentie = await page.evaluate(
+      () => document.querySelector('[data-sectie="hero-unie"]')?.dataset.stand ?? '',
+    );
+    oordeel(
+      zonderIntentie === '',
+      'scènes: zonder intentie start de bewegingslaag niet vanzelf (4 s na load: stand "' + zonderIntentie + '")',
+    );
+    // Een echte, korte veeg is de intentie; daarna staat de scène er binnen 3 s.
+    await veeg(cdp, 24);
+    const geladen = await page
+      .waitForFunction(() => document.querySelector('[data-sectie="hero-unie"]')?.dataset.stand === 'eerste', null, {
+        timeout: 3000,
+      })
+      .then(() => true)
+      .catch(() => false);
+    oordeel(geladen, 'scènes: de bewegingslaag is binnen 3 s na de eerste veeg actief (stand "eerste")');
+    if (!geladen) return;
 
-    // Frameteller aan, dan met de vinger door het verhaal heen.
+    const begin = await page.evaluate(() => {
+      const foto = document.querySelector('[data-shot="h1"]');
+      if (!foto) return { geladen: false, inBeeld: false };
+      const r = foto.getBoundingClientRect();
+      return {
+        geladen: foto.complete && foto.naturalWidth > 0,
+        inBeeld: r.width >= 80 && r.height >= 80 && r.top >= 0 && r.top < window.innerHeight,
+      };
+    });
+    oordeel(
+      begin.geladen && begin.inBeeld,
+      'scènes: het verhaal begint met een beeld en niet met een leeg vlak (foto h1 geladen en in het eerste scherm)',
+    );
+
     await page.evaluate(() => {
       Reflect.set(globalThis, '__frames', 0);
       Reflect.set(globalThis, '__t0', performance.now());
@@ -475,37 +651,45 @@ async function keurCinema(browser, baseUrl) {
       Reflect.set(globalThis, '__raf', requestAnimationFrame(loop));
     });
 
-    // Naar het podium toe, dan er dwars doorheen in stappen van een halve scherm.
-    const top = await page.evaluate(() => {
-      const el = document.querySelector('[data-cinema]');
-      return el ? el.getBoundingClientRect().top + window.scrollY : 0;
-    });
-    await veeg(cdp, Math.max(400, Math.round(top - 200)));
+    // De hero is drie schermhoogten lang: halen van een kwart scherm, zodat de
+    // poort de opbouw ziet en niet in één haal van begin naar eind springt.
+    const heroVerloop = [];
+    for (let i = 0; i < 15; i += 1) {
+      await veeg(cdp, Math.round(TELEFOON.height * 0.25));
+      await page.waitForTimeout(350);
+      heroVerloop.push(await sceneStand(page));
+    }
+    const standen = new Set(heroVerloop.map((s) => s.stand));
+    const terug = heroVerloop.some((s, i) => i > 0 && s.hero < heroVerloop[i - 1].hero - 0.02);
+    const heroEind = Math.max(...heroVerloop.map((s) => s.hero));
+    oordeel(
+      heroEind >= 0.99 && !terug,
+      'hero-unie: de voortgang volgt de vinger van 0 naar 1 zonder terugval (hoogste ' + heroEind.toFixed(2) + ')',
+    );
+    oordeel(
+      standen.has('fasen') && standen.has('slot'),
+      'hero-unie: het verhaal loopt door de fasen naar het slot (' + [...standen].join(', ') + ')',
+    );
+    oordeel(
+      heroVerloop.some((s) => s.stand === 'slot' && s.slotKnoppen),
+      'hero-unie: in het slot staan de twee knoppen in beeld en zijn ze bedienbaar',
+    );
 
-    // Kleine halen van een tiende scherm: met een halve scherm per haal sloeg
-    // de eerste meting meteen naar 1,0/1,0/1,0 en zag de poort de opbouw nooit.
-    // Het podium is 200vh, dus de voortgang loopt één op één met de afgelegde
-    // schermhoogte; 14 halen samen komen ruim over het einde heen.
-    const verloop = [];
-    let kontourPiek = 0;
-    let kontourVoorFoto = false;
-    let fotoZonderMassa = false;
-    for (let i = 0; i < 14; i += 1) {
-      await veeg(cdp, Math.round(TELEFOON.height * 0.1));
-      const stand = {
-        kontour: await opacity(page, 'kontour'),
-        massa: await opacity(page, 'massa'),
-        foto: await opacity(page, 'foto'),
-      };
-      verloop.push(stand);
-      if (stand.kontour > kontourPiek) kontourPiek = stand.kontour;
-      // De contour is een korte flits over de donkere foto, geen laag die blijft:
-      // 0,5 is ruim boven wat er te zien is en ver onder de 0,95-piek, zodat de
-      // eis niet op een halve tiende afronding stukloopt.
-      if (stand.kontour >= 0.5 && stand.foto < 0.5) kontourVoorFoto = true;
-      // De foto mag nooit zonder zijn donkere ondergrond in beeld staan. Dat was
-      // precies de fout van 17-11: wel lijnen en foto, geen massa eronder.
-      if (stand.foto >= 0.9 && stand.massa < 0.9) fotoZonderMassa = true;
+    // Door naar de piek en er in halen van een kwart scherm doorheen.
+    const afstand = await page.evaluate(() => {
+      const el = document.querySelector('[data-sectie="piek-ruimtes"]');
+      const kop = document.querySelector('header')?.getBoundingClientRect().bottom ?? 0;
+      return el ? el.getBoundingClientRect().top - kop : 0;
+    });
+    if (afstand > 0) await veeg(cdp, Math.round(afstand));
+    const lengte = await page.evaluate(
+      () => Number(document.querySelector('[data-sectie="piek-ruimtes"]')?.dataset.lengte) || 5,
+    );
+    const piekVerloop = [];
+    for (let i = 0; i < Math.ceil(lengte * 4) + 4; i += 1) {
+      await veeg(cdp, Math.round(TELEFOON.height * 0.25));
+      await page.waitForTimeout(350);
+      piekVerloop.push(await sceneStand(page));
     }
     const fps = await page.evaluate(() => {
       cancelAnimationFrame(Reflect.get(globalThis, '__raf'));
@@ -513,39 +697,32 @@ async function keurCinema(browser, baseUrl) {
       return Math.round((Reflect.get(globalThis, '__frames') / ms) * 1000);
     });
 
-    const eind = verloop[verloop.length - 1];
+    const piekEind = Math.max(...piekVerloop.map((s) => s.piek));
+    oordeel(piekEind >= 0.99, 'piek-ruimtes: de voortgang loopt tot het einde (hoogste ' + piekEind.toFixed(2) + ')');
+    // Tussen het openen van de kern en het papier dat eroverheen schuift staat er
+    // altijd een foto: de kern is dicht en de onderste laag ligt er vol onder.
+    const midden = piekVerloop.filter((s) => s.piek >= 0.12 && s.piek <= 0.9);
+    const leeg = midden.filter((s) => s.kern < 0.99 || (s.lagen[0] ?? 0) < 0.99);
     oordeel(
-      start.foto <= 0.2,
-      'scroll-cinema: het verhaal begint zonder de eindfoto (foto ' + start.foto.toFixed(2) + ')',
+      midden.length >= 6 && leeg.length === 0,
+      'piek-ruimtes: tijdens de scène staat er altijd een foto, nooit een leeg podium (' +
+        midden.length +
+        ' metingen, ' +
+        leeg.length +
+        ' leeg)',
     );
+    const aantalLagen = piekVerloop[0]?.lagen.length ?? 0;
+    const gezien = Array.from({ length: aantalLagen }, (_, i) => piekVerloop.some((s) => (s.lagen[i] ?? 0) >= 0.9));
     oordeel(
-      eind.foto >= 0.95,
-      'scroll-cinema: na het doorvegen staat de eindfoto vol in beeld (foto ' + eind.foto.toFixed(2) + ')',
-    );
-    oordeel(
-      start.massa >= 0.9,
-      'scroll-cinema: de donkere foto staat er vanaf de eerste scrollpixel (massa ' +
-        start.massa.toFixed(2) +
-        '), dus het verhaal begint met een beeld en niet met een leeg vlak',
-    );
-    oordeel(
-      kontourVoorFoto,
-      'scroll-cinema: de lijncontour flitst over de foto heen voordat de foto zelf staat (piek ' +
-        kontourPiek.toFixed(2) +
-        ')',
-    );
-    oordeel(
-      !fotoZonderMassa,
-      'scroll-cinema: de eindfoto staat nooit zonder zijn donkere ondergrond, dus geen bouwtekening',
+      aantalLagen >= 2 && gezien.every(Boolean),
+      'piek-ruimtes: elk van de ' + aantalLagen + ' beelden komt vol in beeld (' + gezien.map((g) => (g ? 'ja' : 'nee')).join(', ') + ')',
     );
     oordeel(
       fps >= FPS_VLOER,
-      'scroll-cinema: ' + fps + ' beelden per seconde tijdens het vegen (vloer ' + FPS_VLOER + ')',
+      'scènes: ' + fps + ' beelden per seconde tijdens het vegen (vloer ' + FPS_VLOER + ')',
     );
-    console.log(
-      '       verloop: ' +
-        verloop.map((v) => v.kontour.toFixed(1) + '/' + v.massa.toFixed(1) + '/' + v.foto.toFixed(1)).join(' '),
-    );
+    console.log('       hero: ' + heroVerloop.map((v) => v.hero.toFixed(2)).join(' '));
+    console.log('       piek: ' + piekVerloop.map((v) => v.piek.toFixed(2)).join(' '));
   } finally {
     await context.close();
   }
@@ -558,20 +735,52 @@ async function keurStil(browser, baseUrl) {
   const page = await context.newPage();
   try {
     await page.goto(baseUrl + '/', { waitUntil: 'load' });
+    await page.waitForTimeout(600);
     const stand = await page.evaluate(() => {
-      const el = document.querySelector('[data-cinema]');
-      const foto = document.querySelector('[data-laag="foto"]');
+      const zichtbaar = (el) => Boolean(el && el.getClientRects().length > 0);
+      const meet = (naam, podiumKlasse) => {
+        const sectie = document.querySelector('[data-sectie="' + naam + '"]');
+        const podium = sectie?.querySelector(podiumKlasse);
+        return {
+          vast: podium ? getComputedStyle(podium).position === 'sticky' : true,
+          sectie: sectie ? Math.round(sectie.getBoundingClientRect().height) : 0,
+          podium: podium ? Math.round(podium.getBoundingClientRect().height) : -1,
+        };
+      };
+      const foto = document.querySelector('[data-shot="h1"]');
       return {
-        aan: document.documentElement.classList.contains('cinema-aan'),
-        hoogte: el ? Math.round(el.getBoundingClientRect().height) : 0,
-        foto: foto ? Number(getComputedStyle(foto).opacity) : -1,
+        aan: document.documentElement.classList.contains('beweging-aan'),
+        hero: meet('hero-unie', '.hero-podium'),
+        piek: meet('piek-ruimtes', '.piek-podium'),
+        foto: foto && zichtbaar(foto) ? Number(getComputedStyle(foto).opacity) : -1,
+        heroBeelden: [...document.querySelectorAll('.hero-sleutels img, .hero-sleutels svg')].filter(zichtbaar).length,
+        piekBeelden: [...document.querySelectorAll('.piek-stil img')].filter(zichtbaar).length,
+        bewegend: [...document.querySelectorAll('.alleen-beweging')].filter(zichtbaar).length,
       };
     });
     oordeel(!stand.aan, 'reduced motion: de bewegingslaag staat uit op een telefoon');
-    oordeel(stand.foto >= 0.99, 'reduced motion: de eindfoto staat direct vol in beeld (' + stand.foto.toFixed(2) + ')');
+    oordeel(stand.foto >= 0.99, 'reduced motion: de foto van het eerste scherm staat direct vol in beeld (' + stand.foto.toFixed(2) + ')');
     oordeel(
-      stand.hoogte > 0 && stand.hoogte < TELEFOON.height,
-      'reduced motion: geen lege vastgepinde ruimte (' + stand.hoogte + ' px hoog, venster ' + TELEFOON.height + ' px)',
+      !stand.hero.vast && !stand.piek.vast && stand.hero.sectie - stand.hero.podium <= 2 && stand.piek.sectie - stand.piek.podium <= 2,
+      'reduced motion: geen lege vastgepinde ruimte (hero ' +
+        stand.hero.sectie +
+        '/' +
+        stand.hero.podium +
+        ' px, piek ' +
+        stand.piek.sectie +
+        '/' +
+        stand.piek.podium +
+        ' px: sectie en inhoud even hoog)',
+    );
+    oordeel(
+      stand.heroBeelden > 0 && stand.piekBeelden > 0 && stand.bewegend === 0,
+      'reduced motion: het verhaal staat er als sleutelbeelden (hero ' +
+        stand.heroBeelden +
+        ', piek ' +
+        stand.piekBeelden +
+        ', bewegende delen zichtbaar: ' +
+        stand.bewegend +
+        ')',
     );
   } finally {
     await context.close();
@@ -593,7 +802,8 @@ try {
   console.log('');
   await tikMenu(browser, server.baseUrl);
   await tikSponsor(browser, server.baseUrl);
-  await keurCinema(browser, server.baseUrl);
+  await tikSteun(browser, server.baseUrl);
+  await keurScenes(browser, server.baseUrl);
   await keurStil(browser, server.baseUrl);
 } finally {
   await browser.close();

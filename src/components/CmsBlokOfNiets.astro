@@ -1,0 +1,95 @@
+---
+/**
+ * Een blok uit het CMS, of helemaal niets (DESIGNSYSTEEM 7.7).
+ *
+ * Leeg levert het geen enkel element op: geen kop, geen omhullende sectie, geen
+ * marge, geen lijn en geen tekst "binnenkort". Gevuld: een h2 en een `ul` van
+ * regels in de stijl van de dienstenindex. Een kop draagt nooit een aantal.
+ */
+export interface CmsRegel {
+  titel: string;
+  href: string;
+  /** Kleine regel onder de titel, zoals een datum; alleen als hij er echt is. */
+  onder?: string;
+}
+
+interface Props {
+  id: string;
+  kop: string;
+  items: readonly CmsRegel[];
+}
+
+const { id, kop, items } = Astro.props;
+---
+
+{
+  items.length > 0 ? (
+    <section id={id} data-sectie={id} class="cms-blok">
+      <h2 class="cms-kop">{kop}</h2>
+      <ul class="cms-lijst" role="list">
+        {items.map((item) => (
+          <li>
+            <a class="cms-link" href={item.href}>
+              <span class="cms-titel">{item.titel}</span>
+              {item.onder ? <span class="cms-onder">{item.onder}</span> : null}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ) : null
+}
+
+<style>
+  .cms-blok {
+    --blad: max(var(--spacing-marge), calc((100% - var(--container-blad)) / 2));
+    padding: 3rem var(--blad);
+    background: var(--color-papier);
+    color: var(--color-inkt);
+  }
+  .cms-kop {
+    margin: 0 0 1.5rem;
+    font-family: var(--font-kop);
+    font-size: var(--text-h2);
+    line-height: var(--text-h2--line-height);
+    font-weight: var(--text-h2--font-weight);
+  }
+  .cms-lijst {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--lijn);
+  }
+  .cms-link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-height: 44px;
+    padding: 1.25rem 0;
+    color: var(--color-inkt);
+    text-decoration: none;
+    box-shadow: inset 0 -1px 0 var(--lijn);
+  }
+  .cms-link:focus-visible {
+    box-shadow: inset 0 -2px 0 var(--color-petrol-diep);
+  }
+
+  @media (hover: hover) {
+    .cms-link:hover {
+      box-shadow: inset 0 -2px 0 var(--color-petrol-diep);
+    }
+  }
+  .cms-link:focus-visible {
+    outline: 3px solid var(--color-petrol);
+    outline-offset: 2px;
+  }
+  .cms-titel {
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+    font-weight: 600;
+  }
+  .cms-onder {
+    font-size: var(--text-label);
+    color: var(--inkt-zacht);
+  }
+</style>

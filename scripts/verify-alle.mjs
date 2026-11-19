@@ -25,6 +25,8 @@ import {
   LOCALES,
   SLUGS as ALL_SLUGS,
 } from './lib/keuring.mjs';
+import { keurRedirects, leesTabel, vindTabel } from './lib/verhuistabel.mjs';
+import { keurHover } from './lib/hoverwacht.mjs';
 
 const distDir = resolve('dist');
 const errors = [];
@@ -34,6 +36,9 @@ errors.push(...actief.errors);
 
 const concept = await checkConcepten({ distDir, slugs: CONCEPT_SLUGS });
 errors.push(...concept.errors);
+
+// Hover alleen achter @media (hover: hover) (scripts/lib/hoverwacht.mjs).
+errors.push(...(await keurHover(resolve('src'))));
 
 // De 404 moet echt bestaan en één h1 hebben.
 const viernullvier = resolve(distDir, '404.html');
@@ -46,6 +51,25 @@ if (!existsSync(viernullvier)) {
   if (!/<meta\s+name="robots"\s+content="[^"]*noindex/i.test(html)) {
     errors.push('404: mist <meta name="robots" content="noindex">');
   }
+}
+
+// De doorverwijzingen (F3 D4): public/_redirects is de generatoruitvoer van de
+// verhuistabel, staat ongewijzigd in dist, en elke rij doorverwijzen of vangregel
+// komt met 301 op zijn nieuwe adres; geen doelpad ontbreekt in dist.
+const tabel = leesTabel(vindTabel());
+errors.push(...tabel.fouten.map((f) => `verhuistabel: ${f}`));
+const redirectsBron = resolve('public', '_redirects');
+const redirectsDist = resolve(distDir, '_redirects');
+let verhuis = null;
+if (!existsSync(redirectsBron)) {
+  errors.push('_redirects: public/_redirects ontbreekt, draai `node scripts/lib/verhuis.mjs`');
+} else {
+  const tekst = await readFile(redirectsBron, 'utf8');
+  if (!existsSync(redirectsDist) || (await readFile(redirectsDist, 'utf8')) !== tekst) {
+    errors.push('_redirects: dist/_redirects ontbreekt of wijkt af van public/_redirects (bouw opnieuw)');
+  }
+  verhuis = keurRedirects(tekst, tabel.rijen, { distDir });
+  errors.push(...verhuis.fouten.map((f) => `_redirects: ${f}`));
 }
 
 if (errors.length > 0) {
@@ -66,3 +90,6 @@ console.log(
     : `OK ${concept.checked} conceptpagina's verborgen (${CONCEPT_SLUGS.length} slugs x ${LOCALES.length} talen): route bestaat, noindex, nergens gelinkt, niet in de sitemap.`,
 );
 console.log('OK 404: dist/404.html bestaat en draagt noindex.');
+console.log(
+  `OK _redirects: ${verhuis.vast} vaste en ${verhuis.dynamisch} dynamische regels dekken ${verhuis.gedekt} rijen van de verhuistabel, gelijk aan de generator.`,
+);

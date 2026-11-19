@@ -5,6 +5,8 @@ import { getDictionary, type Locale } from '../i18n';
 import { pagePath } from '../i18n/config';
 import type { Slug } from '../data/site';
 import { isActiveSlug } from '../lib/actief';
+import { f3 } from '../i18n/f3';
+import { rechtspersoon } from '../lib/rechtspersoon';
 
 interface Props {
   locale: Locale;
@@ -12,6 +14,9 @@ interface Props {
 
 const { locale } = Astro.props;
 const t = getDictionary(locale);
+const teksten = f3(locale);
+/** Naam, rechtsvorm, zetel en KBO zoals het register ze toont; het bezoekadres staat er apart boven. */
+const rp = rechtspersoon(locale);
 
 /**
  * De quick links van het huidige footerblok, zonder de pagina's die nog geen
@@ -40,7 +45,7 @@ const LEGAL_LINKS = (
 ).filter((link) => isActiveSlug(link.slug));
 ---
 
-<footer class="site-footer on-dark">
+<footer class="site-footer">
   <div class="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
     <div class="grid gap-10 md:grid-cols-3">
       <div>
@@ -61,13 +66,36 @@ const LEGAL_LINKS = (
       </div>
 
       <div>
-        <h2 class="footer-heading">{t.footer.address}</h2>
+        <h2 class="footer-heading">{teksten.labelBezoekadres}</h2>
         <address class="mt-3 not-italic leading-relaxed">
-          {t.siteTaglineAlt}<br />
-          {t.siteTagline}<br />
           {SITE.street}<br />
-          {SITE.postalCode} {SITE.city}, België
+          {SITE.postalCode} {SITE.city}, {teksten.land}
         </address>
+        {
+          rp.naam ? (
+            <p class="mt-4 text-sm leading-relaxed">
+              {rp.naam}
+              {rp.rechtsvorm ? (
+                <>
+                  <br />
+                  {rp.rechtsvorm}
+                </>
+              ) : null}
+              {rp.zetel ? (
+                <>
+                  <br />
+                  {teksten.labelZetel}: {rp.zetel}
+                </>
+              ) : null}
+              {rp.kbo ? (
+                <>
+                  <br />
+                  {`${teksten.labelKbo} ${rp.kbo}`}
+                </>
+              ) : null}
+            </p>
+          ) : null
+        }
       </div>
 
       <div>
@@ -92,7 +120,7 @@ const LEGAL_LINKS = (
 
   <div class="footer-bottom">
     <div class="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-5 text-sm sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
-      <p>{t.footer.rights}</p>
+      <p>© 2026 | {[rp.afkorting, rp.naam].filter(Boolean).join(' | ')}</p>
       <nav aria-label={t.footerNavLabel}>
         <ul class="flex flex-wrap gap-x-5 gap-y-1">
           {
@@ -112,8 +140,9 @@ const LEGAL_LINKS = (
 
 <style>
   .site-footer {
-    background: var(--color-footer);
-    color: var(--color-footer-text);
+    background: var(--color-papier);
+    color: var(--color-inkt);
+    border-top: 1px solid var(--lijn);
   }
 
   .footer-logo {
@@ -121,7 +150,7 @@ const LEGAL_LINKS = (
     width: 224px;
     max-width: 100%;
     height: auto;
-    background: #fff;
+    background: var(--color-wit);
     border-radius: 6px;
     padding: 6px 10px;
   }
@@ -130,21 +159,35 @@ const LEGAL_LINKS = (
     font-family: var(--font-body);
     font-size: var(--text-h4);
     font-weight: 700;
-    color: #fff;
+    color: var(--color-inkt);
   }
 
   .footer-link {
-    color: var(--color-footer-text);
+    color: var(--color-inkt);
     text-decoration: none;
   }
 
-  .footer-link:hover,
   .footer-link:focus-visible {
-    color: #fff;
+    color: var(--color-petrol-diep);
     text-decoration: underline;
   }
 
+  @media (hover: hover) {
+    .footer-link:hover {
+      color: var(--color-petrol-diep);
+      text-decoration: underline;
+    }
+  }
+
   .footer-bottom {
-    border-top: 1px solid var(--color-footer-line);
+    border-top: 1px solid var(--lijn);
+  }
+  /* Onderaan de pagina blijft de laatste regel anders onder de WhatsApp-knop staan
+     (DESIGNSYSTEEM: zone 88 x 88 rechtsonder zonder tekst). Vanaf 1264 px eindigt
+     de inhoud (max-w-6xl plus 32 px rand) links van die zone. */
+  @media (max-width: 78.99rem) {
+    .footer-bottom {
+      padding-bottom: 4.5rem;
+    }
   }
 </style>

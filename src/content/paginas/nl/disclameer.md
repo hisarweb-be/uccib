@@ -8,9 +8,10 @@ order: 11
 
 ## (1) Verantwoordelijke uitgever
 
-Deze website, uccib.com, wordt uitgegeven door de vereniging Union des Centres Culturels Islamiques Belgium (UCCIB).
+Deze website, uccib.com, wordt uitgegeven door Union des Centres Culturels Islamiques de Belgique (afgekort UCCIB), een stichting van openbaar nut.
 
-- Adres: Rue Charles Demeer 3, 1020 Brussel, België
+- Maatschappelijke zetel (KBO): Charles Demeerstraat 1-3, 1020 Brussel, België
+- Bezoekadres: Rue Charles Demeer 3, 1020 Brussel, België
 - Ondernemingsnummer (KBO): BE 0843.891.981
 - E-mail: info@uccib.com
 - Telefoon: +32 493 344 665
@@ -19,11 +20,13 @@ Deze website, uccib.com, wordt uitgegeven door de vereniging Union des Centres C
 
 Wij houden de informatie op deze site zorgvuldig en actueel. Toch kan er iets ontbreken, verouderd of onjuist zijn. Voor schade die voortkomt uit beslissingen op basis van deze informatie aanvaarden wij geen aansprakelijkheid.
 
-Niets op deze site geldt als een aanbod, een overeenkomst of juridisch advies. Voor bindende informatie over schenken, lidmaatschap of een bezoek neemt u rechtstreeks contact op met de vereniging.
+Niets op deze site geldt als een aanbod, een overeenkomst of juridisch advies. Voor bindende informatie over schenken, lidmaatschap of een bezoek neemt u rechtstreeks contact op met de stichting.
 
 ## (3) Intellectuele eigendom
 
 De teksten, de foto's, het logo en het ontwerp op deze site zijn eigendom van UCCIB. U mag ze gebruiken met bronvermelding en zonder ze te wijzigen. Voor commercieel gebruik of een volledige overname is voorafgaande schriftelijke toestemming nodig. Die vraagt u aan via info@uccib.com.
+
+Sommige foto's op deze site zijn bijgewerkt, en de films op de startpagina zijn met AI gemaakt op basis van echte foto's van onze ruimtes.
 
 ## (4) Links
 
@@ -37,4 +40,4 @@ Dit colofon valt onder het Belgische recht. Bij een geschil zijn de rechtbanken 
 
 De meest recente versie van deze pagina staat altijd op dit adres. Als de tekst verandert, passen wij de datum aan.
 
-Laatst bijgewerkt: 17 november 2026. Vragen? Schrijf naar info@uccib.com.
+Laatst bijgewerkt: 19 november 2026. Vragen? Schrijf naar info@uccib.com.

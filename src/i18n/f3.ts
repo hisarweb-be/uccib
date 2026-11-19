@@ -20,8 +20,10 @@ import type { Slug } from '../data/site';
 export interface Dienst {
   titel: string;
   tekst: string;
-  /** Doel van de tegel. Een concept wordt in de component naar `/iletisim/` geleid. */
+  /** Doel van de regel. Een concept-pagina krijgt in DienstenIndex `data-binnenkort` en haar leeg-titel. */
   href: string;
+  /** Plek op de startpagina: `deur` is de kop van OpenDeur, `bezoek` de regel eronder. */
+  rol?: 'deur' | 'bezoek';
 }
 
 export interface Mijlpaal {
@@ -57,24 +59,60 @@ export interface F3Teksten {
   contactKop: string;
   contactIntro: string;
   labelAdres: string;
+  /** Label van het bezoekadres (site.ts) in voet en contactpagina; het zeteladres uit de KBO heeft labelZetel. */
+  labelBezoekadres: string;
   labelTelefoon: string;
   labelEmail: string;
   labelUren: string;
   labelRoute: string;
+  /** Label van het ondernemingsnummer in het adresblad (alleen als kerngegevens.kbo gevuld is). */
+  labelKbo: string;
+  /** Label van de officiële naam en rechtsvorm uit de KBO. */
+  labelRechtspersoon: string;
+  /** Label van het zeteladres uit de KBO (src/lib/rechtspersoon.ts). */
+  labelZetel: string;
+  /** Alleen Turks: vertaling van de rechtsvorm, achter de officiële term tussen haakjes. */
+  rechtsvormUitleg?: string;
+  /** Het land achter het bezoekadres. */
+  land: string;
   routeTekst: string;
   whatsappLabel: string;
   whatsappAria: string;
   juridischNoot: string;
-  leeg: Record<
-    | 'subelerimiz'
-    | 'bolge-derneklerimiz'
-    | 'namaz-vakitleri'
-    | 'cuma-hutbesi'
-    | 'haberler'
-    | 'baharkermesi-menu',
-    LegeTekst
-  >;
+  /**
+   * De eerlijke binnenkort-tekst per pagina die uit kan staan: elk menupunt en
+   * elke dienst. Geen tijd, aantal of plaats: die feiten zijn niet bevestigd.
+   */
+  leeg: Record<LeegSlug, LegeTekst>;
+  /**
+   * De 404 (DESIGNSYSTEEM 7.13): kop, één zin, label van de bestemmingenlijst en
+   * de meta-beschrijving. De Turkse kop zoekt verify-een-voor-een.
+   */
+  nietGevonden: { kop: string; lead: string; lijstLabel: string; beschrijving: string };
+  /**
+   * De bedankpagina na een donatie (/bagis-onayi/): alt-tekst van de Turkse
+   * dankkaart en de twee knoppen. Kop en beschrijving staan in de taal-json.
+   */
+  bedankt: { beeldAlt: string; terug: string; opnieuw: string };
+  /** Toegankelijke naam van de menuknop in de kop (DESIGNSYSTEEM 7.3). */
+  rozetMenuOpen: string;
+  rozetMenuSluit: string;
+  /** De vier slagen van de piek, in volgorde (BRIEF); zelfde zin als dienstenIntro. */
+  piekSlagen: readonly [string, string, string, string];
 }
+
+/** Pagina's met een eigen binnenkort-tekst. InAanbouw leest ze hieruit. */
+export const LEEG_SLUGS = [
+  'hakkimizda',
+  'haberler',
+  'bolge-derneklerimiz',
+  'subelerimiz',
+  'namaz-vakitleri',
+  'cuma-hutbesi',
+  'bagislar',
+  'baharkermesi-menu',
+] as const;
+export type LeegSlug = (typeof LEEG_SLUGS)[number];
 
 const TR: F3Teksten = {
   heroKlein: '1979’dan beri Brüksel’de',
@@ -82,7 +120,7 @@ const TR: F3Teksten = {
   heroCtaSecundair: 'Namaz vakitleri',
   dienstenKop: 'Hizmetlerimiz',
   dienstenIntro:
-    'Yedi başlıkta hizmet veriyoruz. Elinizdeki her hizmetin arkasında bir şube, bir gönüllü ve bir kapı var.',
+    'Elinizdeki her hizmetin arkasında bir şube, bir gönüllü ve bir kapı var.',
   dienstenAlle: 'Tüm hizmetler',
   dienstenMeer: 'Daha fazla',
   diensten: [
@@ -115,11 +153,13 @@ const TR: F3Teksten = {
       titel: 'Cami Tanıtım Programları',
       tekst: 'Okullar, kurumlar ve ilgilenen herkes için cami ziyaretleri düzenliyoruz. Ziyaretler için en yakın şubemizle iletişime geçebilirsiniz.',
       href: '/subelerimiz',
+      rol: 'bezoek',
     },
     {
       titel: 'Açık Cami Günü',
       tekst: 'Her yıl düzenlenen Açık Cami Günü’nde kapılarımızı tüm komşularımıza açıyor, tanışma ve diyalog ortamı oluşturuyoruz.',
       href: '/haberler',
+      rol: 'deur',
     },
   ],
   steunKop: 'Desteğiniz',
@@ -163,20 +203,26 @@ const TR: F3Teksten = {
   contactIntro:
     'Sorularınız, ziyaret talepleriniz ve bağış bilgileri için sekretaryamızı arayabilir veya yazabilirsiniz.',
   labelAdres: 'Adres',
+  labelBezoekadres: 'Ziyaret adresi',
   labelTelefoon: 'Telefon',
   labelEmail: 'E-posta',
   labelUren: 'Açık olduğumuz saatler',
   labelRoute: 'Yol tarifi',
   routeTekst: 'Haritada aç',
+  labelKbo: 'KBO',
+  labelRechtspersoon: 'Tüzel kişi',
+  labelZetel: 'Kayıtlı merkez',
+  rechtsvormUitleg: 'kamu yararına vakıf',
+  land: 'Belçika',
   whatsappLabel: 'WhatsApp’tan yazın',
   whatsappAria: 'WhatsApp sohbetini aç',
   juridischNoot:
-    'Bu hukuki metin 17 Kasım 2026 tarihinde güncellenmiştir. Sorularınız için info@uccib.com adresine yazabilirsiniz.',
+    'Bu hukuki metin 19 Kasım 2026 tarihinde güncellenmiştir. Sorularınız için info@uccib.com adresine yazabilirsiniz.',
   leeg: {
     subelerimiz: {
       titel: 'Şube bilgileri hazırlanıyor',
       tekst:
-        'Belçika genelindeki şubelerimizin adres ve iletişim bilgilerini tek tek doğruluyoruz. Yanlış bir adres, kaybolmuş bir ziyaretçiden daha kötüdür. Bu arada sekretaryamız size en yakın şubeyi telefonla söyleyebilir.',
+        'Şubelerimizin adres ve iletişim bilgilerini tek tek doğruluyoruz. Yanlış bir adres, kaybolmuş bir ziyaretçiden daha kötüdür. Bu arada sekretaryamız size en yakın şubeyi telefonla söyleyebilir.',
     },
     'bolge-derneklerimiz': {
       titel: 'Bölge dernekleri listesi hazırlanıyor',
@@ -186,12 +232,12 @@ const TR: F3Teksten = {
     'namaz-vakitleri': {
       titel: 'Vakit çizelgesi hazırlanıyor',
       tekst:
-        'Brüksel ve Belçika şehirleri için günlük vakitleri tek bir çizelgede yayımlayacağız: imsak, güneş, öğle, ikindi, akşam ve yatsı. O zamana kadar vakitleri şubelerimizden öğrenebilirsiniz.',
+        'Günlük vakitleri tek bir çizelgede yayımlayacağız: imsak, güneş, öğle, ikindi, akşam ve yatsı. O zamana kadar vakitleri şubelerimizden öğrenebilirsiniz.',
     },
     'cuma-hutbesi': {
       titel: 'Hutbe arşivi hazırlanıyor',
       tekst:
-        'Haftalık hutbelerimizi metin ve isteğe bağlı pdf ile arşivleyeceğiz, en yeni hutbe başta. Şu an için hutbeler camilerimizde okunmaktadır.',
+        'Hutbelerimizi metin ve isteğe bağlı pdf ile arşivleyeceğiz, en yeni hutbe başta. Şu an için hutbeler camilerimizde okunmaktadır.',
     },
     haberler: {
       titel: 'Haberler bölümü hazırlanıyor',
@@ -201,9 +247,35 @@ const TR: F3Teksten = {
     'baharkermesi-menu': {
       titel: 'Bahar çarşısı menüsü arşivde',
       tekst:
-        '2026 bahar çarşısı geride kaldı. O günün menüsünü arşiv olarak saklıyoruz. Derneğimiz yeni tarihi belirlediğinde güncel menü burada yayımlanacak.',
+        'Son bahar çarşısı geride kaldı. O günün menüsünü arşiv olarak saklıyoruz. Derneğimiz yeni tarihi belirlediğinde güncel menü burada yayımlanacak.',
+    },
+    hakkimizda: {
+      titel: 'Hakkımızda sayfası hazırlanıyor',
+      tekst:
+        'Birliğimizi anlatan sayfayı yeniden yazıyoruz. O zamana kadar sorularınızı telefonla veya e-postayla sekretaryamıza iletebilirsiniz.',
+    },
+    bagislar: {
+      titel: 'Bağış sayfası hazırlanıyor',
+      tekst:
+        'Güvenli bağış bağlantılarını yeniden düzenliyoruz. Bu arada bağış yapmak isterseniz sekretaryamız size yardımcı olur.',
     },
   },
+  nietGevonden: {
+    kop: 'Sayfa bulunamadı',
+    lead: 'Aradığınız sayfa taşınmış veya kaldırılmış olabilir.',
+    lijstLabel: 'Sitedeki sayfalar',
+    beschrijving:
+      'Aradığınız sayfa bulunamadı. Ana sayfadan veya aşağıdaki sayfalardan devam edebilirsiniz.',
+  },
+  bedankt: {
+    beeldAlt:
+      'Teşekkür kartı. Değerli Kardeşim, şimdiye kadar olduğu gibi maddi ve manevi yardımlarını esirgemeyen, yaptığı hayır-hasenatla destek olan, ilim öğrenen Kur’an talebelerine sahip çıkan, bu gibi hayırları fırsat bilip en güzel şekilde değerlendiren siz değerli kardeşlerimize, emeği geçen, üzerimizde hakkı olan herkese şükranlarımızı arzederiz. Teşekkür Ederiz. Hz Allah razı olsun. Altta UCCIB logosu.',
+    terug: 'Ana sayfaya dön',
+    opnieuw: 'Yeniden bağış yap',
+  },
+  rozetMenuOpen: 'Menü',
+  rozetMenuSluit: 'Menüyü kapat',
+  piekSlagen: ['Elinizdeki her hizmetin arkasında', 'bir şube,', 'bir gönüllü', 've bir kapı var.'],
 };
 
 const NL: F3Teksten = {
@@ -212,14 +284,14 @@ const NL: F3Teksten = {
   heroCtaSecundair: 'Gebedstijden',
   dienstenKop: 'Onze diensten',
   dienstenIntro:
-    'Wij werken rond zeven thema’s. Achter elke dienst staat een vestiging, een vrijwilliger en een deur die openstaat.',
+    'Achter elke dienst staat een afdeling, een vrijwilliger en een deur die openstaat.',
   dienstenAlle: 'Alle diensten',
   dienstenMeer: 'Meer info',
   diensten: [
     {
       titel: 'Gebedstijden',
       tekst:
-        'De dagelijkse tijden voor Brussel en onze vestigingen: imsak, zonsopgang, middag, namiddag, avond en nacht.',
+        'De dagelijkse tijden voor Brussel en onze afdelingen: imsak, zonsopgang, middag, namiddag, avond en nacht.',
       href: '/namaz-vakitleri',
     },
     {
@@ -229,8 +301,8 @@ const NL: F3Teksten = {
       href: '/cuma-hutbesi',
     },
     {
-      titel: 'Onze vestigingen',
-      tekst: 'Onze vestigingen in heel België: adres, telefoon en de plaats op de kaart.',
+      titel: 'Onze afdelingen',
+      tekst: 'Onze afdelingen in heel België: adres, telefoon en de plaats op de kaart.',
       href: '/subelerimiz',
     },
     {
@@ -241,20 +313,22 @@ const NL: F3Teksten = {
     {
       titel: 'Onderwijs en jeugdwerk',
       tekst:
-        'In onze vestigingen bieden wij kinderen en jongeren naast godsdienstige en morele vorming ook ondersteuning bij de schoolvakken, en sociale en culturele activiteiten.',
+        'In onze afdelingen bieden wij kinderen en jongeren naast godsdienstige en morele vorming ook ondersteuning bij de schoolvakken, en sociale en culturele activiteiten.',
       href: '/hakkimizda',
     },
     {
       titel: 'Moskeebezoeken',
       tekst:
-        'Voor scholen, instellingen en iedereen die interesse heeft organiseren wij bezoeken aan de moskee. Neem daarvoor contact op met de dichtstbijzijnde vestiging.',
+        'Voor scholen, instellingen en iedereen die interesse heeft organiseren wij bezoeken aan de moskee. Neem daarvoor contact op met de dichtstbijzijnde afdeling.',
       href: '/subelerimiz',
+      rol: 'bezoek',
     },
     {
       titel: 'Open Moskeedag',
       tekst:
         'Tijdens de jaarlijkse Open Moskeedag zetten wij onze deuren open voor alle buren en creëren wij een ontmoeting en een gesprek.',
       href: '/haberler',
+      rol: 'deur',
     },
   ],
   steunKop: 'Uw steun',
@@ -298,20 +372,25 @@ const NL: F3Teksten = {
   contactIntro:
     'Voor vragen, een bezoekaanvraag of informatie over schenken kunt u ons secretariaat bellen of schrijven.',
   labelAdres: 'Adres',
+  labelBezoekadres: 'Bezoekadres',
   labelTelefoon: 'Telefoon',
   labelEmail: 'E-mail',
   labelUren: 'Wanneer wij open zijn',
   labelRoute: 'Route',
   routeTekst: 'Open in kaart',
+  labelKbo: 'KBO',
+  labelRechtspersoon: 'Rechtspersoon',
+  labelZetel: 'Maatschappelijke zetel',
+  land: 'België',
   whatsappLabel: 'Stuur een WhatsApp',
   whatsappAria: 'Open de WhatsApp-gesprek',
   juridischNoot:
-    'Deze juridische tekst is bijgewerkt op 17 november 2026. Vragen? Schrijf naar info@uccib.com.',
+    'Deze juridische tekst is bijgewerkt op 19 november 2026. Vragen? Schrijf naar info@uccib.com.',
   leeg: {
     subelerimiz: {
-      titel: 'De vestigingen worden aangevuld',
+      titel: 'De afdelingen worden aangevuld',
       tekst:
-        'Wij controleren de adressen en contactgegevens van al onze vestigingen in België een voor een. Een verkeerd adres is erger dan een bezoeker die even wacht. In de tussentijd noemt ons secretariaat u graag de dichtstbijzijnde vestiging.',
+        'Wij controleren de adressen en contactgegevens van onze afdelingen een voor een. Een verkeerd adres is erger dan een bezoeker die even wacht. In de tussentijd noemt ons secretariaat u graag de dichtstbijzijnde afdeling.',
     },
     'bolge-derneklerimiz': {
       titel: 'De lijst van de regionale verenigingen volgt',
@@ -321,12 +400,12 @@ const NL: F3Teksten = {
     'namaz-vakitleri': {
       titel: 'Het tijdschema wordt opgemaakt',
       tekst:
-        'Wij brengen de dagelijkse tijden voor Brussel en de Belgische steden in één schema samen: imsak, zonsopgang, middag, namiddag, avond en nacht. Tot dan kunt u de tijden bij onze vestigingen vragen.',
+        'Wij brengen de dagelijkse tijden in één schema samen: imsak, zonsopgang, middag, namiddag, avond en nacht. Tot dan kunt u de tijden bij onze afdelingen vragen.',
     },
     'cuma-hutbesi': {
       titel: 'Het preekarchief wordt opgebouwd',
       tekst:
-        'Wij archiveren de wekelijkse preken met de tekst en optioneel een pdf, de nieuwste eerst. Voorlopig worden de preken in onze moskeeën gehouden.',
+        'Wij archiveren de preken met de tekst en optioneel een pdf, de nieuwste eerst. Voorlopig worden de preken in onze moskeeën gehouden.',
     },
     haberler: {
       titel: 'De nieuwsrubriek wordt opgebouwd',
@@ -336,9 +415,35 @@ const NL: F3Teksten = {
     'baharkermesi-menu': {
       titel: 'Het menu van de lentejaarmarkt is archief',
       tekst:
-        'De lentejaarmarkt van 2026 is voorbij. Het menu van die dag bewaren wij als archief. Zodra de vereniging de nieuwe datum vastlegt, staat het nieuwe menu hier.',
+        'De vorige lentejaarmarkt is voorbij. Het menu van die dag bewaren wij als archief. Zodra de vereniging de nieuwe datum vastlegt, staat het nieuwe menu hier.',
+    },
+    hakkimizda: {
+      titel: 'De pagina over ons wordt herschreven',
+      tekst:
+        'Wij schrijven de pagina over onze unie opnieuw. Tot dan beantwoordt ons secretariaat uw vragen graag per telefoon of e-mail.',
+    },
+    bagislar: {
+      titel: 'De pagina voor giften wordt klaargemaakt',
+      tekst:
+        'Wij zetten de veilige betaallinks opnieuw klaar. Wilt u in de tussentijd een gift doen, dan helpt ons secretariaat u graag.',
     },
   },
+  nietGevonden: {
+    kop: 'Pagina niet gevonden',
+    lead: 'De pagina die u zoekt, is misschien verplaatst of verwijderd.',
+    lijstLabel: 'Pagina’s op deze site',
+    beschrijving:
+      'De pagina die u zoekt, bestaat hier niet. Ga verder via de startpagina of een van de pagina’s hieronder.',
+  },
+  bedankt: {
+    beeldAlt:
+      'Turkse dankkaart van UCCIB: een dankwoord aan iedereen die met giften en hulp de werking en de Koranleerlingen steunt, afgesloten met “Teşekkür Ederiz” (wij danken u) en “Allah razı olsun” (moge God tevreden over u zijn). Onderaan het logo van UCCIB.',
+    terug: 'Terug naar de hoofdpagina',
+    opnieuw: 'Nog een donatie',
+  },
+  rozetMenuOpen: 'Menu',
+  rozetMenuSluit: 'Menu sluiten',
+  piekSlagen: ['Achter elke dienst staat', 'een afdeling,', 'een vrijwilliger', 'en een deur die openstaat.'],
 };
 
 const FR: F3Teksten = {
@@ -347,14 +452,14 @@ const FR: F3Teksten = {
   heroCtaSecundair: 'Heures de prière',
   dienstenKop: 'Nos services',
   dienstenIntro:
-    'Nous travaillons autour de sept thèmes. Derrière chaque service, il y a un centre, un bénévole et une porte ouverte.',
+    'Derrière chaque service, il y a une section, un bénévole et une porte ouverte.',
   dienstenAlle: 'Tous les services',
   dienstenMeer: 'En savoir plus',
   diensten: [
     {
       titel: 'Heures de prière',
       tekst:
-        'Les horaires quotidiens pour Bruxelles et nos centres : imsak, lever du soleil, midi, après-midi, soir et nuit.',
+        'Les horaires quotidiens pour Bruxelles et nos sections : imsak, lever du soleil, midi, après-midi, soir et nuit.',
       href: '/namaz-vakitleri',
     },
     {
@@ -364,8 +469,8 @@ const FR: F3Teksten = {
       href: '/cuma-hutbesi',
     },
     {
-      titel: 'Nos centres',
-      tekst: 'Nos centres dans toute la Belgique : adresse, téléphone et position sur la carte.',
+      titel: 'Nos sections',
+      tekst: 'Nos sections dans toute la Belgique : adresse, téléphone et position sur la carte.',
       href: '/subelerimiz',
     },
     {
@@ -376,20 +481,22 @@ const FR: F3Teksten = {
     {
       titel: 'Enseignement et jeunesse',
       tekst:
-        'Dans nos centres, nous offrons aux enfants et aux jeunes, outre une formation religieuse et morale, un soutien pour les cours scolaires ainsi que des activités sociales et culturelles.',
+        'Dans nos sections, nous offrons aux enfants et aux jeunes, outre une formation religieuse et morale, un soutien pour les cours scolaires ainsi que des activités sociales et culturelles.',
       href: '/hakkimizda',
     },
     {
       titel: 'Visites de la mosquée',
       tekst:
-        'Nous organisons des visites de la mosquée pour les écoles, les institutions et toute personne intéressée. Pour une visite, contactez le centre le plus proche.',
+        'Nous organisons des visites de la mosquée pour les écoles, les institutions et toute personne intéressée. Pour une visite, contactez la section la plus proche.',
       href: '/subelerimiz',
+      rol: 'bezoek',
     },
     {
       titel: 'Journée portes ouvertes',
       tekst:
         'Lors de la Journée portes ouvertes annuelle, nous ouvrons nos portes à tous nos voisins et créons un lieu de rencontre et de dialogue.',
       href: '/haberler',
+      rol: 'deur',
     },
   ],
   steunKop: 'Votre soutien',
@@ -433,20 +540,25 @@ const FR: F3Teksten = {
   contactIntro:
     'Pour vos questions, une demande de visite ou des informations sur les dons, vous pouvez appeler ou écrire à notre secrétariat.',
   labelAdres: 'Adresse',
+  labelBezoekadres: 'Adresse de visite',
   labelTelefoon: 'Téléphone',
   labelEmail: 'E-mail',
   labelUren: 'Nos heures d’ouverture',
   labelRoute: 'Itinéraire',
   routeTekst: 'Ouvrir dans la carte',
+  labelKbo: 'BCE',
+  labelRechtspersoon: 'Personne morale',
+  labelZetel: 'Siège',
+  land: 'Belgique',
   whatsappLabel: 'Écrire sur WhatsApp',
   whatsappAria: 'Ouvrir la conversation WhatsApp',
   juridischNoot:
-    'Ce texte juridique a été mis à jour le 17 novembre 2026. Une question ? Écrivez à info@uccib.com.',
+    'Ce texte juridique a été mis à jour le 19 novembre 2026. Une question ? Écrivez à info@uccib.com.',
   leeg: {
     subelerimiz: {
-      titel: 'Les centres sont en cours de complétion',
+      titel: 'Les sections sont en cours de complétion',
       tekst:
-        'Nous vérifions une à une les adresses et les coordonnées de tous nos centres en Belgique. Une adresse erronée est pire qu’un visiteur qui attend un peu. Entre-temps, notre secrétariat vous indique volontiers le centre le plus proche.',
+        'Nous vérifions une à une les adresses et les coordonnées de nos sections. Une adresse erronée est pire qu’un visiteur qui attend un peu. Entre-temps, notre secrétariat vous indique volontiers la section la plus proche.',
     },
     'bolge-derneklerimiz': {
       titel: 'La liste des associations régionales suit',
@@ -456,12 +568,12 @@ const FR: F3Teksten = {
     'namaz-vakitleri': {
       titel: 'Le tableau des horaires est en préparation',
       tekst:
-        'Nous réunirons les horaires quotidiens de Bruxelles et des villes belges dans un seul tableau : imsak, lever du soleil, midi, après-midi, soir et nuit. D’ici là, vous pouvez demander les horaires à nos centres.',
+        'Nous réunirons les horaires quotidiens dans un seul tableau : imsak, lever du soleil, midi, après-midi, soir et nuit. D’ici là, vous pouvez demander les horaires à nos sections.',
     },
     'cuma-hutbesi': {
       titel: 'Les archives des prêches se constituent',
       tekst:
-        'Nous archivons les prêches hebdomadaires avec le texte et, si disponible, un pdf, le plus récent en premier. Pour l’instant, les prêches sont donnés dans nos mosquées.',
+        'Nous archivons les prêches avec le texte et, si disponible, un pdf, le plus récent en premier. Pour l’instant, les prêches sont donnés dans nos mosquées.',
     },
     haberler: {
       titel: 'La rubrique actualités est en préparation',
@@ -471,9 +583,35 @@ const FR: F3Teksten = {
     'baharkermesi-menu': {
       titel: 'Le menu du marché de printemps est archivé',
       tekst:
-        'Le marché de printemps 2026 est terminé. Nous conservons le menu de cette journée comme archive. Dès que l’association fixe la nouvelle date, le nouveau menu paraîtra ici.',
+        'Le dernier marché de printemps est terminé. Nous conservons le menu de cette journée comme archive. Dès que l’association fixe la nouvelle date, le nouveau menu paraîtra ici.',
+    },
+    hakkimizda: {
+      titel: 'La page de présentation est en cours de rédaction',
+      tekst:
+        'Nous réécrivons la page qui présente notre union. D’ici là, notre secrétariat répond volontiers à vos questions par téléphone ou par e-mail.',
+    },
+    bagislar: {
+      titel: 'La page des dons est en préparation',
+      tekst:
+        'Nous remettons en place les liens de paiement sécurisés. Si vous souhaitez faire un don entre-temps, notre secrétariat vous aide volontiers.',
     },
   },
+  nietGevonden: {
+    kop: 'Page introuvable',
+    lead: 'La page que vous cherchez a peut-être été déplacée ou supprimée.',
+    lijstLabel: 'Pages du site',
+    beschrijving:
+      'La page que vous cherchez n’existe pas ici. Continuez par l’accueil ou l’une des pages ci-dessous.',
+  },
+  bedankt: {
+    beeldAlt:
+      'Carte de remerciement en turc de l’UCCIB : un mot de gratitude à toutes celles et ceux qui soutiennent par leurs dons et leur aide l’action de l’UCCIB et les élèves du Coran, conclu par « Teşekkür Ederiz » (nous vous remercions) et « Allah razı olsun » (que Dieu soit satisfait de vous). En bas, le logo de l’UCCIB.',
+    terug: 'Retour à la page d’accueil',
+    opnieuw: 'Faire un autre don',
+  },
+  rozetMenuOpen: 'Menu',
+  rozetMenuSluit: 'Fermer le menu',
+  piekSlagen: ['Derrière chaque service, il y a', 'une section,', 'un bénévole', 'et une porte ouverte.'],
 };
 
 export const F3: Record<Locale, F3Teksten> = { tr: TR, nl: NL, fr: FR };

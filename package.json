@@ -3,13 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "UCCIB vzw — statische site in drie talen (Astro 5, Tailwind 4)",
+  "description": "UCCIB, statische site in drie talen (Astro 5, Tailwind 4)",
   "engines": {
     "node": ">=22.0.0"
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && node scripts/lib/taal-404.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "verify": "node scripts/verify-alle.mjs",
@@ -20,14 +20,19 @@
     "verify:mobiel": "node scripts/verify-mobiel.mjs",
     "verify:scherm": "node scripts/verify-eerste-scherm.mjs",
     "verify:live": "node scripts/verify-een-voor-een.mjs --basis=https://uccib.com",
-    "verify:sponsor": "node scripts/verify-sponsor.mjs"
+    "verify:sponsor": "node scripts/verify-sponsor.mjs",
+    "verify:media": "node scripts/verify-media.mjs",
+    "verify:tekens": "node scripts/verify-tekens.mjs",
+    "verify:betaallinks": "node scripts/verify-betaallinks.mjs",
+    "verify:menu": "node scripts/verify-menu.mjs",
+    "verify:leeg": "node scripts/leeg-scherm.mjs",
+    "verify:verhuis": "node scripts/verify-verhuis.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "3.7.4",
-    "@fontsource-variable/noto-serif": "^5.3.0",
-    "@fontsource-variable/open-sans": "^5.3.0",
     "@tailwindcss/vite": "^4.3.5",
     "astro": "^5.18.2",
+    "gsap": "3.15.1",
     "tailwindcss": "^4.3.5"
   },
   "devDependencies": {
