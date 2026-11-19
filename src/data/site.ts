@@ -7,7 +7,7 @@ export const SITE = {
   founded: '1979',
   phone: '+32 493 344 665',
   phoneHref: '+32493344665',
-  email: 'info@uccib.com',
+  email: 'contact@hisarweb.be',
   whatsapp: '+32493344665',
   street: 'Rue Charles Demeer 3',
   postalCode: '1020',

@@ -12,7 +12,7 @@ uccib.com ne place aucun cookie. Nous ne stockons rien dans votre navigateur et 
 
 ## (1) Responsable
 
-Union des Centres Culturels Islamiques de Belgique (UCCIB), fondation d'utilité publique. Siège Rue Charles Demeer 1-3, 1020 Bruxelles ; adresse de visite Rue Charles Demeer 3, 1020 Bruxelles, Belgique. Numéro d'entreprise BE 0843.891.981. E-mail info@uccib.com, téléphone +32 493 344 665.
+Union des Centres Culturels Islamiques de Belgique (UCCIB), fondation d'utilité publique. Siège Rue Charles Demeer 1-3, 1020 Bruxelles ; adresse de visite Rue Charles Demeer 3, 1020 Bruxelles, Belgique. Numéro d'entreprise BE 0843.891.981. E-mail contact@hisarweb.be, téléphone +32 493 344 665.
 
 ## (2) Ce que nous avons mesuré sur le site
 
@@ -38,10 +38,10 @@ Le bouton WhatsApp et le lien d'itinéraire de ce site sont de simples liens. Il
 
 ## (6) Vos droits
 
-Vous avez le droit de demander des informations sur vos données personnelles, de les faire corriger ou effacer, et de vous opposer au traitement. Écrivez pour cela à info@uccib.com. Nous répondons dans le mois. Si cela ne résout rien, vous pouvez introduire une plainte auprès de l'Autorité belge de protection des données, Rue de la Presse 35, 1000 Bruxelles.
+Vous avez le droit de demander des informations sur vos données personnelles, de les faire corriger ou effacer, et de vous opposer au traitement. Écrivez pour cela à contact@hisarweb.be. Nous répondons dans le mois. Si cela ne résout rien, vous pouvez introduire une plainte auprès de l'Autorité belge de protection des données, Rue de la Presse 35, 1000 Bruxelles.
 
 ## (7) Modifications
 
 La version la plus récente de cette page se trouve toujours à cette adresse. Si nous ajoutons un jour une fonction qui conserve des données, cette page sera mise à jour d'abord.
 
-Dernière mise à jour : 17 novembre 2026. Une question ? Écrivez à info@uccib.com.
+Dernière mise à jour : 17 novembre 2026. Une question ? Écrivez à contact@hisarweb.be.
