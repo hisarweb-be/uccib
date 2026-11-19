@@ -3,13 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "UCCIB vzw — statische site in drie talen (Astro 5, Tailwind 4)",
+  "description": "UCCIB, statische site in drie talen (Astro 5, Tailwind 4)",
   "engines": {
     "node": ">=22.0.0"
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && node scripts/lib/taal-404.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "verify": "node scripts/verify-alle.mjs",
@@ -25,7 +25,8 @@
     "verify:tekens": "node scripts/verify-tekens.mjs",
     "verify:betaallinks": "node scripts/verify-betaallinks.mjs",
     "verify:menu": "node scripts/verify-menu.mjs",
-    "verify:leeg": "node scripts/leeg-scherm.mjs"
+    "verify:leeg": "node scripts/leeg-scherm.mjs",
+    "verify:verhuis": "node scripts/verify-verhuis.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "3.7.4",

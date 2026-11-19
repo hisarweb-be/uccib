@@ -59,12 +59,22 @@ export interface F3Teksten {
   contactKop: string;
   contactIntro: string;
   labelAdres: string;
+  /** Label van het bezoekadres (site.ts) in voet en contactpagina; het zeteladres uit de KBO heeft labelZetel. */
+  labelBezoekadres: string;
   labelTelefoon: string;
   labelEmail: string;
   labelUren: string;
   labelRoute: string;
   /** Label van het ondernemingsnummer in het adresblad (alleen als kerngegevens.kbo gevuld is). */
   labelKbo: string;
+  /** Label van de officiële naam en rechtsvorm uit de KBO. */
+  labelRechtspersoon: string;
+  /** Label van het zeteladres uit de KBO (src/lib/rechtspersoon.ts). */
+  labelZetel: string;
+  /** Alleen Turks: vertaling van de rechtsvorm, achter de officiële term tussen haakjes. */
+  rechtsvormUitleg?: string;
+  /** Het land achter het bezoekadres. */
+  land: string;
   routeTekst: string;
   whatsappLabel: string;
   whatsappAria: string;
@@ -74,6 +84,16 @@ export interface F3Teksten {
    * elke dienst. Geen tijd, aantal of plaats: die feiten zijn niet bevestigd.
    */
   leeg: Record<LeegSlug, LegeTekst>;
+  /**
+   * De 404 (DESIGNSYSTEEM 7.13): kop, één zin, label van de bestemmingenlijst en
+   * de meta-beschrijving. De Turkse kop zoekt verify-een-voor-een.
+   */
+  nietGevonden: { kop: string; lead: string; lijstLabel: string; beschrijving: string };
+  /**
+   * De bedankpagina na een donatie (/bagis-onayi/): alt-tekst van de Turkse
+   * dankkaart en de twee knoppen. Kop en beschrijving staan in de taal-json.
+   */
+  bedankt: { beeldAlt: string; terug: string; opnieuw: string };
   /** Toegankelijke naam van de menuknop in de kop (DESIGNSYSTEEM 7.3). */
   rozetMenuOpen: string;
   rozetMenuSluit: string;
@@ -186,16 +206,21 @@ const TR: F3Teksten = {
   contactIntro:
     'Sorularınız, ziyaret talepleriniz ve bağış bilgileri için sekretaryamızı arayabilir veya yazabilirsiniz.',
   labelAdres: 'Adres',
+  labelBezoekadres: 'Ziyaret adresi',
   labelTelefoon: 'Telefon',
   labelEmail: 'E-posta',
   labelUren: 'Açık olduğumuz saatler',
   labelRoute: 'Yol tarifi',
   routeTekst: 'Haritada aç',
   labelKbo: 'KBO',
+  labelRechtspersoon: 'Tüzel kişi',
+  labelZetel: 'Kayıtlı merkez',
+  rechtsvormUitleg: 'kamu yararına vakıf',
+  land: 'Belçika',
   whatsappLabel: 'WhatsApp’tan yazın',
   whatsappAria: 'WhatsApp sohbetini aç',
   juridischNoot:
-    'Bu hukuki metin 17 Kasım 2026 tarihinde güncellenmiştir. Sorularınız için info@uccib.com adresine yazabilirsiniz.',
+    'Bu hukuki metin 19 Kasım 2026 tarihinde güncellenmiştir. Sorularınız için info@uccib.com adresine yazabilirsiniz.',
   leeg: {
     subelerimiz: {
       titel: 'Şube bilgileri hazırlanıyor',
@@ -237,6 +262,19 @@ const TR: F3Teksten = {
       tekst:
         'Güvenli bağış bağlantılarını yeniden düzenliyoruz. Bu arada bağış yapmak isterseniz sekretaryamız size yardımcı olur.',
     },
+  },
+  nietGevonden: {
+    kop: 'Sayfa bulunamadı',
+    lead: 'Aradığınız sayfa taşınmış veya kaldırılmış olabilir.',
+    lijstLabel: 'Sitedeki sayfalar',
+    beschrijving:
+      'Aradığınız sayfa bulunamadı. Ana sayfadan veya aşağıdaki sayfalardan devam edebilirsiniz.',
+  },
+  bedankt: {
+    beeldAlt:
+      'Teşekkür kartı. Değerli Kardeşim, şimdiye kadar olduğu gibi maddi ve manevi yardımlarını esirgemeyen, yaptığı hayır-hasenatla destek olan, ilim öğrenen Kur’an talebelerine sahip çıkan, bu gibi hayırları fırsat bilip en güzel şekilde değerlendiren siz değerli kardeşlerimize, emeği geçen, üzerimizde hakkı olan herkese şükranlarımızı arzederiz. Teşekkür Ederiz. Hz Allah razı olsun. Altta UCCIB logosu.',
+    terug: 'Ana sayfaya dön',
+    opnieuw: 'Yeniden bağış yap',
   },
   rozetMenuOpen: 'Menü',
   rozetMenuSluit: 'Menüyü kapat',
@@ -339,16 +377,20 @@ const NL: F3Teksten = {
   contactIntro:
     'Voor vragen, een bezoekaanvraag of informatie over schenken kunt u ons secretariaat bellen of schrijven.',
   labelAdres: 'Adres',
+  labelBezoekadres: 'Bezoekadres',
   labelTelefoon: 'Telefoon',
   labelEmail: 'E-mail',
   labelUren: 'Wanneer wij open zijn',
   labelRoute: 'Route',
   routeTekst: 'Open in kaart',
   labelKbo: 'KBO',
+  labelRechtspersoon: 'Rechtspersoon',
+  labelZetel: 'Maatschappelijke zetel',
+  land: 'België',
   whatsappLabel: 'Stuur een WhatsApp',
   whatsappAria: 'Open de WhatsApp-gesprek',
   juridischNoot:
-    'Deze juridische tekst is bijgewerkt op 17 november 2026. Vragen? Schrijf naar info@uccib.com.',
+    'Deze juridische tekst is bijgewerkt op 19 november 2026. Vragen? Schrijf naar info@uccib.com.',
   leeg: {
     subelerimiz: {
       titel: 'De vestigingen worden aangevuld',
@@ -390,6 +432,19 @@ const NL: F3Teksten = {
       tekst:
         'Wij zetten de veilige betaallinks opnieuw klaar. Wilt u in de tussentijd een gift doen, dan helpt ons secretariaat u graag.',
     },
+  },
+  nietGevonden: {
+    kop: 'Pagina niet gevonden',
+    lead: 'De pagina die u zoekt, is misschien verplaatst of verwijderd.',
+    lijstLabel: 'Pagina’s op deze site',
+    beschrijving:
+      'De pagina die u zoekt, bestaat hier niet. Ga verder via de startpagina of een van de pagina’s hieronder.',
+  },
+  bedankt: {
+    beeldAlt:
+      'Turkse dankkaart van UCCIB: een dankwoord aan iedereen die met giften en hulp de werking en de Koranleerlingen steunt, afgesloten met “Teşekkür Ederiz” (wij danken u) en “Allah razı olsun” (moge God tevreden over u zijn). Onderaan het logo van UCCIB.',
+    terug: 'Terug naar de hoofdpagina',
+    opnieuw: 'Nog een donatie',
   },
   rozetMenuOpen: 'Menu',
   rozetMenuSluit: 'Menu sluiten',
@@ -492,16 +547,20 @@ const FR: F3Teksten = {
   contactIntro:
     'Pour vos questions, une demande de visite ou des informations sur les dons, vous pouvez appeler ou écrire à notre secrétariat.',
   labelAdres: 'Adresse',
+  labelBezoekadres: 'Adresse de visite',
   labelTelefoon: 'Téléphone',
   labelEmail: 'E-mail',
   labelUren: 'Nos heures d’ouverture',
   labelRoute: 'Itinéraire',
   routeTekst: 'Ouvrir dans la carte',
   labelKbo: 'BCE',
+  labelRechtspersoon: 'Personne morale',
+  labelZetel: 'Siège',
+  land: 'Belgique',
   whatsappLabel: 'Écrire sur WhatsApp',
   whatsappAria: 'Ouvrir la conversation WhatsApp',
   juridischNoot:
-    'Ce texte juridique a été mis à jour le 17 novembre 2026. Une question ? Écrivez à info@uccib.com.',
+    'Ce texte juridique a été mis à jour le 19 novembre 2026. Une question ? Écrivez à info@uccib.com.',
   leeg: {
     subelerimiz: {
       titel: 'Les centres sont en cours de complétion',
@@ -543,6 +602,19 @@ const FR: F3Teksten = {
       tekst:
         'Nous remettons en place les liens de paiement sécurisés. Si vous souhaitez faire un don entre-temps, notre secrétariat vous aide volontiers.',
     },
+  },
+  nietGevonden: {
+    kop: 'Page introuvable',
+    lead: 'La page que vous cherchez a peut-être été déplacée ou supprimée.',
+    lijstLabel: 'Pages du site',
+    beschrijving:
+      'La page que vous cherchez n’existe pas ici. Continuez par l’accueil ou l’une des pages ci-dessous.',
+  },
+  bedankt: {
+    beeldAlt:
+      'Carte de remerciement en turc de l’UCCIB : un mot de gratitude à toutes celles et ceux qui soutiennent par leurs dons et leur aide l’action de l’UCCIB et les élèves du Coran, conclu par « Teşekkür Ederiz » (nous vous remercions) et « Allah razı olsun » (que Dieu soit satisfait de vous). En bas, le logo de l’UCCIB.',
+    terug: 'Retour à la page d’accueil',
+    opnieuw: 'Faire un autre don',
   },
   rozetMenuOpen: 'Menu',
   rozetMenuSluit: 'Fermer le menu',

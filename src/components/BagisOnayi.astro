@@ -1,0 +1,166 @@
+---
+/**
+ * De bedankpagina na een donatie (/bagis-onayi/, drie talen). Mollie stuurt de
+ * bezoeker hierheen terug zodra de betaling is afgerond.
+ *
+ * Kop en beschrijving komen uit de taal-json (`pages['bagis-onayi']`), de
+ * alt-tekst en de knoppen uit f3.ts (`bedankt`). Het bedankbeeld is de Turkse
+ * dankkaart van UCCIB (manifest-slug `dank-donatie`) op een vaste plek: naast de
+ * tekst vanaf 768 px, eronder op een telefoon. Geen kopband en geen formulier.
+ *
+ * Sponsor.astro blijft onaangeroerd (betaallinktoets); zijn tak voor deze pagina
+ * wordt niet meer gebruikt.
+ */
+import Layout from '../layouts/Layout.astro';
+import Beeld from './Beeld.astro';
+import { SITE } from '../data/site';
+import { getDictionary, type Locale } from '../i18n';
+import { pagePath } from '../i18n/config';
+import { f3 } from '../i18n/f3';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale);
+const page = t.pages['bagis-onayi'];
+const tekst = f3(locale).bedankt;
+---
+
+<Layout locale={locale} slug="bagis-onayi" title={page.title} description={page.description}>
+  <div class="bedankt">
+    <div class="tekst-kolom">
+      <h1>{page.h1}</h1>
+      <p class="lead">{page.description}</p>
+      <p class="knoppen">
+        <a class="knop knop-eerst" href={pagePath(locale, '')}>{tekst.terug}</a>
+        <a class="knop knop-tweede" href={pagePath(locale, 'bagislar')}>{tekst.opnieuw}</a>
+      </p>
+      <dl class="contact">
+        <div>
+          <dt>{t.footer.phone}</dt>
+          <dd><a href={`tel:${SITE.phoneHref}`}>{SITE.phone}</a></dd>
+        </div>
+        <div>
+          <dt>{t.footer.email}</dt>
+          <dd><a href={`mailto:${SITE.email}`}>{SITE.email}</a></dd>
+        </div>
+      </dl>
+    </div>
+    <figure class="kaart">
+      <Beeld
+        slug="dank-donatie"
+        alt={tekst.beeldAlt}
+        sizes="(min-width: 768px) 22rem, calc(100vw - 2rem)"
+        breedte={704}
+      />
+    </figure>
+  </div>
+</Layout>
+
+<style>
+  .bedankt {
+    display: grid;
+    gap: 2.5rem;
+    max-width: 72rem;
+  }
+
+  @media (min-width: 768px) {
+    .bedankt {
+      grid-template-columns: minmax(0, 1fr) 22rem;
+      align-items: start;
+    }
+  }
+
+  h1 {
+    font-family: var(--font-kop);
+    font-size: var(--text-h1);
+    line-height: var(--text-h1--line-height);
+    letter-spacing: var(--text-h1--letter-spacing);
+    font-weight: var(--text-h1--font-weight);
+    overflow-wrap: anywhere;
+  }
+
+  .lead {
+    margin-top: 1.25rem;
+    max-width: 34rem;
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+  }
+
+  .knoppen {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+
+  /* Knoppen volgens DESIGNSYSTEEM 7.1: 52 px hoog, hoeken van 2 px. */
+  .knop {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-height: 3.25rem;
+    padding: 0 1.5rem;
+    border: 1.5px solid var(--color-petrol-diep);
+    border-radius: var(--radius-vak);
+    font-family: var(--font-tekst);
+    font-size: var(--text-knop);
+    line-height: var(--text-knop--line-height);
+    letter-spacing: var(--text-knop--letter-spacing);
+    font-weight: var(--text-knop--font-weight);
+    text-decoration: none;
+  }
+
+  .knop-eerst {
+    background: var(--color-petrol-diep);
+    color: var(--color-wit);
+  }
+
+  @media (hover: hover) {
+    .knop-eerst:hover {
+      background: var(--color-inkt);
+      border-color: var(--color-inkt);
+    }
+  }
+
+  .knop-tweede {
+    background: transparent;
+    color: var(--color-petrol-diep);
+  }
+
+  @media (hover: hover) {
+    .knop-tweede:hover {
+      border-color: var(--color-inkt);
+      color: var(--color-inkt);
+    }
+  }
+
+  .knop:focus-visible,
+  .contact a:focus-visible {
+    outline: 3px solid var(--color-petrol-diep);
+    outline-offset: 3px;
+  }
+
+  .contact {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .contact dt {
+    font-weight: 600;
+  }
+
+  /* Vaste plek: de breedte ligt vast, de hoogte volgt uit width en height van het beeld. */
+  .kaart {
+    width: 100%;
+    max-width: 22rem;
+    margin: 0;
+    border: 1px solid var(--color-line);
+  }
+</style>

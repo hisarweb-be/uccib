@@ -1,0 +1,14 @@
+/*
+ * Correctie op de doneertegels van components/Sponsor.astro, zonder dat bestand
+ * te raken (het valt onder de betaallinktoets). DESIGNSYSTEEM verbiedt
+ * pilvormen: de tegels krijgen de hoek van 2 px en de focusring van 3 px in
+ * petrol-diep. De selector is specifieker dan de scoped stijl van Sponsor.
+ */
+.sponsor[data-pagina='bagislar'] .tegel {
+  border-radius: var(--radius-vak);
+}
+
+.sponsor[data-pagina='bagislar'] .tegel:focus-visible {
+  outline: 3px solid var(--color-petrol-diep);
+  outline-offset: 3px;
+}

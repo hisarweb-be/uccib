@@ -1,0 +1,9 @@
+---
+/**
+ * De 404 onder /fr/. Cloudflare Pages toont bij een onbekend pad de 404.html die
+ * het dichtst bij dat pad staat, dus /fr/<onbekend> krijgt deze pagina met status
+ * 404. Zie src/components/NietGevonden.astro.
+ */
+import NietGevonden from '../../components/NietGevonden.astro';
+---
+<NietGevonden locale="fr" />

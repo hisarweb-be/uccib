@@ -1,6 +1,6 @@
 /**
  * Vaste gegevens van de organisatie. Eén bron voor header, footer, contactpagina
- * en de schema.org-gegevens. Wijzigt de vzw iets, dan wijzigt ze het hier.
+ * en de schema.org-gegevens. Wijzigt UCCIB iets, dan wijzigt het hier.
  */
 export const SITE = {
   url: 'https://uccib.com',
