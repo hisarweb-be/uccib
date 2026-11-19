@@ -13,7 +13,7 @@ uccib.com hiçbir çerez yerleştirmez. Tarayıcınıza bilgi kaydetmeyiz, sizi 
 
 ## (1) Sorumlu
 
-Union des Centres Culturels Islamiques de Belgique (UCCIB), kamu yararına vakıf (stichting van openbaar nut). Kayıtlı merkez Charles Demeerstraat 1-3, 1020 Brüksel; ziyaret adresi Rue Charles Demeer 3, 1020 Brüksel, Belçika. KBO/BTW BE 0843.891.981. E-posta contact@hisarweb.be, telefon +32 493 344 665.
+Union des Centres Culturels Islamiques de Belgique (UCCIB), kamu yararına vakıf (stichting van openbaar nut). Kayıtlı merkez Charles Demeerstraat 1-3, 1020 Brüksel; ziyaret adresi Rue Charles Demeer 3, 1020 Brüksel, Belçika. KBO/BTW BE 0843.891.981. E-posta info@uccib.com, telefon +32 493 344 665.
 
 ## (2) Sitede ölçtüğümüz durum
 
@@ -39,10 +39,10 @@ Sitedeki WhatsApp ve yol tarifi düğmeleri birer bağlantıdır. Sitede gömül
 
 ## (6) Haklarınız
 
-Kişisel verileriniz hakkında bilgi isteme, düzeltme, silme ve işlemeye itiraz etme hakkınız vardır. Bunun için contact@hisarweb.be adresine yazın. Yanıt için en fazla bir ay kullanırız. Bir sorun çözülmezse Belçika Veri Koruma Kurumu'na (Gegevensbeschermingsautoriteit, Drukpersstraat 35, 1000 Brüksel) şikayet edebilirsiniz.
+Kişisel verileriniz hakkında bilgi isteme, düzeltme, silme ve işlemeye itiraz etme hakkınız vardır. Bunun için info@uccib.com adresine yazın. Yanıt için en fazla bir ay kullanırız. Bir sorun çözülmezse Belçika Veri Koruma Kurumu'na (Gegevensbeschermingsautoriteit, Drukpersstraat 35, 1000 Brüksel) şikayet edebilirsiniz.
 
 ## (7) Değişiklikler
 
 Bu sayfanın en son sürümü her zaman bu adreste yayımlanır. Siteye veri kaydeden yeni bir işlev eklenirse, bu sayfa önce güncellenir.
 
-Son güncelleme: 17 Kasım 2026. Sorularınız için contact@hisarweb.be.
+Son güncelleme: 17 Kasım 2026. Sorularınız için info@uccib.com.
