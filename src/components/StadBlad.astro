@@ -1,0 +1,63 @@
+---
+/**
+ * De gebedstijden van één stad, als eigen pagina.
+ *
+ * Waarom een eigen adres per stad en geen keuzelijst met een verborgen stand
+ * (19-11): een link die iemand in WhatsApp plakt moet de stad meenemen, en
+ * "gebedstijden Gent" moet een pagina opleveren en geen knop. De stad staat dus
+ * in het pad (`/namaz-vakitleri/gent/`) en deze pagina is dezelfde pagina in elke
+ * taal, met de eigen kop, titel en beschrijving.
+ *
+ * Brussel heeft bewust geen eigen adres: dat is `/namaz-vakitleri/` zelf. Een
+ * tweede adres met dezelfde inhoud is dubbele inhoud en dat kost plaats in de
+ * zoekmachine.
+ *
+ * Zonder JavaScript staan de tijden er al: ze komen uit `src/data/vakitler.json`,
+ * dat de bouw voor elke stad vastlegt (`scripts/lever-vakitler.mjs`).
+ */
+import Layout from '../layouts/Layout.astro';
+import KopBand from './KopBand.astro';
+import Vakitler from './Vakitler.astro';
+import { f3 } from '../i18n/f3';
+import { LOCALES, stadPath } from '../i18n/config';
+import { STEDEN } from '../lib/vakitler';
+import type { Locale } from '../i18n';
+
+interface Props {
+  locale: Locale;
+  stad: string;
+}
+
+const { locale, stad } = Astro.props;
+const teksten = f3(locale);
+const eigen = STEDEN.find((s) => s.slug === stad);
+const naam = eigen?.naam[locale] ?? stad;
+
+/** De patronen uit `f3.ts` dragen `{stad}`; hier wordt het de echte plaatsnaam. */
+const metStad = (patroon: string): string => patroon.replace('{stad}', naam);
+
+const taalPaden = Object.fromEntries(LOCALES.map((taal) => [taal, stadPath(taal, stad)])) as Record<
+  Locale,
+  string
+>;
+---
+
+<Layout
+  locale={locale}
+  slug="namaz-vakitleri"
+  path={stadPath(locale, stad)}
+  taalPaden={taalPaden}
+  title={metStad(teksten.vakitler.stadTitelPatroon)}
+  description={metStad(teksten.vakitler.stadBeschrijvingPatroon)}
+>
+  <KopBand
+    h1={metStad(teksten.vakitler.stadTitelPatroon)}
+    intro={metStad(teksten.vakitler.stadLeadPatroon)}
+  />
+  <div class="py-12 lg:py-16">
+    {/* De lijst met andere steden staat ín `Vakitler`, zodat de hoofdpagina en
+        elke stadspagina dezelfde lijst op dezelfde plek tonen. */}
+    <Vakitler locale={locale} vorm="blad" stad={stad} />
+  </div>
+</Layout>
+

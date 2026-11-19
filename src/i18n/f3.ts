@@ -63,6 +63,14 @@ export interface F3Teksten {
     meer: string;
     geen: string;
     fout: string;
+    /** Kop van een stadspagina; `{stad}` wordt de plaatsnaam in deze taal. */
+    stadTitelPatroon: string;
+    /** De inleiding onder die kop, met dezelfde plaatsaanduiding. */
+    stadLeadPatroon: string;
+    /** De beschrijving voor zoekmachines, met dezelfde plaatsaanduiding. */
+    stadBeschrijvingPatroon: string;
+    /** Kop boven de lijst met alle steden op een stadspagina. */
+    stedenKop: string;
   };
   steunKop: string;
   steunTekst: string;
@@ -148,9 +156,15 @@ const TR: F3Teksten = {
     week: 'Yedi gün',
     bron: 'Kaynak: Fazilet Takvimi',
     opgehaald: 'alındı',
-    meer: 'Tüm şehirler ve hafta',
+    meer: 'Tüm şehirler',
     geen: 'Vakitlere şu anda ulaşılamıyor. Lütfen daha sonra tekrar deneyin.',
     fout: 'Canlı vakitler alınamadı; son derlemedeki vakitler gösteriliyor.',
+    stadTitelPatroon: '{stad} namaz vakitleri',
+    stadLeadPatroon:
+      "{stad} için Fazilet takvimine göre günlük namaz vakitleri: imsak, güneş, öğle, ikindi, akşam ve yatsı.",
+    stadBeschrijvingPatroon:
+      '{stad} için bugünün ve önümüzdeki günlerin namaz vakitleri, Fazilet takvimine göre.',
+    stedenKop: 'Diğer şehirler',
   },
   diensten: [
     {
@@ -326,9 +340,15 @@ const NL: F3Teksten = {
     week: 'Zeven dagen',
     bron: 'Bron: Fazilet Takvimi',
     opgehaald: 'opgehaald',
-    meer: 'Alle steden en de week',
+    meer: 'Alle steden',
     geen: 'De gebedstijden zijn nu niet bereikbaar. Probeer het later opnieuw.',
     fout: 'De verse tijden zijn niet opgehaald; de tijden van de laatste bouw staan er.',
+    stadTitelPatroon: 'Gebedstijden {stad}',
+    stadLeadPatroon:
+      'De gebedstijden in {stad} volgens de Fazilet-kalender: imsak, zonsopgang, middag, namiddag, avond en nacht.',
+    stadBeschrijvingPatroon:
+      'De gebedstijden van vandaag en de komende dagen in {stad}, volgens de Fazilet-kalender.',
+    stedenKop: 'Andere steden',
   },
   diensten: [
     {
@@ -508,9 +528,15 @@ const FR: F3Teksten = {
     week: 'Sept jours',
     bron: 'Source : Fazilet Takvimi',
     opgehaald: 'relevé',
-    meer: 'Toutes les villes et la semaine',
+    meer: 'Toutes les villes',
     geen: 'Les heures de prière sont momentanément indisponibles. Réessayez plus tard.',
     fout: "Les heures à jour n'ont pas pu être chargées ; celles du dernier build restent affichées.",
+    stadTitelPatroon: 'Heures de prière à {stad}',
+    stadLeadPatroon:
+      'Les heures de prière à {stad} selon le calendrier Fazilet : imsak, lever du soleil, midi, après-midi, soir et nuit.',
+    stadBeschrijvingPatroon:
+      "Les heures de prière d'aujourd'hui et des prochains jours à {stad}, selon le calendrier Fazilet.",
+    stedenKop: 'Autres villes',
   },
   diensten: [
     {

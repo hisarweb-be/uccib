@@ -7,9 +7,12 @@
  *   2. de tijden worden vers opgehaald bij `/api/vakitler?stad=<stad>`; lukt dat
  *      niet, dan blijven de tijden van de bouw staan (`src/data/vakitler.json`).
  *      Er komt dus nooit een lege tabel en nooit een foutmelding in beeld;
- *   3. op `/namaz-vakitleri/` kiest de lezer een andere stad; die keuze wordt
- *      onthouden (`localStorage`), zodat hij de volgende keer niet opnieuw hoeft
- *      te kiezen.
+ *   3. op de gebedstijdenpagina's kiest de lezer een andere stad; de pagina gaat
+ *      dan naar het adres van die stad (`/namaz-vakitleri/<stad>/`) in plaats van
+ *      de tabel stilletjes te verwisselen. Zo is wat de lezer ziet altijd wat de
+ *      link in zijn adresbalk zegt, en is een gedeelde link de juiste stad. Die
+ *      keuze wordt bovendien onthouden (`localStorage`), zodat wie de volgende keer
+ *      terugkomt op `/namaz-vakitleri/` zijn eigen stad ziet.
  *
  * Waarom geen aftel-loop met een verzoek per seconde: dat zou 86.400 verzoeken
  * per bezoeker per dag zijn. De tijden zijn genoeg voor de hele dag; alleen de
@@ -140,14 +143,44 @@ function levend(root: HTMLElement): void {
    */
   const zetPlaats = (slug: string): void => zetTekst(plaatsEl, plaatsen[slug] ?? slug);
 
-  try {
-    const bewaard = window.localStorage.getItem(GEKOZEN_STAD);
-    if (keuze && bewaard) keuze.value = bewaard;
-  } catch {
-    /* Privémodus: geen keuze bewaren, de rest werkt gewoon. */
+  /**
+   * De stad van deze pagina komt van de server (`data-stad`), niet uit het
+   * geheugen. Op een stadspagina is het adres de baas: wie `/namaz-vakitleri/gent/`
+   * opent hoort Gent te zien, ook als hij de vorige keer Brussel koos.
+   */
+  const paginaStad = root.dataset.stad || 'brussel';
+
+  /**
+   * Waar de pagina van een stad staat. Brussel is de hoofdpagina zelf; elke andere
+   * stad heeft een eigen adres. Deze regel moet vóór het doorsturen staan, anders
+   * verwijst de kiezer op een stadspagina naar een adres dat niet bestaat.
+   */
+  const padVanStad = (slug: string): string => {
+    const voor = taal === 'tr' ? '' : `/${taal}`;
+    return slug === 'brussel' ? `${voor}/namaz-vakitleri/` : `${voor}/namaz-vakitleri/${slug}/`;
+  };
+
+  /**
+   * Op de hoofdpagina van de gebedstijden (`/namaz-vakitleri/`) telt de eerder
+   * gekozen stad wel: die stuurt de lezer één keer door naar het adres van zijn
+   * stad. Dat is wat de keuze onthouden betekent nu elke stad een eigen adres
+   * heeft; de keuzelijst verwisselde vroeger stil de tabel.
+   */
+  const isHoofdblad = keuze !== null && paginaStad === 'brussel';
+  if (isHoofdblad) {
+    try {
+      const bewaard = window.localStorage.getItem(GEKOZEN_STAD);
+      if (bewaard && bewaard !== 'brussel' && plaatsen[bewaard]) {
+        window.location.replace(padVanStad(bewaard));
+        return;
+      }
+    } catch {
+      /* Privémodus: geen keuze bewaren en dus ook niet doorsturen. */
+    }
   }
 
-  zetPlaats(keuze?.value || root.dataset.stad || 'brussel');
+  if (keuze) keuze.value = paginaStad;
+  zetPlaats(paginaStad);
 
   /** De zeven tijden van de dag, de weektabel en de klok, uit `dagen`. */
   const teken = (): void => {
@@ -272,8 +305,13 @@ function levend(root: HTMLElement): void {
     if (keuze) keuze.value = huidigeStad;
   }
 
-  void haal(keuze?.value || root.dataset.stad || 'brussel');
+  void haal(paginaStad);
 
+  /*
+   * Een andere stad kiezen is naar die stad gaan, niet de tabel van deze pagina
+   * verwisselen. Zo klopt het adres altijd met wat er op het scherm staat, kan de
+   * lezer de link doorsturen en werkt de terugknop van de browser zoals hij hoort.
+   */
   keuze?.addEventListener('change', () => {
     const gekozen = keuze.value || 'brussel';
     try {
@@ -281,7 +319,8 @@ function levend(root: HTMLElement): void {
     } catch {
       /* Privémodus: de keuze geldt alleen deze keer. */
     }
-    void haal(gekozen);
+    if (gekozen === paginaStad) return;
+    window.location.assign(padVanStad(gekozen));
   });
 
   /*

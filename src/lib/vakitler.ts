@@ -9,6 +9,11 @@
  *
  * De tijden staan als UTC-ISO in het bestand. Tonen doen we in de tijdzone van
  * Brussel, want dat is de klok waar de lezer op kijkt.
+ *
+ * Eén bestand voor alle steden (`steden.<slug>`), sinds elke stad een eigen adres
+ * heeft. Alles hieronder werkt per stad: geef de slug mee en je krijgt de tijden,
+ * de bron en het ophaalmoment van díe stad. Zonder geldige slug valt het terug op
+ * Brussel, zodat een pagina die per ongeluk geen stad krijgt nooit leeg is.
  */
 import gegevens from '../data/vakitler.json';
 
@@ -21,8 +26,11 @@ export const GEBEDEN = ['sabah', 'ogle', 'ikindi', 'aksam', 'yatsi'] as const;
 
 export type Dag = { datum: string; tijden: Record<string, string> };
 
-export type VakitGegevens = {
+/** De tijden van één stad, zoals de bouw ze vastlegde. */
+export type Stadgegevens = {
+  /** De stad waar deze tijden bij horen. */
   stad: string;
+  /** Weergavenaam van die stad in de taal van de pagina. */
   stadNaam: string;
   tijdstreep: string;
   bron: string;
@@ -30,15 +38,44 @@ export type VakitGegevens = {
   dagen: Dag[];
 };
 
-const bestand = gegevens as unknown as VakitGegevens;
+/** De vorm van `src/data/vakitler.json`: één tijdzone, één moment, alle steden. */
+type Bestand = {
+  tijdstreep?: string;
+  opgehaald?: string;
+  steden?: Record<string, { bron?: string; opgehaald?: string; dagen?: Dag[] }>;
+};
 
-/** Is er bruikbare inhoud? Zonder dagen tonen we niets liever dan iets verzonnens. */
-export function heeftVakitler(): boolean {
-  return Array.isArray(bestand.dagen) && bestand.dagen.length > 0;
+const bestand = gegevens as unknown as Bestand;
+const TIJDSTREEP = bestand.tijdstreep || 'Europe/Brussels';
+const BRUSSEL = 'brussel';
+
+/** De ruwe dagen van één stad; leeg als die stad (nog) geen tijden heeft. */
+function dagenVan(slug: string): Dag[] {
+  const dagen = bestand.steden?.[slug]?.dagen;
+  return Array.isArray(dagen) ? dagen : [];
 }
 
-export function vakitGegevens(): VakitGegevens {
-  return bestand;
+/**
+ * Alles wat een stadspagina nodig heeft. Een onbekende slug valt terug op Brussel:
+ * een pagina zonder tijden is erger dan een pagina met de tijden van de hoofdstad,
+ * en de kop van die pagina noemt altijd de stad die er echt bij hoort.
+ */
+export function vakitGegevens(slug: string = BRUSSEL): Stadgegevens {
+  const stad = STEDEN.some((s) => s.slug === slug) ? slug : BRUSSEL;
+  const eigen = bestand.steden?.[stad];
+  return {
+    stad,
+    stadNaam: STEDEN.find((s) => s.slug === stad)?.naam.nl ?? stad,
+    tijdstreep: TIJDSTREEP,
+    bron: eigen?.bron ?? 'https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/' + stad,
+    opgehaald: eigen?.opgehaald ?? bestand.opgehaald ?? '',
+    dagen: dagenVan(stad),
+  };
+}
+
+/** Heeft deze stad bruikbare tijden? Zonder dagen tonen we niets liever dan iets verzonnens. */
+export function heeftVakitler(slug: string = BRUSSEL): boolean {
+  return dagenVan(slug).length > 0;
 }
 
 /**
@@ -49,7 +86,7 @@ export function vakitGegevens(): VakitGegevens {
 export function kiesDag(dagen: readonly Dag[], nu: Date = new Date()): Dag | null {
   if (dagen.length === 0) return null;
   const vandaag = new Intl.DateTimeFormat('en-CA', {
-    timeZone: bestand.tijdstreep || 'Europe/Brussels',
+    timeZone: TIJDSTREEP,
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -84,7 +121,7 @@ export function klok(iso: string, metSeconden = false): string {
   const moment = new Date(iso);
   if (Number.isNaN(moment.getTime())) return '--:--';
   return new Intl.DateTimeFormat('nl-BE', {
-    timeZone: bestand.tijdstreep || 'Europe/Brussels',
+    timeZone: TIJDSTREEP,
     hour: '2-digit',
     minute: '2-digit',
     ...(metSeconden ? { second: '2-digit' } : {}),

@@ -192,10 +192,15 @@ function attr(tag, name) {
 /**
  * Keurt één gebouwde pagina. Geeft een lijst leesbare foutregels terug;
  * een lege lijst betekent groen.
+ *
+ * `route` en `taalPaden` zijn er voor pagina's waarvan het adres niet uit een
+ * slug volgt: de stadspagina's van de gebedstijden (`/namaz-vakitleri/<stad>/`).
+ * Zonder die twee zou de keuring de hreflang-wissels van de gewone pagina
+ * verwachten en een gezonde stadspagina afkeuren.
  */
-export async function checkPage({ browser, baseUrl, distDir, locale, slug }) {
+export async function checkPage({ browser, baseUrl, distDir, locale, slug, route: routeIn, taalPaden }) {
   const errors = [];
-  const route = pagePath(locale, slug);
+  const route = routeIn ?? pagePath(locale, slug);
   const label = `${locale} ${route}`;
 
   const file = distFileFor(distDir, route);
@@ -266,7 +271,7 @@ export async function checkPage({ browser, baseUrl, distDir, locale, slug }) {
 
   const alternates = [...html.matchAll(/<link\s+rel="alternate"\s+hreflang="([^"]*)"\s+href="([^"]*)"/gi)];
   for (const other of LOCALES) {
-    const wanted = new URL(pagePath(other, slug), SITE_URL).href;
+    const wanted = new URL(taalPaden?.[other] ?? pagePath(other, slug), SITE_URL).href;
     const lang = other === 'tr' ? 'tr-BE' : other === 'nl' ? 'nl-BE' : 'fr-BE';
     const found = alternates.find((m) => m[1] === lang);
     if (!found) {

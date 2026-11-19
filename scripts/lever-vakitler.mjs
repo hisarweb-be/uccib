@@ -1,65 +1,143 @@
 #!/usr/bin/env node
 /**
- * Legt de gebedstijden van Brussel vast vóór de bouw: `src/data/vakitler.json`.
+ * Legt vóór de bouw de gebedstijden van elke Belgische stad vast:
+ * `src/data/vakitler.json` (één bestand, één ingang).
  *
  * Waarom vastleggen en niet elke keer ophalen: een site die niet bouwt omdat een
  * bron van een derde partij even niet antwoordt, is erger dan een site met de
- * tijden van gisteren. De pagina leest dit bestand bij de bouw, zodat er ook
- * zonder JavaScript en zonder bereik tijden staan; de browser haalt daarna de
- * verse tijden op via `/api/vakitler?stad=<stad>`.
+ * tijden van gisteren. Elke stadspagina leest dit bestand bij de bouw, zodat er
+ * ook zonder JavaScript en zonder bereik tijden staan; de browser haalt daarna
+ * de verse tijden op via `/api/vakitler?stad=<stad>`.
  *
- * Draait `npm run build` dit script en antwoordt de bron niet, dan blijft het
- * bestaande bestand staan (geen schrijfactie) en gaat de bouw gewoon door. Is er
- * nog helemaal geen bestand, dan schrijft het alleen `null` en toont de pagina
- * de boodschap dat de tijden tijdelijk niet beschikbaar zijn: nooit verzonnen.
+ * Waarom alle steden en niet alleen Brussel (19-11): elke stad heeft sinds deze
+ * ronde een eigen adres (`/namaz-vakitleri/<stad>/`), en een gedeelde link moet
+ * de juiste plaats tonen ook als de lezer geen JavaScript heeft. Zonder eigen
+ * tijden per stad zou zo'n pagina Brussel tonen onder de naam van Gent.
+ *
+ * Faalt een stad, dan blijven haar eigen tijden uit de vorige bouw staan; faalt
+ * de bron helemaal, dan blijft het bestand onaangeroerd en bouwt de site door.
+ * Er wordt nooit iets verzonnen en nooit een halve tabel geschreven.
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { haalStad, STEDEN } from '../functions/_lib/vakitler.js';
+import { bronPad, haalStad, STEDEN } from '../functions/_lib/vakitler.js';
 
 const DOEL = resolve('src/data/vakitler.json');
-const STAD = process.env.VAKITLER_STAD || 'brussel';
 
-/** Zeven dagen is genoeg: drie van de bron plus de vorige, zodat een oude build niet meteen leeg is. */
+/**
+ * Vier verzoeken tegelijk: de bron antwoordt in ongeveer 150 ms, dus 34 steden
+ * duren zo'n twee seconden. Acht seconden per stad is ruim; bij een trage bron
+ * staat de bouw hooguit (34/4) × 8 ≈ 68 s stil en daarna gaat hij gewoon door.
+ */
+const TEGELIJK = 4;
+const TIMEOUT_MS = 8000;
+
+/** De vorige inhoud, in de vorm van dit script. Onbekend of onleesbaar telt als leeg. */
 function lees() {
   if (!existsSync(DOEL)) return null;
   try {
-    return JSON.parse(readFileSync(DOEL, 'utf8'));
+    const oud = JSON.parse(readFileSync(DOEL, 'utf8'));
+    return oud && typeof oud.steden === 'object' && oud.steden ? oud : null;
   } catch {
     return null;
   }
 }
 
-const oud = lees();
-const dagen = await haalStad(STAD, { timeoutMs: 8000 });
+/** Elke stad ophalen, met een klein aantal verzoeken tegelijk. */
+async function haalAlle(slugs) {
+  const wachtrij = [...slugs];
+  const uit = new Map();
+  const werker = async () => {
+    for (;;) {
+      const slug = wachtrij.shift();
+      if (slug === undefined) return;
+      uit.set(slug, await haalStad(slug, { timeoutMs: TIMEOUT_MS }));
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(TEGELIJK, slugs.length) }, werker));
+  return uit;
+}
 
-if (dagen.length === 0) {
-  const heeftOud = oud && Array.isArray(oud.dagen) && oud.dagen.length > 0;
-  console.warn(
-    `[vakitler] de bron antwoordde niet voor ${STAD}; ` +
-      (heeftOud ? `de tijden van ${oud.opgehaald} blijven staan.` : 'er staan geen tijden in de pagina.'),
-  );
+const oud = lees();
+const vers = await haalAlle(STEDEN.map((stad) => stad.slug));
+
+const nu = new Date().toISOString();
+const steden = {};
+let gelukt = 0;
+let bewaard = 0;
+let leeg = 0;
+
+for (const stad of STEDEN) {
+  const nieuw = vers.get(stad.slug) ?? [];
+  const eerder = oud?.steden?.[stad.slug];
+
+  /**
+   * Samenvoegen met wat er al lag: een bouw op woensdag mag de dag van dinsdag
+   * niet wissen, want de pagina toont ook de dagen ervoor in de weektabel.
+   */
+  const samen = new Map();
+  for (const dag of [...(eerder?.dagen ?? []), ...nieuw]) samen.set(dag.datum, dag);
+  const dagen = [...samen.values()].sort((a, b) => (a.datum < b.datum ? -1 : 1)).slice(-9);
+
+  if (dagen.length === 0) {
+    leeg += 1;
+    continue;
+  }
+
+  if (nieuw.length > 0) gelukt += 1;
+  else bewaard += 1;
+
+  steden[stad.slug] = {
+    bron: bronPad(stad.slug),
+    opgehaald: nieuw.length > 0 ? nu : (eerder?.opgehaald ?? nu),
+    dagen,
+  };
+}
+
+/*
+ * Niets opgehaald én geen bruikbare oude inhoud: dan is er niets om te schrijven
+ * en blijft het bestand zoals het was. De pagina's zeggen dan eerlijk dat de
+ * tijden niet beschikbaar zijn in plaats van een lege tabel te tonen.
+ */
+if (gelukt === 0 && Object.keys(steden).length === 0) {
+  console.warn('[vakitler] de bron antwoordde niet en er lag nog niets; het bestand blijft ongewijzigd.');
   process.exit(0);
 }
 
-/**
- * Samenvoegen met wat er al lag: een build op woensdag mag de dag van dinsdag
- * niet wissen, want de pagina toont ook "gisteren" in de weektabel.
+/*
+ * Alleen schrijven als de tijden echt veranderd zijn.
+ *
+ * `opgehaald` is de tijd van het ophalen, en die verandert bij elke bouw. Zonder
+ * deze vergelijking stond `src/data/vakitler.json` na elke `npm run build` in de
+ * werkmap: een gewijzigd bestand dat niets nieuws zei. Dat leverde ruis in elke
+ * diff en een botsing tussen twee werkbomen die allebei bouwden (gemeten 19-11:
+ * een bouw in deze werkboom overschreef de versie van de andere). De tijden zelf
+ * zijn de enige inhoud die telt; is er niets nieuws, dan blijft het bestand -
+ * inclusief zijn eerlijke ophaalmoment - staan.
  */
-const samen = new Map();
-for (const dag of [...(oud?.dagen ?? []), ...dagen]) samen.set(dag.datum, dag);
+const kern = (bestand) =>
+  JSON.stringify({
+    tijdstreep: bestand?.tijdstreep,
+    steden: Object.fromEntries(
+      Object.entries(bestand?.steden ?? {}).map(([slug, stad]) => [
+        slug,
+        { bron: stad?.bron, dagen: stad?.dagen },
+      ]),
+    ),
+  });
 
-const dagenGesorteerd = [...samen.values()].sort((a, b) => (a.datum < b.datum ? -1 : 1)).slice(-9);
-
-const inhoud = {
-  stad: STAD,
-  stadNaam: STEDEN.find((s) => s.slug === STAD)?.nl ?? STAD,
-  tijdstreep: 'Europe/Brussels',
-  bron: 'https://namaz-vakitleri.fazilettakvimi.com/nl/belgie/' + STAD,
-  opgehaald: new Date().toISOString(),
-  dagen: dagenGesorteerd,
-};
-
+const inhoud = { tijdstreep: 'Europe/Brussels', opgehaald: nu, steden };
+if (oud && kern(oud) === kern(inhoud)) {
+  console.log('[vakitler] de tijden zijn gelijk aan het bestand; niets geschreven.');
+  process.exit(0);
+}
 writeFileSync(DOEL, JSON.stringify(inhoud, null, 2) + '\n', 'utf8');
-console.log(`[vakitler] ${STAD}: ${dagenGesorteerd.length} dagen vastgelegd (${dagenGesorteerd[0].datum} t/m ${dagenGesorteerd.at(-1).datum}).`);
+
+const dagenVan = (slug) => steden[slug]?.dagen ?? [];
+const eerste = dagenVan('brussel')[0]?.datum ?? '?';
+const laatste = dagenVan('brussel').at(-1)?.datum ?? '?';
+console.log(
+  `[vakitler] ${gelukt} steden vers, ${bewaard} uit de vorige bouw, ${leeg} zonder tijden` +
+    ` (Brussel: ${eerste} t/m ${laatste}).`,
+);
