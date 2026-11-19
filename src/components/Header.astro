@@ -20,15 +20,28 @@ interface Props {
   locale: Locale;
   /** Null op een pagina zonder eigen inhoud (404, concept): dan is er geen actief menu-item. */
   slug: Slug | null;
+  /**
+   * Het adres van deze pagina in elke taal, als dat niet uit `slug` volgt: een
+   * stadspagina heeft per taal een eigen adres (`/namaz-vakitleri/gent/` en
+   * `/nl/namaz-vakitleri/gent/`). Zonder dit wisselde de taalkeuzer op een
+   * stadspagina naar de hoofdpagina, en raakte de lezer zijn stad kwijt.
+   */
+  taalPaden?: Record<Locale, string>;
 }
 
-const { locale, slug } = Astro.props;
+const { locale, slug, taalPaden } = Astro.props;
 const t = getDictionary(locale);
 const teksten = f3(locale);
 
 /** De taalkiezer wijst op deze pagina; zonder slug (404) valt hij terug op de eigen taal. */
-const languageHref = (other: Locale) =>
-  slug === null ? (other === 'tr' ? '/' : `/${other}/`) : pagePath(other, slug);
+const languageHref = (other: Locale): string =>
+  taalPaden
+    ? taalPaden[other]
+    : slug === null
+      ? other === 'tr'
+        ? '/'
+        : `/${other}/`
+      : pagePath(other, slug);
 ---
 
 <header class="kop">

@@ -158,6 +158,22 @@ for (const stad of slugs.filter((s) => s !== 'brussel')) {
       fouten.push(`${label}: de plaatsregel zegt "${plaats}", verwacht "${naam}"`);
     }
 
+    /*
+     * De taalkeuzer boven in de pagina, niet alleen de hreflang in de kop. Die
+     * twee liepen uit elkaar: de hreflang wees naar Gent in elke taal, maar het
+     * knopje in de balk stuurde de lezer naar de hoofdpagina en gooide zijn stad
+     * weg (gemeten 19-11). Een lezer die van taal wisselt hoort bij zijn stad te
+     * blijven, dus de knop en de hreflang moeten hetzelfde adres noemen.
+     */
+    const keuzer = /<nav class="talen"[\s\S]*?<\/nav>/.exec(html)?.[0] ?? '';
+    if (!keuzer) fouten.push(`${label}: geen taalkeuzer in de balk gevonden`);
+    for (const ander of LOCALES) {
+      const doel = stadPad(ander, stad);
+      if (keuzer && !keuzer.includes(`href="${doel}"`)) {
+        fouten.push(`${label}: de taalkeuzer wijst voor ${ander} niet naar ${doel}`);
+      }
+    }
+
     const tijden = tijdenVan(html);
     const verwachteTijden = tijdenVoor(stad);
     if (tijden.length !== 6 || tijden.some((t) => !/^\d{2}:\d{2}$/.test(t))) {
