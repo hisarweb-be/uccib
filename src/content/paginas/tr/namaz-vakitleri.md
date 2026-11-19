@@ -4,7 +4,7 @@ h1: Namaz Vakitleri
 description: "Brüksel için günlük namaz vakitleri: imsak, güneş, öğle, ikindi, akşam ve yatsı."
 intro: ""
 order: 9
-active: false
+active: true
 ---
 
-Brüksel ve Belçika şehirleri için namaz vakitleri yakında burada yer alacaktır.
+Vakitler Fazilet takvimine göre güncellenir. Şehir seçerek Belçika genelindeki vakitleri görebilirsiniz.

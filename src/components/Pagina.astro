@@ -20,6 +20,7 @@ import Beeld from './Beeld.astro';
 import CinemaBeeld from './CinemaBeeld.astro';
 import GebouwCinema from './GebouwCinema.astro';
 import LedenDienst from './LedenDienst.astro';
+import Vakitler from './Vakitler.astro';
 import { getDictionary, type Locale } from '../i18n';
 import { pagePath, isSlug } from '../i18n/config';
 import { SITE, type Slug } from '../data/site';
@@ -294,7 +295,9 @@ const ngo =
               {teksten.juridischNoot}
             </p>
           ) : null}
-          {isLedenSlug(slug) ? (
+          {slug === 'namaz-vakitleri' ? (
+            <Vakitler locale={locale} vorm="blad" />
+          ) : isLedenSlug(slug) ? (
             <LedenDienst slug={slug} locale={locale}>
               {heeftBody ? (
                 <div class="tekst">

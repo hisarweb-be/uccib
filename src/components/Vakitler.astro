@@ -1,0 +1,226 @@
+---
+/**
+ * De gebedstijden van vandaag, levend (STORYBOARD na D12; eigenaar 19 nov:
+ * "ik had de website meer interactief en dynamisch verwacht").
+ *
+ * Twee vormen, één bron:
+ *   - `band`: de strook op de startpagina. Volgend gebed groot met een klok die
+ *     aftelt, de zeven tijden op een rij en de daglijn eronder;
+ *   - `blad`: de pagina `/namaz-vakitleri/`. Dezelfde kop, daaronder de weektabel,
+ *     de stadskiezer en de bronregel.
+ *
+ * Zonder JavaScript staat alles er: de tijden komen uit `src/data/vakitler.json`
+ * (vastgelegd tijdens de bouw) en de klok staat op de eerstvolgende tijd zonder
+ * af te tellen. Met JavaScript haalt `src/scripts/home/vakit.ts` verse tijden op
+ * bij `/api/vakitler?stad=<stad>` en telt hij af, seconde voor seconde, zonder
+ * elke seconde een verzoek: de tijden komen één keer per pagina, de klok rekent
+ * lokaal verder.
+ *
+ * Waarom de bron de Fazilet-kalender is: dat is de kalender die de Turkse
+ * gemeenschap in België gebruikt, en dezelfde bron die de site van Almere
+ * gebruikt (gemeten 19 nov 2026). De tijden staan in UTC in de bron; dit
+ * onderdeel toont ze in de klok van Brussel.
+ */
+import '../styles/vakitler.css';
+import { f3 } from '../i18n/f3';
+import type { Locale } from '../i18n';
+import {
+  TIJDEN,
+  NAMEN,
+  STEDEN,
+  GEBEDEN,
+  heeftVakitler,
+  kiesDag,
+  klok,
+  volgendeTijd,
+  vakitGegevens,
+  type Dag,
+} from '../lib/vakitler';
+
+interface Props {
+  locale: Locale;
+  /** `band` op de startpagina, `blad` op de eigen pagina. */
+  vorm?: 'band' | 'blad';
+}
+
+const { locale, vorm = 'band' } = Astro.props;
+const teksten = f3(locale).vakitler;
+const gegevens = vakitGegevens();
+const dagen: readonly Dag[] = heeftVakitler() ? gegevens.dagen : [];
+
+const vandaag = kiesDag(dagen);
+const volgende = volgendeTijd(dagen);
+const namen = NAMEN[locale];
+
+/** De dag als `donderdag 19 november`, in de taal van de pagina. */
+const datumTekst = (datum: string): string => {
+  const [jaar, maand, dag] = datum.split('-').map(Number);
+  if (!jaar || !maand || !dag) return datum;
+  return new Intl.DateTimeFormat(locale === 'tr' ? 'tr-BE' : locale === 'fr' ? 'fr-BE' : 'nl-BE', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'UTC',
+  }).format(new Date(Date.UTC(jaar, maand - 1, dag)));
+};
+
+const kort = (datum: string): string => {
+  const [jaar, maand, dag] = datum.split('-').map(Number);
+  if (!jaar || !maand || !dag) return datum;
+  return new Intl.DateTimeFormat(locale === 'tr' ? 'tr-BE' : locale === 'fr' ? 'fr-BE' : 'nl-BE', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+  }).format(new Date(Date.UTC(jaar, maand - 1, dag)));
+};
+
+/** De regel onder de kop: welke dag, welke stad, hoe oud de gegevens zijn. */
+const vandaagDatum = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Europe/Brussels',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+}).format(new Date());
+
+const opgehaald = gegevens.opgehaald ? new Date(gegevens.opgehaald) : null;
+const opgehaaldTekst = opgehaald && !Number.isNaN(opgehaald.getTime())
+  ? new Intl.DateTimeFormat(locale === 'tr' ? 'tr-BE' : locale === 'fr' ? 'fr-BE' : 'nl-BE', {
+      day: 'numeric',
+      month: 'long',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'Europe/Brussels',
+    }).format(opgehaald)
+  : '';
+---
+
+<section
+  id="vakitler"
+  class:list={['vakitler', `vakitler--${vorm}`]}
+  data-sectie="vakitler"
+  data-vakitler
+  data-taal={locale}
+  data-stad={gegevens.stad}
+  data-melding-fout={teksten.fout}
+  aria-labelledby="vakitler-kop"
+>
+  <div class="vakit-kop">
+    <h2 id="vakitler-kop" class="vakit-titel">{teksten.kop}</h2>
+    {vorm === 'blad' && <p class="vakit-lead">{teksten.lead}</p>}
+  </div>
+
+  {/* De tijden als gegevens mee: het script begint met echte waarden, ook als
+      het verse verzoek mislukt of er nog geen antwoord is. Zonder dit stond de
+      klok op "nog geen tijd" tot het netwerk antwoordde. */}
+  <script
+    type="application/json"
+    data-vakit-data
+    set:html={JSON.stringify({ stad: gegevens.stad, dagen })}
+  />
+
+  {
+    dagen.length === 0 ? (
+      <p class="vakit-leeg">{teksten.geen}</p>
+    ) : (
+      <>
+        <div class="vakit-nu">
+          <p class="vakit-datum" data-vakit-datum>{vandaag ? datumTekst(vandaag.datum) : ''}</p>
+          <div class="vakit-volgend">
+            <p class="vakit-volgend-label">{teksten.volgend}</p>
+            <p class="vakit-volgend-naam" data-vakit-volgend>
+              {volgende ? namen[volgende.sleutel] : ''}
+            </p>
+            <p class="vakit-volgend-tijd">
+              <span data-vakit-tijd>{volgende ? klok(volgende.moment.toISOString()) : ''}</span>
+              <span class="vakit-klok" data-vakit-klok aria-live="off">
+                {teksten.nogNiet}
+              </span>
+            </p>
+          </div>
+          <div class="vakit-daglijn" aria-hidden="true">
+            <span class="vakit-daglijn-vul" data-vakit-vul></span>
+          </div>
+        </div>
+
+        <ol class="vakit-rij" data-vakit-rij>
+          {TIJDEN.map((sleutel) => (
+            <li class="vakit-cel" data-tijd={sleutel}>
+              <span class="vakit-cel-naam">{namen[sleutel]}</span>
+              <time class="vakit-cel-tijd">
+                {vandaag?.tijden[sleutel] ? klok(vandaag.tijden[sleutel]) : '--:--'}
+              </time>
+              {GEBEDEN.includes(sleutel as (typeof GEBEDEN)[number]) ? (
+                <span class="vakit-cel-merk" aria-hidden="true" />
+              ) : null}
+            </li>
+          ))}
+        </ol>
+
+        {vorm === 'blad' ? (
+          <>
+            <div class="vakit-kiezer">
+              <label class="vakit-kiezer-label" for="vakit-stad">{teksten.stad}</label>
+              <div class="vakit-kiezer-veld">
+                <select id="vakit-stad" data-vakit-stad>
+                  {STEDEN.map((stad) => (
+                    <option value={stad.slug} selected={stad.slug === gegevens.stad}>
+                      {stad.naam[locale]}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <p class="vakit-kiezer-status" data-vakit-status role="status" aria-live="polite" />
+            </div>
+
+            <div class="vakit-tabel-wrap">
+              <table class="vakit-tabel" data-vakit-tabel>
+                <caption class="vakit-tabel-caption">{teksten.week}</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">{teksten.tijd}</th>
+                    {dagen.slice(0, 7).map((dag) => (
+                      <th scope="col" data-datum={dag.datum} class:list={{ 'is-vandaag': dag.datum === vandaagDatum }}>
+                        {kort(dag.datum)}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {TIJDEN.map((sleutel) => (
+                    <tr>
+                      <th scope="row">{namen[sleutel]}</th>
+                      {dagen.slice(0, 7).map((dag) => (
+                        <td class:list={{ 'is-vandaag': dag.datum === vandaagDatum }}>
+                          <time>{dag.tijden[sleutel] ? klok(dag.tijden[sleutel]) : '--:--'}</time>
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <p class="vakit-bron">
+              {teksten.bron}
+              <a href={gegevens.bron} rel="noopener noreferrer nofollow" target="_blank">
+                fazilettakvimi.com
+              </a>
+              {opgehaaldTekst ? ` · ${teksten.opgehaald} ${opgehaaldTekst}` : ''}
+            </p>
+          </>
+        ) : (
+          <p class="vakit-meer">
+            <a class="vakit-meer-link" href={`${locale === 'tr' ? '' : '/' + locale}/namaz-vakitleri/`}>
+              {teksten.meer}
+            </a>
+          </p>
+        )}
+      </>
+    )
+  }
+</section>
+
+<script>
+  import '../scripts/home/vakit';
+</script>
