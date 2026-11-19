@@ -36,8 +36,9 @@ Bunlar bizim tarafımızdan yapılamaz, çünkü sizin hesabınıza ve alan adı
    (Hostinger) girilip DNS kayıtlarının Cloudflare'e yönlendirilmesi gerekiyor. Bunu yapmadan site `uccib.pages.dev`
    adresinde çalışmaya devam eder; hiçbir şey bozulmaz. Adım adım anlatımı ayrıca ileteceğiz.
 2. **E-posta.** `info@uccib.com` adresinin süresi 27 Ekim'de dolmuş görünüyor. Uzatılmazsa bu adrese gelen mesajlar
-   ulaşmaz. Site ve kılavuz artık teknik konularda **contact@hisarweb.be** adresini gösteriyor; böylece uzatma
-   yapılana kadar da kimse boşluğa yazmaz. Uzatıldığında isterseniz tek satırla uccib.com adresine çeviririz.
+   ulaşmaz. Site ve kılavuz bu adresi gösteriyor, çünkü site UCCIB'in kendi adresini kullanmalıdır. Adres uzatıldığında
+   her şey kendiliğinden çalışır. O zamana kadar teknik bir sorunu bize doğrudan iletebilirsiniz; elimizdeki telefon
+   numarası yeterlidir.
 
 ## 4. Sizin bir şey yapmanız gerekmiyor
 
@@ -54,4 +55,4 @@ arıza olmadığı sürece bizden destek gerekmez.
    görürsünüz.
 3. Alan adı ve e-posta için bize tek bir mesaj yazın; gerisini birlikte yaparız.
 
-Sorularınız için: contact@hisarweb.be, konu "UCCIB web sitesi".
+Sorularınız için bize doğrudan ulaşabilirsiniz; konu olarak "UCCIB web sitesi" yazın.

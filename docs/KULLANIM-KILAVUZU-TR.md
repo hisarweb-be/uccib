@@ -180,7 +180,7 @@ ziyaretçiler için doğru dil her zaman daha iyidir.
 
 Her kayıt bir "sürüm" olarak saklanır. Geri almak mümkündür:
 
-1. Bize tek bir e-posta yazın: **contact@hisarweb.be**. Konu: "UCCIB geri alma".
+1. Bize tek bir mesaj yazın, konu: "UCCIB geri alma".
 2. Yazın: hangi sayfa, hangi tarih ve saat, ne yapmak istiyorsunuz.
 3. Değişiklik 1 iş günü içinde geri alınır.
 
@@ -229,7 +229,7 @@ C: Evet. Tarayıcıdan aynı adrese girin. Telefonda menü altta açılır.
 
 İçerikle ilgili sorular: UCCIB yönetimi (kendi aranızda).
 
-Teknik bir sorun (giriş yapamıyorum, kaydetmiyor, site açılmıyor): **contact@hisarweb.be**, konu "UCCIB web sitesi".
+Teknik bir sorun (giriş yapamıyorum, kaydetmiyor, site açılmıyor): bize doğrudan ulaşın, konu "UCCIB web sitesi".
 
 Sorunu yazarken şunları ekleyin: hangi sayfa, saat kaçta, hangi tarayıcı, ekranda ne yazıyordu. Bu üç bilgi sorunu
 çoğu zaman tek seferde çözer.
