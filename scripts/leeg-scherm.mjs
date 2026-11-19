@@ -38,7 +38,12 @@
  *   B2 de foto in de ster: het zichtbare fotovlak (kijkgat binnen foto, beeld en
  *      venster) is als de scène in beeld komt minstens 50 % van de kortste zijde,
  *      op geen enkele stand onder 40 %, en aan het eind van elke ruimte minstens
- *      80 % van de vensterbreedte (375, 768, 860, 1024, 1440 px).
+ *      80 % van de vensterbreedte (375, 768, 860, 1024, 1440 px);
+ *   B3 het eerste beeld van de ster is de foto, niet het papier: op de eerste stand
+ *      van de scène is hooguit 40 % van het scherm papier (kleur #f2f6f5) en is de
+ *      gemiddelde helderheid onder 205. Dit is de meter van de klacht van 19 nov
+ *      ("een witte ster met geen foto erin"); B2 kwam daar groen door, want die
+ *      keek naar rechthoeken en opacity in plaats van naar de getekende pixels.
  * Een tegentoets met de oude maten (kijkgat min(64svh, 80vw), film van 260 px) moet
  * daarop falen.
  */
@@ -46,7 +51,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
-import { helderheid, lichtAandeel } from './lib/beeldhelderheid.mjs';
+import { helderheid, lichtAandeel, papierAandeel } from './lib/beeldhelderheid.mjs';
 import { LOCALES, openBrowser, pagePath, startStaticServer } from './lib/keuring.mjs';
 
 /** DESIGNSYSTEEM: minstens 60 % licht, licht is boven 35 % helderheid. */
@@ -270,9 +275,14 @@ const PIEK_SCHERMEN = HERO_SCHERMEN.filter(([b]) => b <= 1440);
 const HERO_MIN = { breed: 0.9, hoog: 0.55 };
 const PIEK_MIN = { begin: 0.5, altijd: 0.4, eind: 0.8 };
 const PIEK_STANDEN = 36;
+/* Het eerste beeld van de ster: hooguit zoveel papier en zo licht. Op een telefoon ligt onder
+   het beeld de kop op papier (het beeldvak is daar 68 % hoog), dus daar is 39 % papier normaal;
+   de oude opening zat op 83 %. */
+const PIEK_OPEN = { papier: 0.45, licht: 205 };
 /* De oude maten (zoals op Altuners schermbeelden): moeten afgekeurd worden. */
 const OUDE_MATEN =
   '.piek-podium{--piek-doos:min(64svh,80vw)!important}' +
+  '.piek-masker g,.piek-rozet g{transform:rotate(0deg) scale(1)!important}' +
   '.hero-film{inset:auto 0 0 auto!important;width:260px!important;height:260px!important}';
 
 /** Het filmvlak van de hero als deel van het venster, en zijn dekking. */
@@ -408,6 +418,30 @@ async function keurPiek(page, label) {
   return { fout, laagst: Math.min(...inBeeld.map((m) => m.vlak)), midden: inBeeld[Math.floor(inBeeld.length / 2)].vlak };
 }
 
+/** Het eerste beeld van de ster: is de foto het onderwerp en niet het papier? */
+async function keurPiekOpen(page, label) {
+  const fout = [];
+  const bereik = await page.evaluate(() => {
+    const s = document.querySelector('[data-sectie="piek-ruimtes"]');
+    if (!s) return null;
+    return { top: s.getBoundingClientRect().top + scrollY, hoog: s.offsetHeight };
+  });
+  if (!bereik) return [label + ': geen piek'];
+  for (const deel of [0, 0.01, 0.03]) {
+    await naar(page, Math.round(bereik.top + (bereik.hoog - (await page.evaluate(() => innerHeight))) * deel), true);
+    await page.waitForTimeout(450);
+    const png = await page.screenshot({ type: 'png' });
+    const papier = papierAandeel(png);
+    const licht = helderheid(png).gemiddelde;
+    if (papier > PIEK_OPEN.papier || licht > PIEK_OPEN.licht)
+      fout.push(
+        label + ' op ' + Math.round(deel * 100) + ' % van de scrub: ' + Math.round(papier * 100) + ' % papier en licht ' +
+          Math.round(licht) + ' (lat hooguit ' + Math.round(PIEK_OPEN.papier * 100) + ' % en onder ' + PIEK_OPEN.licht + ')',
+      );
+  }
+  return fout;
+}
+
 async function nieuwePagina(browser, [width, height], variant = 'film') {
   const context = await browser.newContext({
     viewport: { width, height },
@@ -432,6 +466,11 @@ async function tegentoetsMaten(browser, basis) {
     oordeel(hero.length > 0, 'tegentoets B1: een film van 260 px in de hero wordt afgekeurd', hero);
     const piek = await keurPiek(page, 'tegentoets oud kijkgat');
     oordeel(piek.fout.length > 0, 'tegentoets B2: het oude kijkgat min(64svh, 80vw) wordt afgekeurd (kleinste ' + Math.round(piek.laagst * 100) + ' %)', piek.fout);
+    // B3 moet de oude opening (de ster op haar eigen kleine maat, 83 % papier) afkeuren.
+    await openVoorpagina(page, basis + pagePath('nl', ''));
+    await page.addStyleTag({ content: '.piek-masker g, .piek-rozet g { transform: rotate(0deg) scale(1) !important }' });
+    const oudOpen = await keurPiekOpen(page, 'tegentoets oude opening');
+    oordeel(oudOpen.length > 0, 'tegentoets B3: de oude opening met de ster op haar eigen maat wordt afgekeurd', oudOpen);
   } finally {
     await context.close();
   }
@@ -489,6 +528,21 @@ async function keurMaten(browser, basis) {
     }
   }
   oordeel(kaart.length === 0, 'B2: de foto in de ster is bij het begin minstens 50 %, nooit onder 40 % (kleinste/midden: ' + maten.join(', ') + ') en aan het eind van elke ruimte minstens 80 % breed', kaart);
+
+  const open = [];
+  const openMaten = [];
+  for (const scherm of PIEK_SCHERMEN) {
+    const { context, page } = await nieuwePagina(browser, scherm);
+    try {
+      await openVoorpagina(page, basis + pagePath('nl', ''));
+      open.push(...(await keurPiekOpen(page, 'open ' + scherm.join('x'))));
+      const png = await page.screenshot({ type: 'png' });
+      openMaten.push(scherm[0] + ' ' + Math.round(papierAandeel(png) * 100) + ' %');
+    } finally {
+      await context.close();
+    }
+  }
+  oordeel(open.length === 0, 'B3: het eerste beeld van de ster is de foto, niet het papier (papier per scherm: ' + openMaten.join(', ') + ')', open);
 }
 
 /* ── Uitvoeren ── */

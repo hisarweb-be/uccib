@@ -68,6 +68,9 @@ jobs:
       - name: Eerste scherm in pixels
         run: npm run verify:scherm
 
+      - name: Leeg scherm, witte ster en tweede posterlaag
+        run: npm run verify:leeg
+
       - name: Mobiel met een echte vinger
         run: npm run verify:mobiel
 
