@@ -16,6 +16,16 @@
  * vol, 56 px, statisch boven de kop (M05). De regel die het midden van het scherm
  * passeert, wordt "aangewezen" (lijn petrol-diep). Dat doet een kleine observer;
  * zonder JavaScript is er geen aangewezen regel en is de index volledig.
+ *
+ * Beweging (DESIGNSYSTEEM 6.3, 6.4): elke regel komt één keer binnen, 10 px
+ * omhoog en opacity 0 naar 1 in `duur-kom` met `ease-uit`, zodra ze 10 % in beeld
+ * is; regels die samen binnenkomen volgen elkaar op met 50 ms, hooguit zeven
+ * stappen (een achtste komt mee met de zevende). D10: komt `open-deur` voor de
+ * helft van het scherm in beeld, dan verliest de margerozet haar vlakken (stand vol
+ * naar open-kern) in `duur-lijn` met `ease-in-uit`; terug omhoog keert ze terug.
+ * Beide standen liggen op elkaar en wisselen alleen met opacity. De beginstand
+ * zet het script zelf (`data-kom` op de sectie): zonder JavaScript of bij minder
+ * beweging staat alles er meteen.
  */
 import Rozet from '../Rozet.astro';
 import { type Locale } from '../../i18n';
@@ -53,7 +63,10 @@ const regels = teksten.diensten.map((dienst) => {
         <Rozet stand="vol" maat={56} />
       </div>
       <div class="index-rozet" aria-hidden="true">
-        <Rozet stand="vol" maat={32} />
+        <span class="index-rozet-standen">
+          <Rozet stand="vol" maat={32} class="stand-vol" />
+          <Rozet stand="open-kern" maat={32} class="stand-open" />
+        </span>
       </div>
       <h2 class="index-kop">{teksten.dienstenKop}</h2>
       <ul class="index-lijst" role="list">
@@ -87,6 +100,44 @@ const regels = teksten.diensten.map((dienst) => {
       { rootMargin: '-50% 0px -50% 0px' },
     );
     regels.forEach((r) => kijker.observe(r));
+  }
+
+  const sectie = document.querySelector<HTMLElement>('.diensten-index');
+  const beweging = matchMedia('(prefers-reduced-motion: no-preference)').matches;
+
+  /* Binnenkomst: één keer per regel, start als de regel 10 % in beeld is. */
+  if (sectie && beweging && 'IntersectionObserver' in window) {
+    const STAP = 50;
+    const MAX_STAPPEN = 6;
+    const kom = new IntersectionObserver(
+      (items) => {
+        let stap = 0;
+        for (const item of items) {
+          if (!item.isIntersecting) continue;
+          const regel = item.target as HTMLElement;
+          regel.style.setProperty('--kom-wacht', `${Math.min(stap, MAX_STAPPEN) * STAP}ms`);
+          regel.setAttribute('data-binnen', '');
+          kom.unobserve(regel);
+          stap += 1;
+        }
+      },
+      { rootMargin: '0px 0px -10% 0px' },
+    );
+    sectie.setAttribute('data-kom', '');
+    regels.forEach((r) => kom.observe(r));
+  }
+
+  /* D10: open-deur voor de helft in beeld = de margerozet verliest haar vlakken. */
+  const deur = document.querySelector<HTMLElement>('[data-sectie="open-deur"]');
+  if (sectie && deur && 'IntersectionObserver' in window) {
+    new IntersectionObserver(
+      ([item]) => {
+        if (!item) return;
+        const voorbij = item.isIntersecting || item.boundingClientRect.top < 0;
+        sectie.toggleAttribute('data-d10', voorbij);
+      },
+      { rootMargin: '0px 0px -50% 0px' },
+    ).observe(deur);
   }
 </script>
 
@@ -193,16 +244,21 @@ const regels = teksten.diensten.map((dienst) => {
     color: var(--color-petrol-diep);
     transition: transform var(--duur-kort) var(--ease-uit);
   }
-  .index-link:hover::after,
   .index-link:focus-visible::after,
   .index-regel[data-aangewezen] .index-link::after {
     opacity: 1;
   }
-  .index-link:hover .index-titel {
-    color: var(--color-petrol-diep);
-  }
-  .index-link:hover .index-pijl {
-    transform: translateX(4px);
+
+  @media (hover: hover) {
+    .index-link:hover::after {
+      opacity: 1;
+    }
+    .index-link:hover .index-titel {
+      color: var(--color-petrol-diep);
+    }
+    .index-link:hover .index-pijl {
+      transform: translateX(4px);
+    }
   }
   .index-link:focus-visible {
     outline: 3px solid var(--color-petrol);
@@ -210,6 +266,19 @@ const regels = teksten.diensten.map((dienst) => {
   }
   .index-link:active {
     transform: translateY(1px);
+  }
+
+  /* Binnenkomst (6.3): de beginstand alleen als het script `data-kom` zette. */
+  .diensten-index[data-kom] .index-regel {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  .diensten-index[data-kom] .index-regel[data-binnen] {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity var(--duur-kom) var(--ease-uit) var(--kom-wacht, 0ms),
+      transform var(--duur-kom) var(--ease-uit) var(--kom-wacht, 0ms);
   }
 
   @media (min-width: 64rem) {
@@ -224,9 +293,21 @@ const regels = teksten.diensten.map((dienst) => {
       left: calc(var(--blad) / 2 - 16px);
       color: var(--color-petrol-diep);
     }
-    .index-rozet :global(svg) {
+    .index-rozet-standen {
       position: sticky;
       top: calc(50svh - 16px);
+      display: grid;
+    }
+    .index-rozet-standen :global(svg) {
+      grid-area: 1 / 1;
+      transition: opacity var(--duur-lijn) var(--ease-in-uit);
+    }
+    .index-rozet-standen :global(.stand-open),
+    .diensten-index[data-d10] .index-rozet-standen :global(.stand-vol) {
+      opacity: 0;
+    }
+    .diensten-index[data-d10] .index-rozet-standen :global(.stand-open) {
+      opacity: 1;
     }
     .index-kop,
     .index-lijst {

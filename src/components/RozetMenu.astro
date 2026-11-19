@@ -244,12 +244,20 @@ const punten = PUNTEN.map((key) => {
     }
   }
 
-  .bestemming:hover,
   .bestemming:focus-visible {
     color: var(--color-petrol-diep);
     text-decoration: underline;
     text-decoration-thickness: 2px;
     text-underline-offset: 0.18em;
+  }
+
+  @media (hover: hover) {
+    .bestemming:hover {
+      color: var(--color-petrol-diep);
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 0.18em;
+    }
   }
 
   .bestemming[aria-current='page'] {

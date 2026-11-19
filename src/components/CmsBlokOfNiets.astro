@@ -70,9 +70,14 @@ const { id, kop, items } = Astro.props;
     text-decoration: none;
     box-shadow: inset 0 -1px 0 var(--lijn);
   }
-  .cms-link:hover,
   .cms-link:focus-visible {
     box-shadow: inset 0 -2px 0 var(--color-petrol-diep);
+  }
+
+  @media (hover: hover) {
+    .cms-link:hover {
+      box-shadow: inset 0 -2px 0 var(--color-petrol-diep);
+    }
   }
   .cms-link:focus-visible {
     outline: 3px solid var(--color-petrol);

@@ -605,14 +605,26 @@ async function keurScenes(browser, baseUrl) {
       oordeel(false, 'scènes: hero-unie en piek-ruimtes staan niet allebei op de voorpagina (' + secties + ')');
       return;
     }
-    // De bewegingslaag komt pas na `load` binnen (GSAP zit niet in de eerste bundel).
+    // De bewegingslaag komt pas bij de eerste intentie binnen (GSAP zit niet in de
+    // eerste bundel, en er is geen wekker meer: herkeuring F2b, herstelpunt 1).
+    // Zonder intentie blijft het eerste scherm stil, ook na een tijd rust.
+    await page.waitForTimeout(4000);
+    const zonderIntentie = await page.evaluate(
+      () => document.querySelector('[data-sectie="hero-unie"]')?.dataset.stand ?? '',
+    );
+    oordeel(
+      zonderIntentie === '',
+      'scènes: zonder intentie start de bewegingslaag niet vanzelf (4 s na load: stand "' + zonderIntentie + '")',
+    );
+    // Een echte, korte veeg is de intentie; daarna staat de scène er binnen 3 s.
+    await veeg(cdp, 24);
     const geladen = await page
       .waitForFunction(() => document.querySelector('[data-sectie="hero-unie"]')?.dataset.stand === 'eerste', null, {
-        timeout: 8000,
+        timeout: 3000,
       })
       .then(() => true)
       .catch(() => false);
-    oordeel(geladen, 'scènes: de bewegingslaag is na het laden actief (stand "eerste")');
+    oordeel(geladen, 'scènes: de bewegingslaag is binnen 3 s na de eerste veeg actief (stand "eerste")');
     if (!geladen) return;
 
     const begin = await page.evaluate(() => {

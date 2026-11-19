@@ -57,30 +57,47 @@
   font-weight: var(--text-knop--font-weight);
   text-decoration: none;
   white-space: nowrap;
+  position: relative;
   transition:
-    background-color 160ms var(--ease-uit),
-    border-color 160ms var(--ease-uit),
-    color 160ms var(--ease-uit);
+    background-color var(--duur-kort) var(--ease-uit),
+    color var(--duur-kort) var(--ease-uit);
+}
+/* De inktrand bij hover ligt klaar over de petrol rand en komt op met opacity:
+   alleen transform en opacity bewegen (DESIGNSYSTEEM 6.5), nooit border-color. */
+.hero-unie .knop::after,
+.piek-ruimtes .knop::after {
+  content: '';
+  position: absolute;
+  inset: -1.5px;
+  border: 1.5px solid var(--color-inkt);
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity var(--duur-kort) var(--ease-uit);
+  pointer-events: none;
 }
 .hero-unie .knop-eerst,
 .piek-ruimtes .knop-eerst {
   background: var(--color-petrol-diep);
   color: var(--color-wit);
 }
-.hero-unie .knop-eerst:hover,
-.piek-ruimtes .knop-eerst:hover {
-  background: var(--color-inkt);
-  border-color: var(--color-inkt);
-}
 .hero-unie .knop-tweede,
 .piek-ruimtes .knop-tweede {
   background: transparent;
   color: var(--color-petrol-diep);
 }
-.hero-unie .knop-tweede:hover,
-.piek-ruimtes .knop-tweede:hover {
-  border-color: var(--color-inkt);
-  color: var(--color-inkt);
+@media (hover: hover) {
+  .hero-unie .knop-eerst:hover,
+  .piek-ruimtes .knop-eerst:hover {
+    background: var(--color-inkt);
+  }
+  .hero-unie .knop-tweede:hover,
+  .piek-ruimtes .knop-tweede:hover {
+    color: var(--color-inkt);
+  }
+  .hero-unie .knop:hover::after,
+  .piek-ruimtes .knop:hover::after {
+    opacity: 1;
+  }
 }
 .hero-unie .knop:active,
 .piek-ruimtes .knop:active {
@@ -216,6 +233,20 @@
   bottom: 1.5rem;
   right: 1.5rem;
   max-width: calc(100% - 3rem);
+}
+/* De filmregel staat er vanaf het begin in de lay-out, onzichtbaar. Bij de scènestart gaat alleen
+   de dekking aan; het label springt dan niet van één naar twee regels (herkeuring F2b-2). */
+@media (min-height: 35rem) {
+  html.beweging-aan:not(.home-stil) .hero-vermelding .vermelding-film:not(.is-getoond) {
+    display: inline;
+    opacity: 0;
+    visibility: hidden;
+  }
+  html.beweging-aan:not(.home-stil) .hero-vermelding.vermelding-film:not(.is-getoond) {
+    display: flex;
+    opacity: 0;
+    visibility: hidden;
+  }
 }
 
 .hero-intro {
@@ -707,14 +738,9 @@
       /* Hoe ver deze ruimte is op haar eigen stuk van de tijdlijn, 0 tot 1. */
       --l: clamp(0, (var(--piek-p) - var(--a)) / (var(--b) - var(--a)), 1);
     }
-    .piek-laag[data-laag='2'] {
-      opacity: clamp(0, (var(--piek-p) - 0.435) / 0.01, 1);
-    }
-    .piek-laag[data-laag='3'] {
-      opacity: clamp(0, (var(--piek-p) - 0.595) / 0.01, 1);
-    }
-    .piek-laag[data-laag='4'] {
-      opacity: clamp(0, (var(--piek-p) - 0.775) / 0.01, 1);
+    /* Vanaf `--in` (inline, uit `piekPlan`) ligt de laag bovenop; de eerste heeft -1. */
+    .piek-laag {
+      opacity: clamp(0, (var(--piek-p) - var(--in, -1)) / 0.01, 1);
     }
     /* De foto in haar eigen verhouding; maat en plaats zet het script (`meet`, `zet`):
        nooit breder dan 110 % van haar eigen pixels, verschoven met translate3d. */
@@ -795,29 +821,9 @@
       bottom: 1rem;
     }
     /* De vermelding van een ruimte staat er zolang haar foto de bovenste is; de eerste
-       pas als de kern (de foto's) in beeld komt, op p 0,06. */
+       pas als de kern (de foto's) in beeld komt, op p 0,06. `--in`/`--uit` staan inline. */
     .piek-plek {
-      --in: 0.06;
-      --uit: 2;
-      opacity: clamp(0, min((var(--piek-p) - var(--in)) / 0.01, 1 - (var(--piek-p) - var(--uit)) / 0.01), 1);
-    }
-    .piek-plek[data-laag='2'] {
-      --in: 0.435;
-    }
-    .piek-plek[data-laag='3'] {
-      --in: 0.595;
-    }
-    .piek-plek[data-laag='4'] {
-      --in: 0.775;
-    }
-    .piek-plek:has(+ .piek-plek[data-laag='2']) {
-      --uit: 0.435;
-    }
-    .piek-plek:has(+ .piek-plek[data-laag='3']) {
-      --uit: 0.595;
-    }
-    .piek-plek:has(+ .piek-plek[data-laag='4']) {
-      --uit: 0.775;
+      opacity: clamp(0, min((var(--piek-p) - var(--in, 0.06)) / 0.01, 1 - (var(--piek-p) - var(--uit, 2)) / 0.01), 1);
     }
     /* Het venster en de petrol rozet eromheen: dezelfde maat, samen gedraaid en
        geschaald met transform; de kern van de rozet is de rand van het venster en de
@@ -881,11 +887,8 @@
       font-weight: var(--text-naam--font-weight);
       color: var(--color-inkt);
     }
-    .piek-klein [data-na='2'] {
-      opacity: clamp(0, (var(--piek-p) - 0.435) / 0.02, 1);
-    }
-    .piek-klein [data-na='3'] {
-      opacity: clamp(0, (var(--piek-p) - 0.595) / 0.02, 1);
+    .piek-klein [data-klein] {
+      opacity: clamp(0, (var(--piek-p) - var(--in, -1)) / 0.02, 1);
     }
     .piek-slagen {
       display: grid;
@@ -900,14 +903,9 @@
       font-weight: var(--text-citaat--font-weight);
       color: var(--color-petrol-diep);
     }
-    .piek-slag[data-slag='1'] {
-      opacity: clamp(0, 1 - (var(--piek-p) - 0.42) / 0.015, 1);
-    }
-    .piek-slag[data-slag='2'] {
-      opacity: clamp(0, min((var(--piek-p) - 0.435) / 0.015, 1 - (var(--piek-p) - 0.58) / 0.015), 1);
-    }
-    .piek-slag[data-slag='3'] {
-      opacity: clamp(0, (var(--piek-p) - 0.595) / 0.015, 1);
+    /* Elke zin van `--in` tot `--uit` (inline, uit `piekPlan`). */
+    .piek-slag {
+      opacity: clamp(0, min((var(--piek-p) - var(--in, -1)) / 0.015, 1 - (var(--piek-p) - var(--uit, 2)) / 0.015), 1);
     }
     .piek-tekst .piek-knoppen {
       margin-top: 1rem;

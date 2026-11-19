@@ -2,8 +2,16 @@
  * Startpagina: het kleine stuk dat in de eerste bundel zit.
  *
  * Het meet de echte hoogte van de kop (het podium plakt eronder) en haalt de
- * scène pas ná `load` op, als de bezoeker beweging wil en het venster hoog genoeg
- * is. GSAP zit dus niet in de eerste bundel en laadt alleen op de startpagina.
+ * scène pas op als de bezoeker iets doet (scrollen, aanraken, een toets), als
+ * de bezoeker beweging wil en het venster hoog genoeg is. Er is bewust geen
+ * wekker: de oude van 3 s na `load` liet het zware laden (GSAP, 64 verzoeken)
+ * in het meetvenster van Lighthouse vallen (herkeuring F2b: 82 en 84). Het
+ * eerste scherm is bij
+ * p 0 af zonder script; de scène opstarten (GSAP, maten, de frame-reeks) kostte
+ * meteen na `load` tot 1,8 s rekentijd op een trage telefoon (keuring F2b,
+ * herstelpunt 1). Staat de pagina bij `load` al voorbij de top (herladen
+ * halverwege, een anker), dan start ze meteen. GSAP zit dus niet in de eerste
+ * bundel en laadt alleen op de startpagina.
  * Lukt het laden niet, dan zet `home-stil` de pagina terug in de stille stand:
  * alles onder elkaar en leesbaar.
  */
@@ -16,9 +24,18 @@ const kop = document.querySelector<HTMLElement>('.kop');
  * scherm (gemeten met Lighthouse: 350 ms op een trage telefoon).
  */
 function meetKop(hoogte: number) {
-  if (!hoogte) return;
-  const waarde = `${hoogte}px`;
-  if (wortel.style.getPropertyValue('--kop-echt') !== waarde) wortel.style.setProperty('--kop-echt', waarde);
+  if (!hoogte || !kop) return;
+  // Klopt de standaard uit de CSS (balkhoogte plus haarlijn) al, dan niets
+  // zetten: een variabele op de wortel herberekent de stijl van de hele pagina
+  // (keuring F2b, herstelpunt 1: de lange taak meteen na het eerste scherm).
+  const balk = kop.querySelector<HTMLElement>('.balk');
+  const standaard = balk
+    ? Math.round(parseFloat(getComputedStyle(balk).minHeight) + parseFloat(getComputedStyle(kop).borderBottomWidth))
+    : NaN;
+  const waarde = hoogte === standaard ? '' : `${hoogte}px`;
+  if (wortel.style.getPropertyValue('--kop-echt') === waarde) return;
+  if (waarde) wortel.style.setProperty('--kop-echt', waarde);
+  else wortel.style.removeProperty('--kop-echt');
 }
 
 if (kop) {
@@ -43,5 +60,24 @@ function laadScene() {
     .catch(() => wortel.classList.add('home-stil'));
 }
 
-if (document.readyState === 'complete') laadScene();
-else window.addEventListener('load', laadScene, { once: true });
+const INTENTIE = ['scroll', 'wheel', 'touchstart', 'pointerdown', 'keydown'] as const;
+let gestart = false;
+function bijIntentie() {
+  if (gestart) return;
+  gestart = true;
+  for (const soort of INTENTIE) window.removeEventListener(soort, bijIntentie);
+  laadScene();
+}
+
+function naLoad() {
+  for (const soort of INTENTIE) window.addEventListener(soort, bijIntentie, { passive: true });
+  if (location.hash) return bijIntentie();
+  // scrollY pas lezen na het volgende beeld: meteen in `load` dwingt het een
+  // volledige opmaak af (trace herstel F2b-1: 48 ms, x4 op een trage telefoon).
+  // Dit start de scène alleen als de pagina al voorbij de top staat; het is geen
+  // wekker. Wie niets doet, krijgt geen scène: het eerste scherm is af zonder.
+  requestAnimationFrame(() => setTimeout(() => window.scrollY > 0 && bijIntentie(), 0));
+}
+
+if (document.readyState === 'complete') naLoad();
+else window.addEventListener('load', naLoad, { once: true });

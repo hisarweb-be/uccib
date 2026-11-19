@@ -272,13 +272,17 @@ async function naarPodium(page, deel, kies = '[data-controle-podium]') {
 
 /**
  * Naar een stand van een scène. De voortgang loopt via ScrollTrigger met een
- * naloop van 0,3 s (`scrub: 0.3`), en de bewegingslaag komt pas na `load`
- * binnen: eerst wachten tot ze er is, dan scrollen, dan de naloop uitzitten.
+ * naloop van 0,3 s (`scrub: 0.3`), en de bewegingslaag komt pas bij de eerste
+ * intentie binnen (geen wekker meer, herkeuring F2b): eerst een echte scroll van
+ * 1 px met het wiel, dan wachten tot ze er is, dan scrollen, dan de naloop
+ * uitzitten. Zonder bewegingslaag (verminderde beweging) loopt de wacht af en
+ * meet de poort de stille stand, zoals voorheen.
  */
 async function naarScene(page, kies, deel) {
+  await page.mouse.wheel(0, 1);
   await page
     .waitForFunction(() => document.querySelector('[data-sectie="hero-unie"]')?.dataset.stand, null, {
-      timeout: 8000,
+      timeout: 3000,
     })
     .catch(() => {});
   // Letters eerst: `document.fonts.ready` zet in `start.ts` een ScrollTrigger-refresh

@@ -257,8 +257,10 @@ const naam = `steun-${locale}`;
     /* Alleen achtergrondkleur loopt over (DESIGNSYSTEEM 6); de rand wisselt meteen. */
     transition: background-color var(--duur-kort) var(--ease-uit);
   }
-  .steun-label:hover {
-    border-color: var(--color-petrol-diep);
+  @media (hover: hover) {
+    .steun-label:hover {
+      border-color: var(--color-petrol-diep);
+    }
   }
   .steun-radio:checked + .steun-label {
     border: 2px solid var(--color-petrol-diep);
@@ -300,9 +302,11 @@ const naam = `steun-${locale}`;
     text-decoration: none;
     transition: background-color var(--duur-kort) var(--ease-uit);
   }
-  .steun-knop:hover,
-  .steun-leeg-link:hover {
-    background: var(--color-inkt);
+  @media (hover: hover) {
+    .steun-knop:hover,
+    .steun-leeg-link:hover {
+      background: var(--color-inkt);
+    }
   }
   .steun-knop:active {
     transform: translateY(1px);
