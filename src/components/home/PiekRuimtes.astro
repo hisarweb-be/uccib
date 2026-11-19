@@ -94,7 +94,7 @@ const rijen: Sleutelrij[] = plan.zinnen.map((zin) => ({
       <div class="piek-kern">
         <div class="piek-fotos">
           {
-            lagen.map(({ naam, slot, fase, a, b, in: laagIn, vorm, eigen, aspect, film: filmData }) => (
+            lagen.map(({ naam, slot, fase, a, b, in: laagIn, vorm, eigen, aspect, film: filmData }, laagNr) => (
               <div
                 class="piek-laag"
                 data-laag={slot}
@@ -112,6 +112,12 @@ const rijen: Sleutelrij[] = plan.zinnen.map((zin) => ({
                     ) : null}
                     <source media="(max-width: 47.9375rem)" srcset={poster(naam, 'm').pad} />
                     {poster(naam, 'd').avif ? <source type="image/avif" srcset={poster(naam, 'd').avif} /> : null}
+                    {/* Alle vier de posters laden met het eerste scherm mee: lui
+                        laden gaf een lege, witte ster op het moment dat de ster
+                        opengaat (klacht eigenaar 19 nov: "een wit ster wat de
+                        afbeelding er niet erin toont"). De eerste ruimte krijgt
+                        de gewone voorrang, de andere drie een lage, zodat ze de
+                        hero en de eerste ruimte niet verdringen. */}
                     <img
                       class="piek-foto"
                       data-shot={naam}
@@ -119,7 +125,8 @@ const rijen: Sleutelrij[] = plan.zinnen.map((zin) => ({
                       width={poster(naam, 'd').breedte}
                       height={poster(naam, 'd').hoogte}
                       alt={alt(naam, locale)}
-                      loading="lazy"
+                      loading="eager"
+                      fetchpriority={laagNr === 0 ? 'auto' : 'low'}
                       decoding="async"
                       style={`--anker-d:${anker(naam, 'd')};--anker-m:${anker(naam, 'm')}`}
                     />

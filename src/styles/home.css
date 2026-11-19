@@ -116,6 +116,25 @@
   gap: 0.75rem;
 }
 
+/* De twee knoppen van het eerste scherm staan op een smal scherm in twee gelijke
+   kolommen, niet in een rij die vanzelf omklapt. Zonder deze regel bepaalde de
+   tekstbreedte of de rij één of twee regels hoog was, en omdat de afbeelding
+   erboven het veerelement is, sprong die 64 px op het moment dat de webletter
+   binnenkwam en meteen weer terug (klacht eigenaar 19 nov: "bibberende hero
+   afbeelding bij het start"). Een vaste twee-kolomsrij maakt de hoogte
+   onafhankelijk van de letter. */
+@media (max-width: 63.9375rem) {
+  .hero-eerste .hero-knoppen {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+  .hero-eerste .hero-knoppen .knop {
+    min-width: 0;
+    padding: 0 0.5rem;
+  }
+}
+
 /* ── Hero: het eerste scherm ── */
 
 .hero-eerste {
