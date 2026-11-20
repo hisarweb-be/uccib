@@ -48,16 +48,47 @@ const bezoek = teksten.diensten.find((d) => d.rol === 'bezoek');
 }
 
 <style>
+  /* Het witte blad van de pagina, met daarin één plaat in de taal van de
+     cartouche boven de vouw (slice 4a): papier 92 % tussen twee petrol
+     haarlijnen van 1 px, boven en onder. De lucht eromheen is het blad zelf, en
+     de onderste haarlijn is meteen de lijn waarop de piek opent: de sectie
+     eronder begint niet in het niets maar op een rand. De haarlijnen zijn eigen
+     achtergrondlagen en geen `border`, zodat ze de doos niet verschuiven. */
   .open-deur {
     --blad: max(var(--spacing-marge), calc((100% - var(--container-blad)) / 2));
+    position: relative;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     row-gap: 2rem;
     align-content: center;
     min-height: calc(100svh - var(--kop-hoogte));
     padding: 4rem var(--blad);
-    background: var(--color-papier);
+    background: var(--color-wit);
     color: var(--color-inkt);
+  }
+  .open-deur::before {
+    content: '';
+    position: absolute;
+    inset: 3rem var(--blad) 0;
+    background-color: var(--plaat);
+    background-image:
+      linear-gradient(var(--color-petrol-diep), var(--color-petrol-diep)),
+      linear-gradient(var(--color-petrol-diep), var(--color-petrol-diep));
+    background-repeat: no-repeat;
+    background-position:
+      top left,
+      bottom left;
+    background-size:
+      100% 1px,
+      100% 1px;
+    pointer-events: none;
+  }
+  /* De inhoud ligt op de plaat, niet eronder: de plaat is een achtergrondlaag. */
+  .deur-kop,
+  .deur-zin,
+  .deur-rozet,
+  .deur-bezoek {
+    position: relative;
   }
   .deur-kop {
     margin: 0;

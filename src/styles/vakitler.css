@@ -25,6 +25,31 @@
   border-top: 0;
 }
 
+/*
+ * De strook op de startpagina is een plaat in de taal van de cartouche boven de
+ * vouw (slice 4a): papier 92 % met een petrol haarline van 1 px op de bovenkant
+ * en op de onderkant. De haarlijnen zijn eigen achtergrondlagen en geen
+ * `border`: een rand zou de doos verschuiven en de plaat zou niet meer op
+ * dezelfde plek beginnen als de plaat erboven. De lucht tussen de platen is het
+ * witte blad van de pagina, dat de secties zelf niet meer beschilderen.
+ */
+.vakitler--band {
+  /* De plaat zelf: `--plaat` is papier 92 % en legt zich over het witte blad van
+     de pagina, net als bij de plaat van de dienstenindex. */
+  background-color: var(--plaat);
+  border-top: 0;
+  background-image:
+    linear-gradient(var(--color-petrol-diep), var(--color-petrol-diep)),
+    linear-gradient(var(--color-petrol-diep), var(--color-petrol-diep));
+  background-repeat: no-repeat;
+  background-position:
+    top left,
+    bottom left;
+  background-size:
+    100% 1px,
+    100% 1px;
+}
+
 .vakit-kop {
   max-width: 68rem;
 }
