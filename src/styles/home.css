@@ -145,21 +145,22 @@
   flex-direction: column;
   min-height: var(--podium-h);
   padding: 1.25rem var(--blad) 1.5rem;
-  /* De film ligt achter de tekst (z-index -1) maar boven het papier van de sectie. */
+  /* De film ligt achter de cartouche (z-index -2) maar boven het papier van de sectie. */
   isolation: isolate;
   overflow: clip;
 }
 
-/* ── Hero: de film (bijsturing eigenaar 19 nov, B1) ──
-   De film vult het hele eerste scherm. Tot 1024 px is hij bovenaan helder; vanaf de
-   eerste regel tekst ligt er een plaat papier onder de tekst die met een kort verloop
-   begint (`.hero-label::before`, geen filter). Vanaf 1024 px ligt er een verloop van
-   links achter de tekstkolom en een band onderaan achter het uniewoord. Gemeten: elke
-   tekst haalt AA op de donkerste plek van poster en film. */
+/* ── Hero: de film (bijsturing eigenaar 19 nov, B1; cartouche 20 nov, slice 3) ──
+   De film vult het hele eerste scherm en blijft rechts tot de rand scherp en open.
+   De tekst staat op een papierplaat (de cartouche) met een harde rand: tot 1024 px
+   een plaat onder de tekst met een haarline erboven, vanaf 1024 px een kolom links
+   met een haarline op de rechterrand. Geen enkel uitwaaierend verloop meer over de
+   foto. Gemeten: elke tekst haalt AA op de donkerste plek van poster en film. */
 .hero-film {
   position: absolute;
   inset: 0;
-  z-index: -1;
+  /* Twee lagen diep: de cartouche-plaat ligt tussen film en tekst (z-index -1). */
+  z-index: -2;
   background: var(--lijn);
 }
 .hero-film img,
@@ -198,21 +199,25 @@
   font-weight: var(--text-label--font-weight);
   color: var(--color-petrol-diep);
 }
-/* De plaat onder de tekst (tot 1024 px): z-index -1 legt hem tussen film en tekst. Papier
-   92 % zoals de tekstplaat van de piek (petrol-diep slechtst 4,86:1). */
+/* De plaat onder de tekst (tot 1024 px): z-index -1 legt hem tussen film (-2) en
+   tekst. Een harde bovenrand met een haarline van 1 px petrol in plaats van een
+   uitwaaierend verloop: het beeld boven blijft scherp tot de plaat begint.
+   Papier 92 % zoals de tekstplaat van de piek (petrol-diep slechtst 4,86:1).
+   De haarline staat als losse achtergrondlaag van 1 px zodat de entree-animatie
+   haar van links naar rechts kan openzetten (`background-size`). */
 .hero-label::before {
   content: '';
   position: absolute;
   z-index: -1;
-  top: -2.5rem;
+  top: -1.25rem;
   left: calc(-1 * var(--blad));
   right: calc(-1 * var(--blad));
   height: 100vmax;
-  background: linear-gradient(
-    to bottom,
-    color-mix(in srgb, var(--color-papier) 0%, transparent),
-    color-mix(in srgb, var(--color-papier) 92%, transparent) 2.5rem
-  );
+  background-color: var(--plaat);
+  background-image: linear-gradient(var(--color-petrol-diep), var(--color-petrol-diep));
+  background-repeat: no-repeat;
+  background-position: top left;
+  background-size: 100% 1px;
   pointer-events: none;
 }
 
@@ -393,29 +398,126 @@
   .hero-label::before {
     content: none;
   }
-  /* Breed: de film ligt open rechts; links een verloop papier achter de tekstkolom en
-     onderaan een band achter het uniewoord (dat breder is dan de kolom). */
-  .hero-film::after {
-    --band: calc(var(--unie-blok) + var(--onder));
+
+  /* Breed (cartouche, slice 3). De tekstkolom ligt op een papierplaat met een harde
+     rechterrand en daarop een haarline van 1 px petrol. De foto rechts blijft open en
+     scherp tot precies die rand. Onderaan een papierband voor het uniewoord, begrensd
+     door een haarline in plaats van een verloop van 3 rem. Twee pseudolagen op het
+     eerste scherm zelf: die liggen tussen film (-2) en tekst (0). */
+  .hero-eerste::before {
     content: '';
     position: absolute;
-    inset: 0;
-    background:
-      linear-gradient(
-        to top,
-        color-mix(in srgb, var(--color-papier) 92%, transparent) 0,
-        color-mix(in srgb, var(--color-papier) 92%, transparent) var(--band),
-        color-mix(in srgb, var(--color-papier) 0%, transparent) calc(var(--band) + 3rem)
-      ),
-      linear-gradient(
-        to right,
-        color-mix(in srgb, var(--color-papier) 92%, transparent) 0%,
-        color-mix(in srgb, var(--color-papier) 88%, transparent) 46%,
-        color-mix(in srgb, var(--color-papier) 0%, transparent) 70%
-      );
+    z-index: -1;
+    top: 0;
+    /* Tot boven de band van het uniewoord: die band loopt over de volle breedte door. */
+    bottom: calc(var(--onder) + var(--unie-blok));
+    left: 0;
+    /* Hetzelfde raster als de kop: kolom 1 tot 7 (dus de helft van het blad) plus de
+       bladmarge links. Rechts van deze rand staat vanaf 1440 px ruim 40 % open foto. */
+    width: min(52%, calc((100% - 2 * var(--blad)) / 2 + 1rem + var(--blad)));
+    /* De haarline is een eigen achtergrondlaag van 1 px, zodat de entree-animatie
+       alleen haar hoogte opentrekt (van boven naar beneden). */
+    background-color: var(--plaat);
+    background-image: linear-gradient(var(--color-petrol-diep), var(--color-petrol-diep));
+    background-repeat: no-repeat;
+    background-position: top right;
+    background-size: 1px 100%;
+    pointer-events: none;
+  }
+  .hero-eerste::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* De band waar het uniewoord in staat: de regel van het woord plus de staartruimte. */
+    height: calc(var(--onder) + var(--unie-blok) + 1px);
+    background-color: var(--plaat);
+    background-image: linear-gradient(var(--color-petrol-diep), var(--color-petrol-diep));
+    background-repeat: no-repeat;
+    background-position: top left;
+    background-size: 100% 1px;
+    pointer-events: none;
   }
   .hero-slot .hero-knoppen {
     max-width: none;
+  }
+}
+
+/* ── Hero: de entree (cartouche, slice 3) ──
+   Alleen met beweging aan: de cartouche komt op als een museumlabel dat wordt
+   neergelegd. Label, kop, intro en knoppen volgen elkaar met 60 ms, elk van
+   opacity 0 naar 1 en een halve rem omhoog; de petrol haarline trekt open. Zonder
+   beweging (en met `html.home-stil`) staat alles er direct: er is dan geen enkele
+   regel die iets onzichtbaar maakt.
+   `animation-fill-mode: backwards` en nooit `forwards`: na 600 ms valt elk element
+   terug op zijn eigen opacity, zodat `--weg` (het wegvloeien bij scroll) het blijft
+   overnemen. Geen filter, geen `will-change`, en alleen transform en opacity, dus
+   geen layoutverschuiving (CLS 0). */
+@keyframes hero-cartouche-komt {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes hero-haarlijn-h {
+  from {
+    background-size: 0% 1px;
+  }
+  to {
+    background-size: 100% 1px;
+  }
+}
+@keyframes hero-haarlijn-v {
+  from {
+    background-size: 1px 0%;
+  }
+  to {
+    background-size: 1px 100%;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html.beweging-aan:not(.home-stil) {
+    .hero-label,
+    .hero-kop,
+    .hero-intro,
+    .hero-eerste .hero-knoppen {
+      animation: hero-cartouche-komt 600ms var(--ease-uit) backwards;
+    }
+    .hero-label {
+      animation-delay: 0ms;
+    }
+    .hero-kop {
+      animation-delay: 60ms;
+    }
+    .hero-intro {
+      animation-delay: 120ms;
+    }
+    .hero-eerste .hero-knoppen {
+      animation-delay: 180ms;
+    }
+    /* De haarline boven de plaat (tot 1024 px) trekt van links naar rechts open. */
+    .hero-label::before {
+      animation: hero-haarlijn-h 600ms var(--ease-uit) 180ms backwards;
+    }
+  }
+  @media (min-width: 64rem) {
+    html.beweging-aan:not(.home-stil) {
+      /* Breed: de haarline op de rechterrand van de cartouche zakt van boven naar
+         beneden open; de haarline boven de uniewoordband loopt van links naar rechts. */
+      .hero-eerste::before {
+        animation: hero-haarlijn-v 600ms var(--ease-uit) 180ms backwards;
+      }
+      .hero-eerste::after {
+        animation: hero-haarlijn-h 600ms var(--ease-uit) 180ms backwards;
+      }
+    }
   }
 }
 
@@ -455,6 +557,12 @@
       min-height: 0;
     }
     .hero-weg {
+      opacity: var(--weg);
+    }
+    /* De cartouche-plaat is een hulplaag onder het eerste scherm: ze vloeit mee weg
+       met de film, zodat het verhaal op schoon papier staat en de ster het beeld draagt. */
+    .hero-eerste::before,
+    .hero-eerste::after {
       opacity: var(--weg);
     }
     .hero-unie-woord {
