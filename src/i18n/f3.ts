@@ -168,7 +168,7 @@ const TR: F3Teksten = {
     fout: 'Canlı vakitler alınamadı; son derlemedeki vakitler gösteriliyor.',
     stadTitelPatroon: '{stad} namaz vakitleri',
     stadLeadPatroon:
-      "{stad} için Fazilet takvimine göre günlük namaz vakitleri: imsak, güneş, öğle, ikindi, akşam ve yatsı.",
+      "{stad} için Fazilet takvimine göre günlük namaz vakitleri: İmsak, Sabah, Güneş, Öğle, İkindi, Akşam ve Yatsı.",
     stadBeschrijvingPatroon:
       '{stad} için bugünün ve önümüzdeki günlerin namaz vakitleri, Fazilet takvimine göre.',
     stedenKop: 'Diğer şehirler',
@@ -176,7 +176,7 @@ const TR: F3Teksten = {
   diensten: [
     {
       titel: 'Namaz Vakitleri',
-      tekst: 'Brüksel ve şubelerimiz için günlük vakitler: imsak, güneş, öğle, ikindi, akşam ve yatsı.',
+      tekst: 'Brüksel ve şubelerimiz için günlük vakitler: İmsak, Sabah, Güneş, Öğle, İkindi, Akşam ve Yatsı.',
       href: '/namaz-vakitleri',
     },
     {
@@ -353,7 +353,7 @@ const NL: F3Teksten = {
     fout: 'De verse tijden zijn niet opgehaald; de tijden van de laatste bouw staan er.',
     stadTitelPatroon: 'Gebedstijden {stad}',
     stadLeadPatroon:
-      'De gebedstijden in {stad} volgens de Fazilet-kalender: imsak, zonsopgang, middag, namiddag, avond en nacht.',
+      'De gebedstijden in {stad} volgens de Fazilet-kalender: Imsaak, Fadjr, Zonsopgang, Zoehr, Asr, Maghrib en Isjaa.',
     stadBeschrijvingPatroon:
       'De gebedstijden van vandaag en de komende dagen in {stad}, volgens de Fazilet-kalender.',
     stedenKop: 'Andere steden',
@@ -362,7 +362,7 @@ const NL: F3Teksten = {
     {
       titel: 'Gebedstijden',
       tekst:
-        'De dagelijkse tijden voor Brussel en onze afdelingen: imsak, zonsopgang, middag, namiddag, avond en nacht.',
+        'De dagelijkse tijden voor Brussel en onze afdelingen: Imsaak, Fadjr, Zonsopgang, Zoehr, Asr, Maghrib en Isjaa.',
       href: '/namaz-vakitleri',
     },
     {
@@ -542,7 +542,7 @@ const FR: F3Teksten = {
     fout: "Les heures à jour n'ont pas pu être chargées ; celles du dernier build restent affichées.",
     stadTitelPatroon: 'Heures de prière à {stad}',
     stadLeadPatroon:
-      'Les heures de prière à {stad} selon le calendrier Fazilet : imsak, lever du soleil, midi, après-midi, soir et nuit.',
+      'Les heures de prière à {stad} selon le calendrier Fazilet : Imsak, Fajr, Lever du soleil, Dhuhr, Asr, Maghrib et Isha.',
     stadBeschrijvingPatroon:
       "Les heures de prière d'aujourd'hui et des prochains jours à {stad}, selon le calendrier Fazilet.",
     stedenKop: 'Autres villes',
@@ -551,7 +551,7 @@ const FR: F3Teksten = {
     {
       titel: 'Heures de prière',
       tekst:
-        'Les horaires quotidiens pour Bruxelles et nos sections : imsak, lever du soleil, midi, après-midi, soir et nuit.',
+        'Les horaires quotidiens pour Bruxelles et nos sections : Imsak, Fajr, Lever du soleil, Dhuhr, Asr, Maghrib et Isha.',
       href: '/namaz-vakitleri',
     },
     {

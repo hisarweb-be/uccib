@@ -95,7 +95,7 @@ const lees = async (pad) => {
 };
 
 /**
- * De zes tijden van vandaag, uit de rij boven de weektabel. Die rij is wat de
+ * De zeven tijden van vandaag, uit de rij boven de weektabel. Die rij is wat de
  * lezer als eerste ziet.
  *
  * Waarom niet "deze tijden moeten verschillen van een andere stad": dat is geen
@@ -108,7 +108,7 @@ const tijdenVan = (html) => {
   const cellen = [...html.matchAll(/class="vakit-cel-tijd"[^>]*>\s*(\d{2}:\d{2})\s*</g)].map(
     (m) => m[1],
   );
-  return cellen.slice(0, 6);
+  return cellen.slice(0, 7);
 };
 
 /**
@@ -120,7 +120,7 @@ const vakitBestand = JSON.parse(
   await readFile(new URL('../src/data/vakitler.json', import.meta.url), 'utf8'),
 );
 const TIJDZONE = vakitBestand.tijdstreep ?? 'Europe/Brussels';
-const TIJDEN = ['imsak', 'gunes', 'ogle', 'ikindi', 'aksam', 'yatsi'];
+const TIJDEN = ['imsak', 'sabah', 'gunes', 'ogle', 'ikindi', 'aksam', 'yatsi'];
 
 const vandaag = new Intl.DateTimeFormat('en-CA', {
   timeZone: TIJDZONE,
@@ -214,9 +214,9 @@ for (const stad of slugs.filter((s) => s !== 'brussel')) {
 
     const tijden = tijdenVan(html);
     const verwachteTijden = tijdenVoor(stad);
-    if (tijden.length !== 6 || tijden.some((t) => !/^\d{2}:\d{2}$/.test(t))) {
-      fouten.push(`${label}: geen zes echte tijden in de pagina (${tijden.join(' ') || 'leeg'})`);
-    } else if (verwachteTijden.length === 6 && tijden.join(' ') !== verwachteTijden.join(' ')) {
+    if (tijden.length !== 7 || tijden.some((t) => !/^\d{2}:\d{2}$/.test(t))) {
+      fouten.push(`${label}: geen zeven echte tijden in de pagina (${tijden.join(' ') || 'leeg'})`);
+    } else if (verwachteTijden.length === 7 && tijden.join(' ') !== verwachteTijden.join(' ')) {
       fouten.push(
         `${label}: de pagina toont ${tijden.join(' ')} en het stadseigen bestand zegt ${verwachteTijden.join(' ')}`,
       );

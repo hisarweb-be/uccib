@@ -1,7 +1,7 @@
 ---
 title: Heures de prière
 h1: Heures de prière
-description: "Les heures de prière à Bruxelles par jour : imsak, lever du soleil, midi, après-midi, soir et nuit."
+description: "Les heures de prière à Bruxelles par jour : Imsak, Fajr, Lever du soleil, Dhuhr, Asr, Maghrib et Isha."
 intro: ""
 order: 9
 ---
