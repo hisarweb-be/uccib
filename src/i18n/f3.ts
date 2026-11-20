@@ -48,6 +48,12 @@ export interface F3Teksten {
   dienstenAlle: string;
   /** De link onder een dienst op /hizmetlerimiz/: niet de titel nog eens. */
   dienstenMeer: string;
+  /**
+   * Het korte statuswoord naast een dienst waarvan de pagina nog uit staat.
+   * Eén woord, geen belofte en geen tijd: de regel vertelt wat de dienst is, dit
+   * merk zegt eerlijk dat de eigen pagina nog niet open is.
+   */
+  dienstenBinnenkort: string;
   diensten: Dienst[];
   /** De gebedstijden: kop, labels en de korte teksten op de strook en het blad. */
   vakitler: {
@@ -146,6 +152,7 @@ const TR: F3Teksten = {
     'Elinizdeki her hizmetin arkasında bir şube, bir gönüllü ve bir kapı var.',
   dienstenAlle: 'Tüm hizmetler',
   dienstenMeer: 'Daha fazla',
+  dienstenBinnenkort: 'Yakında',
   vakitler: {
     kop: 'Namaz vakitleri',
     lead: 'Brüksel ve Belçika şehirleri için Fazilet takvimine göre günlük vakitler.',
@@ -330,6 +337,7 @@ const NL: F3Teksten = {
     'Achter elke dienst staat een afdeling, een vrijwilliger en een deur die openstaat.',
   dienstenAlle: 'Alle diensten',
   dienstenMeer: 'Meer info',
+  dienstenBinnenkort: 'Binnenkort',
   vakitler: {
     kop: 'Gebedstijden',
     lead: 'De gebedstijden voor Brussel en de Belgische steden, volgens de Fazilet-kalender.',
@@ -518,6 +526,7 @@ const FR: F3Teksten = {
     'Derrière chaque service, il y a une section, un bénévole et une porte ouverte.',
   dienstenAlle: 'Tous les services',
   dienstenMeer: 'En savoir plus',
+  dienstenBinnenkort: 'Bientôt',
   vakitler: {
     kop: 'Heures de prière',
     lead: 'Les heures de prière pour Bruxelles et les villes belges, selon le calendrier Fazilet.',

@@ -8,7 +8,9 @@
  *
  * Doel van een regel (CONTRACT 4.2): de eigen pagina in de eigen taal. Staat die
  * pagina uit, dan linkt de regel toch naar haar eigen adres (de binnenkort-pagina,
- * status 200) en is de uitleg de leeg-titel uit f3, nooit verzonnen inhoud. Zo'n
+ * status 200, met de eerlijke uitleg uit f3) en blijft de uitleg naast de titel
+ * de gewone diensttekst: wat de dienst is, niet wat er nog niet is. Het merkje
+ * `dienstenBinnenkort` zegt in één woord dat de eigen pagina nog dicht is. Zo'n
  * regel draagt `data-binnenkort="<slug>"`: de linkkeuring laat alleen dan een link
  * naar die ene concept-slug toe. Bağış gaat naar `#steun` op deze pagina.
  *
@@ -30,7 +32,7 @@
 import Rozet from '../Rozet.astro';
 import { type Locale } from '../../i18n';
 import { pagePath, isSlug } from '../../i18n/config';
-import { f3, LEEG_SLUGS, type LeegSlug } from '../../i18n/f3';
+import { f3 } from '../../i18n/f3';
 import { conceptSlugs } from '../../lib/actief';
 
 interface Props {
@@ -43,15 +45,17 @@ const uit = new Set<string>(conceptSlugs());
 
 const regels = teksten.diensten.map((dienst) => {
   const slug = dienst.href.replace(/^\//, '').split(/[/#?]/)[0] ?? '';
-  if (slug === 'bagislar') return { ...dienst, doel: '#steun', binnenkort: undefined, uitleg: dienst.tekst, leeg: false };
+  if (slug === 'bagislar') return { ...dienst, doel: '#steun', binnenkort: undefined, uitleg: dienst.tekst, dicht: false };
   if (!isSlug(slug)) throw new Error(`DienstenIndex: onbekend doel ${dienst.href} voor "${dienst.titel}".`);
-  const leeg = uit.has(slug) && (LEEG_SLUGS as readonly string[]).includes(slug);
+  /* Een pagina die uit staat: de regel houdt haar eigen diensttekst en krijgt
+     het merkje "binnenkort" (zie de kop hierboven). */
+  const dicht = uit.has(slug);
   return {
     ...dienst,
     doel: pagePath(locale, slug),
-    binnenkort: uit.has(slug) ? slug : undefined,
-    uitleg: leeg ? teksten.leeg[slug as LeegSlug].titel : dienst.tekst,
-    leeg,
+    binnenkort: dicht ? slug : undefined,
+    uitleg: dienst.tekst,
+    dicht,
   };
 });
 ---
@@ -74,7 +78,8 @@ const regels = teksten.diensten.map((dienst) => {
           <li class="index-regel">
             <a class="index-link" href={regel.doel} data-binnenkort={regel.binnenkort}>
               <span class="index-titel">{regel.titel}</span>
-              <span class:list={['index-uitleg', { 'is-leeg': regel.leeg }]}>{regel.uitleg}</span>
+              <span class="index-uitleg">{regel.uitleg}</span>
+              {regel.dicht ? <span class="index-merk">{teksten.dienstenBinnenkort}</span> : null}
               <svg class="index-pijl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true" focusable="false">
                 <path d="M3 12h16M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
@@ -229,11 +234,18 @@ const regels = teksten.diensten.map((dienst) => {
     line-height: 1.5;
     color: var(--color-inkt);
   }
-  .index-uitleg.is-leeg {
+  /* Het merkje bij een dienst waarvan de eigen pagina nog dicht is: één woord in
+     de kleine letter, zacht van kleur, op dezelfde regel als de uitleg eronder.
+     Het zegt wat er is, niet wat er nog komt. */
+  .index-merk {
+    grid-column: 1 / -1;
+    justify-self: start;
+    font-family: var(--font-tekst);
     font-size: var(--text-label);
     line-height: var(--text-label--line-height);
     letter-spacing: var(--text-label--letter-spacing);
     font-weight: var(--text-label--font-weight);
+    color: var(--inkt-zacht);
   }
   .index-pijl {
     grid-column: 2;
@@ -324,8 +336,14 @@ const regels = teksten.diensten.map((dienst) => {
       grid-column: 1 / 7;
     }
     .index-uitleg {
-      grid-column: 7 / 11;
+      grid-column: 7 / 10;
       grid-row: 1;
+    }
+    .index-merk {
+      grid-column: 10;
+      grid-row: 1;
+      align-self: center;
+      justify-self: end;
     }
     .index-pijl {
       grid-column: 11;
