@@ -1,7 +1,7 @@
 ---
 title: Namaz Vakitleri
 h1: Namaz Vakitleri
-description: "Brüksel için günlük namaz vakitleri: imsak, güneş, öğle, ikindi, akşam ve yatsı."
+description: "Brüksel için günlük namaz vakitleri: İmsak, Sabah, Güneş, Öğle, İkindi, Akşam ve Yatsı."
 intro: ""
 order: 9
 active: true

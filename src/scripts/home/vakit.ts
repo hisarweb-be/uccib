@@ -22,17 +22,17 @@
  * scherpte toe.
  */
 
-/** De zes tijden in de volgorde van de dag. */
-const TIJDEN = ['imsak', 'gunes', 'ogle', 'ikindi', 'aksam', 'yatsi'] as const;
+/** De zeven tijden in de volgorde van de dag. */
+const TIJDEN = ['imsak', 'sabah', 'gunes', 'ogle', 'ikindi', 'aksam', 'yatsi'] as const;
 
 type Dag = { datum: string; tijden: Record<string, string> };
 type Antwoord = { success?: boolean; stad?: string; dagen?: Dag[] };
 
-/** Namen per taal, dezelfde als in `src/lib/vakitler.ts`. */
+/** Namen per taal, dezelfde als in `src/lib/vakitler.ts` (de namen van de bron). */
 const NAMEN: Record<string, Record<string, string>> = {
-  tr: { imsak: 'İmsak', gunes: 'Güneş', ogle: 'Öğle', ikindi: 'İkindi', aksam: 'Akşam', yatsi: 'Yatsı' },
-  nl: { imsak: 'Imsak', gunes: 'Zonsopgang', ogle: 'Middag', ikindi: 'Namiddag', aksam: 'Avond', yatsi: 'Nacht' },
-  fr: { imsak: 'Imsak', gunes: 'Lever du soleil', ogle: 'Midi', ikindi: 'Après-midi', aksam: 'Soir', yatsi: 'Nuit' },
+  tr: { imsak: 'İmsak', sabah: 'Sabah', gunes: 'Güneş', ogle: 'Öğle', ikindi: 'İkindi', aksam: 'Akşam', yatsi: 'Yatsı' },
+  nl: { imsak: 'Imsaak', sabah: 'Fadjr', gunes: 'Zonsopgang', ogle: 'Zoehr', ikindi: 'Asr', aksam: 'Maghrib', yatsi: 'Isjaa' },
+  fr: { imsak: 'Imsak', sabah: 'Fajr', gunes: 'Lever du soleil', ogle: 'Dhuhr', ikindi: 'Asr', aksam: 'Maghrib', yatsi: 'Isha' },
 };
 
 const GEKOZEN_STAD = 'uccib:vakit:stad';

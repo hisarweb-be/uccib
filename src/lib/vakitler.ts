@@ -1,6 +1,6 @@
 /**
  * De gebedstijden zoals de site ze leest: het vaste bestand uit de bouw
- * (`src/data/vakitler.json`) en de namen van de zes tijden in drie talen.
+ * (`src/data/vakitler.json`) en de namen van de zeven tijden in drie talen.
  *
  * Waarom een eigen lezer en niet de parser uit `functions/_lib`: die parser leest
  * HTML van de bron en hoort bij het ophalen, niet bij het tekenen. Dit bestand
@@ -17,11 +17,14 @@
  */
 import gegevens from '../data/vakitler.json';
 
-/** De zes tijden van de dag, in de volgorde waarin ze voorkomen. */
-export const TIJDEN = ['imsak', 'gunes', 'ogle', 'ikindi', 'aksam', 'yatsi'] as const;
+/** De zeven tijden van de dag, in de volgorde waarin ze voorkomen. */
+export const TIJDEN = ['imsak', 'sabah', 'gunes', 'ogle', 'ikindi', 'aksam', 'yatsi'] as const;
 export type TijdSleutel = (typeof TIJDEN)[number];
 
-/** De vijf gebeden; zonsopgang is een tijd om te stoppen met eten, geen gebed. */
+/**
+ * De vijf gebeden. Imsak (het begin van de vasten) en zonsopgang (het einde
+ * ervan) horen bij de dag maar zijn geen gebed, dus die krijgen geen merkje.
+ */
 export const GEBEDEN = ['sabah', 'ogle', 'ikindi', 'aksam', 'yatsi'] as const;
 
 export type Dag = { datum: string; tijden: Record<string, string> };
@@ -129,10 +132,15 @@ export function klok(iso: string, metSeconden = false): string {
   }).format(moment);
 }
 
-/** Namen van de zes tijden per taal. */
+/**
+ * Namen van de zeven tijden per taal, zoals de bron ze noemt
+ * (namaz-vakitleri.fazilettakvimi.com). De Nederlandse namen zijn letterlijk die
+ * van de bronpagina: Imsaak, Fadjr, Zonsopgang, Zoehr, Asr, Maghrib, Isjaa.
+ */
 export const NAMEN: Record<'tr' | 'nl' | 'fr', Record<TijdSleutel, string>> = {
   tr: {
     imsak: 'İmsak',
+    sabah: 'Sabah',
     gunes: 'Güneş',
     ogle: 'Öğle',
     ikindi: 'İkindi',
@@ -140,20 +148,22 @@ export const NAMEN: Record<'tr' | 'nl' | 'fr', Record<TijdSleutel, string>> = {
     yatsi: 'Yatsı',
   },
   nl: {
-    imsak: 'Imsak',
+    imsak: 'Imsaak',
+    sabah: 'Fadjr',
     gunes: 'Zonsopgang',
-    ogle: 'Middag',
-    ikindi: 'Namiddag',
-    aksam: 'Avond',
-    yatsi: 'Nacht',
+    ogle: 'Zoehr',
+    ikindi: 'Asr',
+    aksam: 'Maghrib',
+    yatsi: 'Isjaa',
   },
   fr: {
     imsak: 'Imsak',
+    sabah: 'Fajr',
     gunes: 'Lever du soleil',
-    ogle: 'Midi',
-    ikindi: 'Après-midi',
-    aksam: 'Soir',
-    yatsi: 'Nuit',
+    ogle: 'Dhuhr',
+    ikindi: 'Asr',
+    aksam: 'Maghrib',
+    yatsi: 'Isha',
   },
 };
 
