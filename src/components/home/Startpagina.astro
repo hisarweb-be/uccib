@@ -82,15 +82,20 @@ const ngo = {
   volleBreedte
 >
   <HeroUnie locale={locale} h1={h1} intro={entry.data.intro} />
-  <DienstenIndex locale={locale} />
-  <Vakitler locale={locale} vorm="band" />
-  <CmsBlokOfNiets id="haberler" kop={t.pages.haberler.h1} items={nieuws} />
-  <OpenDeur locale={locale} />
-  <PiekRuimtes locale={locale} />
 
-  <div class="na-piek">
-    <SteunKeuze locale={locale} />
-    <AdresBlad locale={locale} />
+  {/* Alles onder de hero leest als één blad: de ruglijn, de haarlijnen en de
+      wisselende maat staan in `home.css` op deze reeks, niet op de losse secties. */}
+  <div class="blad-reeks">
+    <DienstenIndex locale={locale} />
+    <Vakitler locale={locale} vorm="band" />
+    <CmsBlokOfNiets id="haberler" kop={t.pages.haberler.h1} items={nieuws} />
+    <OpenDeur locale={locale} />
+    <PiekRuimtes locale={locale} />
+
+    <div class="na-piek">
+      <SteunKeuze locale={locale} />
+      <AdresBlad locale={locale} />
+    </div>
   </div>
 
   <script type="application/ld+json" set:html={JSON.stringify(ngo)} />

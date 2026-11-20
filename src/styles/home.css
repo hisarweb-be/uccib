@@ -13,6 +13,8 @@
  * letters en maten komen uit `tokens.css`.
  */
 
+/* `.blad-reeks` in de opmaak is alleen een haak voor de regels verderop; een laag
+   tussen de hero en de secties zou de gemeten marges verschuiven. */
 .hero-unie,
 .piek-ruimtes {
   --kop: var(--kop-echt, calc(var(--kop-hoogte) + 1px));
@@ -1252,4 +1254,117 @@
     padding-top: 1rem;
     padding-bottom: 1rem;
   }
+}
+
+/* ══ Het blad onder de hero: één rug, wisselende maat, harde randen ══
+
+   Tot hier waren `diensten-index`, `vakitler`, `open-deur`, `steun` en het adres
+   zes platte vlakken onder elkaar, elk met een eigen marge en een eigen kleurwissel.
+   Ze lezen nu als één blad van dezelfde drukker als de hero en de piek:
+
+   1. de rug: één petrol haarlijn van 1 px op de rasterlijn, doorlopend van de
+      dienstenindex tot het adresblad, ook over de secties die het papier
+      verbergen (de platen en het podium van de piek liggen eroverheen).
+      Ze staat als eigen achtergrondlaag, nooit als `border`, zodat niets verschuift;
+   2. de maat: de as waar de inhoud begint verschilt per sectie, net als op een
+      gedrukt blad waar een plaat, een tabel en een noot niet op één lijn staan;
+   3. de randen: waar twee secties van achtergrond verschillen, is de grens een
+      haarline of een harde rand, nooit een verloop en nooit een sluier over tekst
+      (de vlakken zelf zijn dekten al: `--plaat` op wit, papier op papier);
+   4. de adem: de ruimte tussen de secties volgt het gewicht. Na de piek het ruimst,
+      tussen de gebedstijden en de open deur het kleinst.
+
+   Alles met de bestaande tokens. Geen nieuwe kleur, geen schaduw, geen radius. */
+.blad-reeks {
+  --rug-blad: max(var(--spacing-marge), calc((100% - var(--container-blad)) / 2));
+  /* De rasterlijn van de pagina: 12 kolommen van 1,5rem met 11 tussenruimtes,
+     dezelfde telling als de plaat van de dienstenindex en de groepen van de steun. */
+  --raster-kolom: calc((100% - 11 * 1.5rem) / 12 + 1.5rem);
+  /* De rug staat niet op de bladrand maar één kolom naar binnen, waar de plaat van
+     de dienstenindex begint: de haarlijnen van die plaat en die van de steun
+     liggen dan op dezelfde as. */
+  --rug-x: calc(var(--rug-blad) + var(--raster-kolom) - 1px);
+  /* De rug loopt over alles heen, ook over de platen en het podium van de piek;
+     de inhoud staat eronder nog steeds bovenop (z-index 1 bij de plaatdragers). */
+  --rug-dek: 1;
+  position: relative;
+}
+
+/* ── De rug ── */
+.blad-reeks::before {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  left: var(--rug-x);
+  width: 1px;
+  background: var(--color-petrol-diep);
+  opacity: 0.55;
+  pointer-events: none;
+}
+@media (max-width: 63.9375rem) {
+  /* Op één kolom is er geen raster om op te staan; daar valt de rug samen met de
+     bladrand en houdt ze alleen de maat van de pagina bij elkaar. */
+  .blad-reeks {
+    --rug-x: calc(50% - var(--container-blad) / 2);
+  }
+  .blad-reeks::before {
+    opacity: 0.35;
+  }
+}
+
+/* ── De maat: de as waar de inhoud begint ──
+   De kop van de dienstenindex blijft op de bladrand (dat is de eerste indruk na de
+   hero), de tabel van de gebedstijden begint vier kolommen naar binnen, de open
+   deur twee, de steun vijf en het adresblad één. Zo verspringt de as bij elke
+   sectie in plaats van zeven keer op dezelfde lijn te staan. */
+.blad-reeks .open-deur::before {
+  inset: 3rem calc(var(--blad) + 2 * var(--raster-kolom)) 0 var(--blad);
+}
+.blad-reeks .open-deur .deur-kop,
+.blad-reeks .open-deur .deur-zin,
+.blad-reeks .open-deur .deur-bezoek {
+  margin-inline-start: calc(2 * var(--raster-kolom));
+}
+
+/* De kop van de dienstenindex blijft op de bladrand en houdt de volle breedte van
+   het blad; dat is de eerste adem na de hero. De lijst eronder begint één kolom
+   naar binnen via de eigen regel van het onderdeel, zodat de rug in de lege marge
+   tussen kop en regels valt en niet door de titel snijdt. */
+
+/* ── De adem: bewust gezet, niet overal dezelfde `padding` ── */
+.blad-reeks .diensten-index {
+  padding: 5rem var(--blad) 6rem;
+}
+.blad-reeks .vakitler--band {
+  /* De kleinste sprong van het blad: deze strook hoort bij de index erboven, als
+     de noot onder een tabel. */
+  padding: 4rem var(--blad) 2rem;
+  border-top: 0;
+  /* De eerste harde rand van de reeks: de plaat opent met een lijn en niet met een
+     kleurverloop. Ze ligt op de rasterlijn en is twee pixels, zodat ze leest als
+     een ingestoken plaat en niet als een gewone scheiding. */
+  background-image:
+    linear-gradient(var(--color-petrol-diep), var(--color-petrol-diep)),
+    linear-gradient(var(--color-petrol-diep), var(--color-petrol-diep)),
+    linear-gradient(var(--color-petrol-diep), var(--color-petrol-diep));
+  background-repeat: no-repeat;
+  background-position:
+    top left,
+    bottom left,
+    top var(--rug-x);
+  background-size:
+    100% 1px,
+    100% 1px,
+    2px 100%;
+}
+.blad-reeks .open-deur {
+  padding: 2.5rem var(--blad) 6rem;
+}
+.blad-reeks .na-piek .steun {
+  padding: 6rem var(--blad) 4rem;
+}
+.blad-reeks .na-piek .adresblad {
+  padding: 4rem var(--blad) 5.5rem;
 }
