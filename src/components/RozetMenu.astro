@@ -7,7 +7,11 @@
  *
  * Met JavaScript is dit een modale `dialog` (focus gevangen, Escape sluit, focus
  * terug naar de knop; dat doet de browser zelf). Zonder JavaScript staat de
- * dialog open als gewone lijst onder de kopbalk: alles blijft bereikbaar.
+ * dialog open, maar is het blad een dichte vouw (`details`): één regel met de
+ * vouwknop onder de kopbalk, en de acht bestemmingen pas na een tik. Zo eet het
+ * menu de eerste schermhoogte niet op en blijft alles met één tik bereikbaar;
+ * niets is verborgen of weggeklikt. Met JavaScript zet het script de vouw open,
+ * want daar doet de modale dialog zelf het openen en sluiten.
  * De structuur `header nav ul a` en `a.donate` blijft (verify-mobiel).
  */
 import { SITE } from '../data/site';
@@ -53,7 +57,9 @@ const punten = PUNTEN.map((key) => {
 ---
 
 <dialog id="rozetmenu" class="rozetmenu" aria-label={t.navLabel} open>
-  <div class="blad">
+  <details class="vouw">
+    <summary class="vouwknop">{teksten.rozetMenuOpen}</summary>
+    <div class="blad">
     <div class="blad-kop">
       <Rozet stand="vlecht" maat={56} class="blad-rozet" />
       <button type="button" class="sluit" data-menu-sluit>{teksten.rozetMenuSluit}</button>
@@ -88,6 +94,7 @@ const punten = PUNTEN.map((key) => {
       <a href={`mailto:${SITE.email}`}><span class="sr-only">{t.footer.email}: </span>{SITE.email}</a>
     </p>
   </div>
+  </details>
 </dialog>
 
 <script>
@@ -103,6 +110,10 @@ const punten = PUNTEN.map((key) => {
     // Het sluiten bij het laden geeft ook een `close`-gebeurtenis (asynchroon).
     // Zonder deze vlag zou die de focus op de knop zetten op elke pagina.
     let geopend = false;
+    // De vouw staat zonder JavaScript dicht; hier doet de modale dialog zelf het
+    // openen en sluiten, dus de vouw gaat altijd open (en blijft dat).
+    const vouw = menu.querySelector<HTMLDetailsElement>('details');
+    if (vouw) vouw.open = true;
     menu.close();
     const wortel = document.documentElement;
     knop.addEventListener('click', () => {
@@ -154,6 +165,63 @@ const punten = PUNTEN.map((key) => {
   /* Papier dekkend, geen donkere sluier. */
   .rozetmenu::backdrop {
     background: transparent;
+  }
+
+  /*
+    Zonder JavaScript is het blad een dichte vouw: alleen deze regel staat onder
+    de kopbalk. Hij is even hoog als een knop (44 px), heeft geen driehoekje en
+    doet met een tik het blad open. Met JavaScript verbergt de modale dialog zelf
+    alles tot het openen; dan is er geen vouwknop nodig.
+  */
+  .vouwknop {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    max-width: var(--container-blad);
+    min-height: 44px;
+    margin-inline: auto;
+    padding: 0 var(--spacing-marge);
+    color: var(--color-inkt);
+    font: inherit;
+    font-size: var(--text-klok);
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .vouwknop::-webkit-details-marker {
+    display: none;
+  }
+
+  /* Een eigen pijltje dat met de vouw meedraait; geen driehoekje van de browser. */
+  .vouwknop::after {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-inline-start: 0.25rem;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: translateY(-0.15rem) rotate(45deg);
+  }
+
+  .vouw[open] > .vouwknop::after {
+    transform: translateY(0.15rem) rotate(-135deg);
+  }
+
+  .vouwknop:focus-visible {
+    outline: 3px solid var(--color-petrol-diep);
+    outline-offset: -3px;
+  }
+
+  @media (hover: hover) {
+    .vouwknop:hover {
+      color: var(--color-petrol-diep);
+    }
+  }
+
+  :global(html.js-aan) .vouwknop {
+    display: none;
   }
 
   .blad {
