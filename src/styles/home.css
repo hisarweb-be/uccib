@@ -843,9 +843,20 @@
 .piek-podium {
   padding: 4rem var(--blad);
 }
+/* De kop van de piek is een cartouche: een wit blad op het papier van de sectie met een
+   petrol haarline van 1 px op de bovenrand, als eigen achtergrondlaag en niet als border,
+   zodat hij dezelfde harde rand draagt als de plaat onder de hero en de steunvraag. In de
+   bewegingstoestand schuift en vervaagt alleen zijn positie; de plaat reist mee. */
 .piek-kop {
   margin: 0;
   max-width: 20ch;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-vak);
+  background-color: var(--color-wit);
+  background-image: linear-gradient(var(--color-petrol-diep), var(--color-petrol-diep));
+  background-repeat: no-repeat;
+  background-position: top left;
+  background-size: 100% 1px;
 }
 .piek-stil {
   margin-top: 2.5rem;
