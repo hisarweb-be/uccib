@@ -107,12 +107,19 @@ const whatsapp = gevuld(SITE.whatsapp) ? `https://wa.me/${SITE.whatsapp.replace(
 </section>
 
 <style>
+  /* Contact is het rustige blad na de steunplaat (slice 4b): hetzelfde papier, geen
+     plaat, geen eigen vlak. Alleen de afsluitende haarline onderaan, in dezelfde
+     1 px petrol-diep als de haarline waarmee de hero opent, zodat de pagina van
+     boven naar beneden gesloten is. Als achtergrondlaag, nooit als border. */
   .adresblad {
     --blad: max(var(--spacing-marge), calc((100% - var(--container-blad)) / 2));
     padding: 5rem var(--blad) 5rem;
-    background: var(--color-papier);
+    background-color: var(--color-papier);
+    background-image: linear-gradient(var(--color-petrol-diep), var(--color-petrol-diep));
+    background-repeat: no-repeat;
+    background-position: bottom left;
+    background-size: 100% 1px;
     color: var(--color-inkt);
-    border-top: 1px solid var(--lijn);
   }
   .blad-merk {
     display: inline-flex;
