@@ -865,9 +865,74 @@
   margin-top: 2.5rem;
   max-width: calc(100% - 4rem);
 }
+/* De stilstand van de piek is geen rij gelijke kaarten. De drie sleutelbeelden wisselen van
+   kant en van hoogte, en de zin staat op een plaat met een petrol haarline: dezelfde museale
+   taal als de bewegende kop, maar met ritme in plaats van herhaling. Alleen binnen .piek-stil,
+   want de hero gebruikt dezelfde sleutelbeelden met zijn eigen maat. */
+.piek-stil .piek-sleutels {
+  display: grid;
+  gap: 4rem;
+  max-width: 72rem;
+}
+.piek-stil .piek-sleutels .sleutelrij {
+  display: grid;
+  gap: 1.25rem;
+}
+.piek-stil .piek-sleutels .sleutel-tekst {
+  width: min(100%, 26rem);
+  max-width: 34rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius-vak);
+  background-color: var(--color-wit);
+  background-image: linear-gradient(var(--color-petrol-diep), var(--color-petrol-diep));
+  background-repeat: no-repeat;
+  background-position: top left;
+  background-size: 100% 1px;
+}
+/* Op de telefoon blijft het beeld volle breedte, maar de rijhoogtes wisselen wel: het
+   tweede beeld staat breder dan het eerste en het derde, zodat ook hier geen drie
+   dezelfde lappen onder elkaar staan. */
+.piek-stil .piek-sleutels .sleutelrij:nth-child(2) .sleutel-foto img {
+  aspect-ratio: 16 / 9;
+}
+.piek-stil .piek-sleutels .sleutelrij:nth-child(3) .sleutel-foto img {
+  aspect-ratio: 1 / 1;
+}
 @media (min-width: 48rem) {
-  .piek-sleutels {
-    max-width: 60rem;
+  .piek-stil .piek-sleutels .sleutelrij {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 2.5rem;
+    align-items: end;
+  }
+  .piek-stil .piek-sleutels .sleutel-foto,
+  .piek-stil .piek-sleutels .sleutel-tekst {
+    grid-row: 1;
+  }
+  /* Oneven: beeld links breed, plaat rechts. */
+  .piek-stil .piek-sleutels .sleutel-foto {
+    grid-column: 1 / 8;
+  }
+  .piek-stil .piek-sleutels .sleutel-tekst {
+    grid-column: 8 / 13;
+    width: auto;
+    margin-left: 0;
+  }
+  /* Even: gespiegeld, met de plaat smaller zodat de as verspringt. */
+  .piek-stil .piek-sleutels .sleutelrij:nth-child(even) .sleutel-foto {
+    grid-column: 6 / 13;
+  }
+  .piek-stil .piek-sleutels .sleutelrij:nth-child(even) .sleutel-tekst {
+    grid-column: 1 / 6;
+  }
+  /* Elke rij zijn eigen hoogte: geen drie dezelfde lappen. */
+  .piek-stil .piek-sleutels .sleutelrij:nth-child(3n + 1) .sleutel-foto img {
+    aspect-ratio: 4 / 3;
+  }
+  .piek-stil .piek-sleutels .sleutelrij:nth-child(3n + 2) .sleutel-foto img {
+    aspect-ratio: 21 / 9;
+  }
+  .piek-stil .piek-sleutels .sleutelrij:nth-child(3n + 3) .sleutel-foto img {
+    aspect-ratio: 3 / 2;
   }
 }
 
