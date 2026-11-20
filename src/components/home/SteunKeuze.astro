@@ -158,12 +158,19 @@ const naam = `steun-${locale}`;
 </script>
 
 <style>
+  /* De steunplaat (slice 4b): dezelfde museale taal als de cartouche van de hero.
+     Papier `--plaat` met een harde bovenrand, en die rand is een haarline van 1 px
+     petrol-diep als eigen achtergrondlaag, nooit als border. Hier wordt iets
+     gevraagd, dus de sectie is een plaat; het contact eronder blijft een rustig blad. */
   .steun {
     --blad: max(var(--spacing-marge), calc((100% - var(--container-blad)) / 2));
     padding: 5rem var(--blad) 4rem;
-    background: var(--color-papier);
+    background-color: var(--plaat);
+    background-image: linear-gradient(var(--color-petrol-diep), var(--color-petrol-diep));
+    background-repeat: no-repeat;
+    background-position: top left;
+    background-size: 100% 1px;
     color: var(--color-inkt);
-    border-top: 1px solid var(--lijn);
   }
   .steun-groep {
     min-width: 0;
@@ -214,9 +221,12 @@ const naam = `steun-${locale}`;
     grid-area: 1 / 1;
     white-space: nowrap;
   }
+  /* De bedragrij verdeelt zichzelf: op een breed scherm staan de vijf bedragen op één
+     rij, op een telefoon in twee kolommen, zodat "€ 1.000" nergens tegen de rand van
+     zijn vak loopt. Eén regel, geen aparte desktopvariant meer. */
   .steun-rij {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
     gap: 0.5rem;
     margin: 2rem 0 0;
     padding: 0;
@@ -341,13 +351,6 @@ const naam = `steun-${locale}`;
   @media (min-width: 64rem) {
     .steun-groep {
       margin-left: calc((100% - 11 * 1.5rem) / 12 + 1.5rem);
-    }
-    .steun-rij {
-      display: flex;
-      flex-wrap: nowrap;
-    }
-    .steun-vak {
-      flex: 1 1 0;
     }
   }
 </style>
